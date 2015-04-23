@@ -1,0 +1,4 @@
+Building1-Apartment3-Kitchen
+Building1-Apartment3-LivingRoom
+Building1-Apartment3-Bathroom
+Building1-Apartment3-Bedroom

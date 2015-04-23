@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/title_gradient_bg" >
+
+    <RelativeLayout
+        android:id="@+id/rlSensorDataText"
+        android:layout_width="fill_parent"
+        android:layout_height="65dp"
+        android:background="@drawable/title_bg"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/backButtonSensor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/ic_action_previous_item"
+            android:contentDescription="@string/back" />
+
+        <TextView
+            android:id="@+id/SensorResumeText"
+            style="@style/TitleStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="@string/bootstrap_ip"
+            android:textSize="18sp" >
+        </TextView>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/sensorFulldata"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rlSensorDataText"
+        android:layout_marginTop="10dp" >
+
+        <TextView
+            android:id="@+id/textAddress"
+            style="@style/TopInputLabelStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:text="@string/emptyList" />
+
+        <TextView
+            android:id="@+id/textFloor"
+            style="@style/MiddleInputLabelStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textAddress"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:text="@string/emptyList" />
+
+        <TextView
+            android:id="@+id/textRoom"
+            style="@style/MiddleInputLabelStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textFloor"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:text="@string/emptyList" />
+
+        <TextView
+            android:id="@+id/textSensor"
+            style="@style/MiddleInputLabelStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textRoom"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:text="@string/emptyList" />
+
+        <TextView
+            android:id="@+id/textTemperature"
+            style="@style/BottomInputLabelStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textSensor"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:text="@string/emptyList" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/graph"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/sensorFulldata"
+        android:layout_margin="20dp"
+        android:padding="10dp"
+        android:background="@drawable/sensor_graph_background"
+        android:orientation="vertical" />
+
+</RelativeLayout>

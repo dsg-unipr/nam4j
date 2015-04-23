@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/BuildingPublishRelLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/title_gradient_bg" >
+
+    <RelativeLayout
+        android:id="@+id/rlBuildingLookupText"
+        android:layout_width="fill_parent"
+        android:layout_height="65dp"
+        android:background="@drawable/title_bg"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/backButtonLookup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+           android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/ic_action_previous_item"
+            android:contentDescription="@string/back" />
+
+        <TextView
+            android:id="@+id/BuildingText"
+            style="@style/TitleStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_centerVertical="true" >
+        </TextView>
+    </RelativeLayout>
+
+    <ListView
+        android:id="@android:id/list"
+        style="@style/ListViewStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/rlBuildingLookupText"
+        android:background="@drawable/title_gradient_bg" />
+
+    <TextView
+        android:id="@android:id/empty"
+        style="@style/MessageStyle"
+        android:layout_below="@+id/rlBuildingLookupText"
+        android:text="@string/emptyList"
+        android:textColor="#444444"
+        android:textSize="20sp" />
+
+</RelativeLayout>

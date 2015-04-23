@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <RelativeLayout
+        android:id="@+id/rlSensorPublishText"
+        android:layout_width="fill_parent"
+        android:layout_height="65dp"
+        android:background="@drawable/title_bg"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/backButtonSensor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/ic_action_previous_item"
+            android:contentDescription="@string/back" />
+
+        <TextView
+            android:id="@+id/SensorPublishText"
+            style="@style/TitleStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/sensorPublish"
+            android:textSize="18sp"
+            android:layout_centerVertical="true" >
+        </TextView>
+    </RelativeLayout>
+
+    <ScrollView
+        android:id="@+id/SensorPublishScrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/rlSensorPublishText"
+        android:background="@drawable/title_gradient_bg" >
+
+        <RelativeLayout
+            android:id="@+id/SensorPublishRelLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/sensorAddress"
+                style="@style/SubTitleStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:text="@string/sensorAddressString" >
+            </TextView>
+
+            <EditText
+                android:id="@+id/editSensorAddress"
+                style="@style/TopInputStyle"
+                android:layout_below="@+id/sensorAddress"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:ellipsize="start"
+                android:gravity="center"
+                android:hint="@string/sensorAddress"
+                android:inputType="text" >
+            </EditText>
+
+            <TextView
+                android:id="@+id/latlng"
+                style="@style/SubTitleStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/editSensorAddress"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="15dp"
+                android:text="@string/latlngText" >
+            </TextView>
+
+            <EditText
+                android:id="@+id/editLatlng"
+                style="@style/TopInputStyle"
+                android:layout_below="@+id/latlng"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:ellipsize="start"
+                android:gravity="center"
+                android:hint="@string/editLatlngText"
+                android:inputType="text" >
+            </EditText>
+
+            <ImageView
+                android:id="@+id/Line"
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/editLatlng"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="20dp"
+                android:contentDescription="@string/dashedLine"
+                android:src="@drawable/line_layout" />
+
+            <TextView
+                android:id="@+id/SensorNameText"
+                style="@style/SubTitleStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/Line"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:text="@string/sensorName" >
+            </TextView>
+
+            <EditText
+                android:id="@+id/editSensorName"
+                style="@style/TopInputStyle"
+                android:layout_below="@+id/SensorNameText"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:ellipsize="start"
+                android:gravity="center"
+                android:hint="@string/name_of_sensor"
+                android:inputType="text" >
+            </EditText>
+
+            <TextView
+                android:id="@+id/SensorFloorText"
+                style="@style/SubTitleStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/editSensorName"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="15dp"
+                android:text="@string/sensorFloor" >
+            </TextView>
+
+            <EditText
+                android:id="@+id/editSensorFloor"
+                style="@style/TopInputStyle"
+                android:layout_below="@+id/SensorFloorText"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:ellipsize="start"
+                android:gravity="center"
+                android:hint="@string/floor_of_sensor"
+                android:inputType="text" >
+            </EditText>
+
+            <TextView
+                android:id="@+id/SensorRoomText"
+                style="@style/SubTitleStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/editSensorFloor"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="15dp"
+                android:text="@string/sensorRoom" >
+            </TextView>
+
+            <EditText
+                android:id="@+id/editSensorRoom"
+                style="@style/TopInputStyle"
+                android:layout_below="@+id/SensorRoomText"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:ellipsize="start"
+                android:gravity="center"
+                android:hint="@string/room_of_sensor"
+                android:inputType="text" >
+            </EditText>
+
+            <TextView
+                android:id="@+id/SensorValueText"
+                style="@style/SubTitleStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/editSensorRoom"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="15dp"
+                android:text="@string/sensorValue" >
+            </TextView>
+
+            <EditText
+                android:id="@+id/editSensorValue"
+                style="@style/TopInputStyle"
+                android:layout_below="@+id/SensorValueText"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:ellipsize="start"
+                android:gravity="center"
+                android:hint="@string/value_of_sensor"
+                android:inputType="text" >
+            </EditText>
+
+            <ImageView
+                android:id="@+id/Line2"
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/editSensorValue"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="20dp"
+                android:contentDescription="@string/dashedLine"
+                android:src="@drawable/line_layout" />
+
+            <Button
+                android:id="@+id/buttonOkSensor"
+                style="@style/ButtonStyle"
+                android:layout_below="@+id/Line2"
+                android:layout_marginTop="10dp"
+                android:height="40dp"
+                android:text="@string/okButton"
+                android:textSize="12sp"
+                android:width="220dp" >
+            </Button>
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

@@ -1,0 +1,53 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_awesome_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize" />
+    <android.support.v4.widget.DrawerLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+        <FrameLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="com.example.hellonavigationdrawer.activities.MainActivity"
+            tools:ignore="MergeRootFrame" >
+        </FrameLayout>
+        <LinearLayout
+            android:id="@+id/navigation_drawer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:background="@color/grey_white_1000"
+            android:orientation="vertical" >
+            <Button
+                android:id="@+id/buttonOne"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="@drawable/listview_selector"
+                android:gravity="center"
+                android:text="@string/drawer_button1_title"
+                android:textColor="@color/primary"
+                android:textSize="22sp" />
+            <Button
+                android:id="@+id/buttonTwo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/listview_selector"
+                android:gravity="center"
+                android:text="@string/drawer_button2_title"
+                android:textColor="@color/primary"
+                android:textSize="22sp" />
+        </LinearLayout>
+    </android.support.v4.widget.DrawerLayout>
+</LinearLayout>

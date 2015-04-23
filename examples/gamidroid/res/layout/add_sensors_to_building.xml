@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <RelativeLayout
+        android:id="@+id/rlAddSensorsText"
+        android:layout_width="fill_parent"
+        android:layout_height="65dp"
+        android:background="@drawable/title_bg"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/backButtonAddSensors"
+            android:contentDescription="@string/back"
+            style="@style/AddSensorButton1Style" />
+
+        <TextView
+            android:id="@+id/BuildingAddSensorsText"
+            android:text="@string/addSensorsTitle"
+            android:textSize="18sp"
+            style="@style/TitleStyle" >
+        </TextView>
+    </RelativeLayout>
+
+    <ScrollView
+        android:id="@+id/AddSensorsScrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/rlAddSensorsText"
+        android:background="@drawable/title_gradient_bg" >
+
+        <RelativeLayout
+            android:id="@+id/rlContainer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <RelativeLayout
+                android:id="@+id/AddSensorsRelLayout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+            </RelativeLayout>
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

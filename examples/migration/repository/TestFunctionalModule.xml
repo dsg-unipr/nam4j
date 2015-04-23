@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lib>
+	<info>
+		<!-- Library id -->
+		<id>TestFunctionalModule</id>
+		
+		<!-- Library version -->
+		<version>1.0</version>
+		
+		<!-- Library type -->
+		<type>FM</type>
+		
+		<!-- Complete name of the library's main class -->
+		<main>it.unipr.ce.dsg.examples.migration.TestFunctionalModule</main>
+	</info>
+	
+	<!-- List of dependencies (do not add the element if no dependency is required) -->
+	<dependency>
+		<dependency_version>1.0</dependency_version>
+		<dependency_id>ChordFunctionalModule</dependency_id>
+	</dependency>
+</lib>

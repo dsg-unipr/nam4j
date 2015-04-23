@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="50dp"
+    android:orientation="horizontal"
+    android:background="@drawable/list_row_gradient" >
+
+    <!--
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/temperature"
+        android:contentDescription="@string/icon" />
+	-->
+    
+    <TextView
+        android:id="@+id/textItem"
+        android:layout_marginLeft="5dp"
+        style="@style/ListViewMessageStyle" />
+
+</LinearLayout>

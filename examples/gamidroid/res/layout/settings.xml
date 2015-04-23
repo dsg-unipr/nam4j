@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#E1E1E1" >
+
+    <RelativeLayout
+        android:id="@+id/rlBootStrapIpText"
+        android:layout_width="fill_parent"
+        android:layout_height="65dp"
+        android:background="@drawable/title_bg"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/backButtonSetting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/ic_action_previous_item"
+            android:contentDescription="@string/back" />
+
+        <TextView
+            android:id="@+id/BootStrapIpText"
+            style="@style/TitleStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="@string/bootstrap_ip"
+            android:textSize="18sp" >
+        </TextView>
+    </RelativeLayout>
+
+    <ExpandableListView
+        android:id="@+id/networkSelector"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rlBootStrapIpText"
+        android:layout_marginTop="15dp"
+        android:groupIndicator="@drawable/settings_selector"
+        android:divider="#CCCCCC" />
+
+    <TextView
+        android:id="@+id/Network"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/networkSelector"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:text="@string/network"
+        android:textColor="#333"
+        android:textSize="14sp" >
+    </TextView>
+
+    <EditText
+        android:id="@+id/editIpBoostrap"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/Network"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/expandable_list_group_bg"
+        android:ellipsize="start"
+        android:gravity="center"
+        android:hint="@string/bootstrap_ip"
+        android:inputType="text" >
+    </EditText>
+
+    <TextView
+        android:id="@+id/BootStrapIp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editIpBoostrap"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:text="@string/bootstrap_ip"
+        android:textColor="#333"
+        android:textSize="14sp" >
+    </TextView>
+
+    <Button
+        android:id="@+id/buttonConfirm"
+        style="@style/ButtonStyle"
+        android:layout_below="@+id/BootStrapIp"
+        android:text="@string/confirmButton" >
+    </Button>
+
+</RelativeLayout>

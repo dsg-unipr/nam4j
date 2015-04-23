@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainContainer"
+    android:layout_width="wrap_content"
+    android:layout_height="fill_parent"
+    android:background="@drawable/title_gradient_bg" >
+
+    <RelativeLayout
+        android:id="@+id/listContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="#33323A" >
+
+        <RelativeLayout
+            android:id="@+id/rlListViewContent"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true" >
+
+            <ListView
+                android:id="@+id/ListViewContent"
+                style="@style/ListViewContentStyle" >
+            </ListView>
+
+            <RelativeLayout
+                android:id="@+id/CpuBarContainer"
+                android:layout_width="30dp"
+                android:layout_height="100dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="10dp"
+                android:background="#4E4D57" >
+
+                <LinearLayout
+                    android:id="@+id/CpuBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentBottom="true"
+                    android:background="#00B800"
+                    android:orientation="horizontal" >
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/CpuBarBg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentBottom="true"
+                    android:background="@drawable/barbg"
+                    android:orientation="horizontal" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/CpuText"
+                    style="@style/TitleStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:text="@string/cpuBarText"
+                    android:textSize="12sp" >
+                </TextView>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/BatteryBarContainer"
+                android:layout_width="30dp"
+                android:layout_height="100dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@+id/CpuBarContainer"
+                android:background="#4E4D57" >
+
+                <LinearLayout
+                    android:id="@+id/MemoryBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentBottom="true"
+                    android:background="#00B800"
+                    android:orientation="horizontal" >
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/MemoryBarBg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentBottom="true"
+                    android:background="@drawable/barbg"
+                    android:orientation="horizontal" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/MemoryText"
+                    style="@style/TitleStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:text="@string/memoryBarText"
+                    android:textSize="12sp" >
+                </TextView>
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/infoButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:background="@drawable/ic_action_about"
+                android:contentDescription="@string/about" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/shadowContainer"
+            android:layout_width="7dp"
+            android:layout_height="fill_parent"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/rlListViewContent"
+            android:background="@drawable/shadow_gradient_bg" >
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="0dp" >
+
+        <FrameLayout
+            android:id="@+id/frameId"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/title_gradient_bg" >
+
+            <fragment
+                android:id="@+id/mapview"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+
+        <RelativeLayout
+            android:id="@+id/titleLl"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:background="@drawable/title_bg"
+            android:descendantFocusability="beforeDescendants"
+            android:focusableInTouchMode="true"
+            android:gravity="center"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/menuButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/ic_action_view_as_grid"
+                android:contentDescription="@string/menu" />
+
+            <ImageView
+                android:id="@+id/BarImgLogo"
+                style="@style/BarLogoStyle"
+                android:contentDescription="@string/dsgLogoDescription" />
+
+            <Button
+                android:id="@+id/centerButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/center_map"
+                android:contentDescription="@string/about" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

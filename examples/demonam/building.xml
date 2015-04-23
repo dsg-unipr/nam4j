@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+	<BUILDING name="Viale G P Usberti, 40">
+		<FLOOR name="1">
+			<ROOM name="Living Room">
+				<SENSOR name="Temperature1"></SENSOR>
+				<SENSOR name="Temperature2"></SENSOR>
+				<SENSOR name="Temperature3"></SENSOR>
+			</ROOM>
+			<ROOM name="Bathroom">
+				<SENSOR name="Temperature1"></SENSOR>
+				<SENSOR name="Temperature2"></SENSOR>
+			</ROOM>
+		</FLOOR>
+		<FLOOR name="2">
+			<ROOM name="Kitchen">
+				<SENSOR name="Temperature1"></SENSOR>
+			</ROOM>
+		</FLOOR>
+	</BUILDING>

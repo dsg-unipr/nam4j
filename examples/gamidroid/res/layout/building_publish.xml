@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <RelativeLayout
+        android:id="@+id/rlBuildingPublishText"
+        android:layout_width="fill_parent"
+        android:layout_height="65dp"
+        android:background="@drawable/title_bg"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/backButtonPublish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/ic_action_previous_item"
+            android:contentDescription="@string/back" />
+
+        <TextView
+            android:id="@+id/BuildingPublishText"
+            style="@style/TitleStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/buildingPublish"
+            android:textSize="18sp"
+            android:layout_centerVertical="true" >
+        </TextView>
+    </RelativeLayout>
+
+    <ScrollView
+        android:id="@+id/BuildingPublishScrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/rlBuildingPublishText"
+        android:background="@drawable/title_gradient_bg" >
+
+        <RelativeLayout
+            android:id="@+id/rlContainer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <RelativeLayout
+                android:id="@+id/BuildingPublishRelLayout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/buildingAddress"
+                    style="@style/SubTitleStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/buildingAddressString" >
+                </TextView>
+
+                <EditText
+                    android:id="@+id/editBuildingAddress"
+                    style="@style/TopInputStyle"
+                    android:layout_below="@+id/buildingAddress"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="5dp"
+                    android:ellipsize="start"
+                    android:gravity="center"
+                    android:hint="@string/buildingAddress"
+                    android:inputType="text" >
+                </EditText>
+
+                <TextView
+                    android:id="@+id/latlng"
+                    style="@style/SubTitleStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/editBuildingAddress"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="15dp"
+                    android:text="@string/latlngText" >
+                </TextView>
+
+                <EditText
+                    android:id="@+id/editLatlng"
+                    style="@style/TopInputStyle"
+                    android:layout_below="@+id/latlng"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="5dp"
+                    android:ellipsize="start"
+                    android:gravity="center"
+                    android:hint="@string/editLatlngText"
+                    android:inputType="text" >
+                </EditText>
+
+                <ImageView
+                    android:id="@+id/Line"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:layout_below="@+id/editLatlng"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="20dp"
+                    android:contentDescription="@string/dashedLine"
+                    android:src="@drawable/line_layout" />
+
+                <TextView
+                    android:id="@+id/FloorText"
+                    style="@style/SubTitleStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/Line"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:text="@string/number_of_floors" >
+                </TextView>
+
+                <EditText
+                    android:id="@+id/editNumberOfFloors"
+                    style="@style/TopInputStyle"
+                    android:layout_below="@+id/FloorText"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="5dp"
+                    android:ellipsize="start"
+                    android:gravity="center"
+                    android:hint="@string/num_of_floors_ip"
+                    android:inputType="number" >
+                </EditText>
+
+                <Button
+                    android:id="@+id/buttonOkFloors"
+                    style="@style/ButtonStyle"
+                    android:layout_below="@+id/editNumberOfFloors"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/okButton" >
+                </Button>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rlButton"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@+id/BuildingPublishRelLayout"
+                android:layout_marginTop="10dp" >
+            </RelativeLayout>
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+	android:background="@drawable/title_gradient_bg" >
+ 
+    <ImageView
+        android:id="@+id/imgLogo"
+        android:contentDescription="@string/dsgLogoDescription"
+        style="@style/SplashLogoStyle" />
+ 
+    <TextView
+        android:layout_below="@+id/imgLogo"
+        android:text="@string/dsg_contacts"
+        style="@style/SplashTextStyle" />
+ 
+</RelativeLayout>

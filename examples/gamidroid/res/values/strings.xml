@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NAM4J</string>
+    <string name="emptyList">Searching&#8230;</string>
+    <string name="dsg_contacts">http://dsg.ce.unipr.it\n\ndsg@ce.unipr.it</string>
+    <string name="bootstrap_ip">BootStrap IP</string>
+    <string name="network">Select network</string>
+    <string name="nam4j">NAM4J</string>
+    <string name="confirmButton">Confirm</string>
+    <string name="dashedLine">Dashed Line</string>
+    <string name="dsgLogoDescription">DSG Logo</string>
+    <string name="icon">Icon</string>
+    <string name="floor">Floor\u0020</string>
+    <string name="room">Room\u0020</string>
+    <string name="sensor">Sensor\u0020</string>
+    <string name="buildingPublish">Define building structure</string>
+    <string name="addSensorsTitle">Define sensors data</string>
+    <string name="sensorPublish">Define sensor data</string>
+    <string name="buildingAddressString">Please specify the address of the building (City, street and number)</string>
+    <string name="sensorAddressString">Please specify the address where the sensor is located (City, street and number)</string>
+    <string name="buildingAddress">Building address</string>
+    <string name="sensorAddress">Sensor address</string>
+    <string name="number_of_floors">Please specify the number of floors</string>
+    <string name="sensorName">Please specify the name of the sensor</string>
+    <string name="sensorValue">Please specify the value of the sensor</string>
+    <string name="sensorFloor">Please specify the floor on which the sensor is located</string>
+    <string name="sensorRoom">Please specify the name of the room where the sensor is located</string>
+    <string name="num_of_floors_ip">Number of floors</string>
+    <string name="name_of_sensor">Sensor name</string>
+    <string name="value_of_sensor">Sensor value</string>
+    <string name="floor_of_sensor">Floor number</string>
+    <string name="room_of_sensor">Room name</string>
+    <string name="okButton">OK</string>
+    <string name="back">Back</string>
+    <string name="menu">Menu</string>
+    <string name="about">About</string>
+    <string name="aboutApp">Developed by the Distributed Systems Group of the University of Parma, Italy.\n\nhttp://dsg.ce.unipr.it/\n\ndsg@ce.unipr.it</string>
+    <string name="leave">Do you really want to leave the network?</string>
+    <string name="connection_started">Connected to the network</string>
+    <string name="not_connected">Not connected to the network.\nOpen the menu, set the bootstrap address in the \"Settings\" section and connect.</string>
+    <string name="disconnected_from_network">Disconnected from the network</string>
+    <string name="geocoder_not_available">Geocoder service is not available</string>
+    <string name="number_of_rooms">Please specify the number of rooms on each floor</string>
+    <string name="names_of_rooms">Please specify the name of each room on the floor(s)</string>
+    <string name="latlngText">Latitude, Longitude</string>
+    <string name="editLatlngText">Lat and lng separated by a comma</string>
+    <string name="pwLeaving">Please wait while leaving network&#8230;</string>
+    <string name="pwJoining">Please wait while joining network&#8230;</string>
+    <string name="pwGeocoding">Please wait while geocoding the selected location&#8230;</string>
+    <string name="pwRevGeocoding">Please wait while reverse-geocoding current location&#8230;</string>
+    <string name="specify_address">Please specify the address of the building</string>
+    <string name="specify_latlng">Please specify lat and lng seprated by a comma</string>
+    <string name="specify_room_names">Please specify the name of all rooms</string>
+    <string name="specify_room_num">Please specify the number of rooms on the floor(s)</string>
+    <string name="specify_floor_num">Please specify the number of floors in the building</string>
+    <string name="specify_all">Please specify all the data for the sensor</string>
+    <string name="resource_published">Resource Published</string>
+    <string name="start_publishing_building">Do you want to publish the building information?</string>
+    <string name="add_rooms_to_building">Do you want to add sensors to the rooms of the building?</string>
+    
+    <!-- Messages -->
+    <string name="connected">Client connected</string>
+    <string name="connection_error_code_unknown">Unknown connection error code:  %1$d</string>
+    <string name="connection_failed">Connection failed</string>
+    <string name="disconnected">Client disconnected</string>
+    <string name="get_address">Get Address</string>
+    <string name="get_location">Get Location</string>
+    <string name="illegal_argument_exception">
+        Illegal arguments: Latitude %1$.8f Longitude %2$.8f
+    </string>
+    <string name="invalid_action">Invalid intent action %1$s</string>
+    <string name="invalid_integer_id">Invalid integer request ID: %1$s</string>
+    <string name="IO_Exception_getFromLocation">IO Exception in Geocoder.getFromLocation()</string>
+    <string name="location_requested">Periodic updates requested</string>
+    <string name="location_updated">Location updated</string>
+    <string name="location_update_error">Location update failed</string>
+    <string name="location_update_error_detail">
+        Location update error. code %1$d message %2$s
+    </string>
+    <string name="location_update_missing_update">
+        Location update error. No incoming location.
+    </string>
+    <string name="location_updates_stopped">Periodic updates stopped</string>
+    <string name="log_new_location">New location: %1$s</string>
+    <string name="no_address_found">No address found for location</string>
+    <string name="no_connection">No connection: Cannot request location</string>
+    <string name="no_geocoder_available">Cannot get address. No geocoder available.</string>
+    <string name="no_location_available">Location not available</string>
+    <string name="resolved">Error resolved. Please re-try operation.</string>
+    <string name="no_resolution">Google Play services: unable to resolve connection error.</string>
+    <string name="periodic_update_stop">Stopping periodic updates</string>
+    <string name="play_services_available">Google Play services is available</string>
+    <string name="request_location_updates_in_progress">
+        Can\'t request location updates, previous request hasn\'t finished
+    </string>
+    <string name="start_updates">Start Updates</string>
+    <string name="stop_updates">Stop Updates</string>
+    <string name="unknown">--Unknown--</string>
+    <string name="unknown_activity_request_code">
+        Received an unknown activity request code %1$d in onActivityResult.
+    </string>
+    <string name="connection_error_misconfigured">Misconfiguration error.</string>
+    <string name="connection_error_internal">Connection error.</string>
+    <string name="connection_error_invalid_account">Invalid account.</string>
+    <string name="connection_error_license_check_failed">License check failed.</string>
+    <string name="connection_error_network">Network connection error.</string>
+    <string name="connection_error_needs_resolution">Connection needs resolution error.</string>
+    <string name="connection_error_disabled">Connection disabled error.</string>
+    <string name="connection_error_invalid">Connection error.</string>
+    <string name="connection_error_missing">Missing connection error.</string>
+    <string name="connection_error_outdated">Outdated connection error.</string>
+    <string name="connection_error_sign_in_required">Sign in required.</string>
+    <string name="connection_error_unknown">Unknown connection error.</string>   
+    <string name="play_services_availability_error">Google Play services are not available.</string>
+    <string name="play_services_availability">Google Play services are available.</string>
+    <string name="location_services_connected">Connected to location services.</string>
+    <string name="disconnected_location_services">Disconnected from location services.</string>
+    <string name="location_not_available">Current location is not available.</string>
+    <string name="current_location">The current location is: </string>
+    <string name="updates_started">Periodic location updates started.</string>
+    <string name="updates_stopped">Periodic location updates stopped.</string>
+    <string name="menu_connect">onOptionsItemSelected MENU_CONNECT</string>
+    <string name="menu_settings">onOptionsItemSelected MENU_SETTINGS</string>
+    <string name="exitOnBackButtonPressed">Are you sure you want to exit?</string>
+    <string name="noLocationInfoAvailable">Location information not available</string>
+    
+    <!-- Side Menu -->
+    <string name="connectMenuTitle">Connect</string>
+    <string name="connectMenuSubTitle">Join the network</string>
+    <string name="settingsMenuTitle">Settings</string>
+    <string name="settingsMenuSubTitle">Configure the network</string>
+    
+     <string name="cpuBarText">C\nP\nU</string>
+      <string name="memoryBarText">M\nE\nM\nO\nR\nY</string>
+    
+    <string name="disconnectMenuTitle">Disconnect</string>
+    <string name="disconnectMenuSubTitle">Disconnect from the network</string>
+    <string name="publishBuildingMenuTitle">Publish Building</string>
+    <string name="publishBuildingMenuSubTitle">Publish in the network a building</string>
+    <string name="publishSensorgMenuTitle">Publish Sensor</string>
+    <string name="publishSensorgMenuSubTitle">Publish in the network a sensor</string>
+    <string name="exitMenuTitle">Exit</string>
+    <string name="exitMenuSubTitle">Close the app</string>
+    
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+     <string name="ok">OK</string>
+    
+    <!-- Latitude, longitude format -->
+    <string name="latitude_longitude">%1$.8f, %2$.8f</string>
+    
+</resources>
