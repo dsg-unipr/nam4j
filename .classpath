@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="examples/contextbus/src"/>
+	<classpathentry kind="src" path="examples/taskmanagerfm/src"/>
+	<classpathentry kind="src" path="examples/sensorfm/src"/>
+	<classpathentry kind="src" path="examples/reasonerfm/src"/>
+	<classpathentry kind="src" path="examples/ontology/src"/>
+	<classpathentry kind="src" path="examples/demonam/src"/>
+	<classpathentry kind="src" path="examples/chordfm/src"/>
+	<classpathentry kind="src" path="examples/migration/src"/>
+	<classpathentry kind="src" path="examples/galileo/src"/>
+	<classpathentry kind="src" path="examples/kademliafm/src"/>
+	<classpathentry kind="src" path="examples/centralizednetworkfm/src"/>
+	<classpathentry kind="src" path="examples/s2pmigration/src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/sip2peer/sip.jar"/>
+	<classpathentry kind="lib" path="lib/sip2peer/server.jar"/>
+	<classpathentry kind="lib" path="lib/gson-1.7.1.jar"/>
+	<classpathentry kind="lib" path="lib/log4j.jar"/>
+	<classpathentry kind="lib" path="lib/sip2peer/sip2peer-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/s2pKademlia.jar"/>
+	<classpathentry kind="lib" path="lib/s2pMesh.jar"/>
+	<classpathentry kind="lib" path="lib/s2pChord.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
