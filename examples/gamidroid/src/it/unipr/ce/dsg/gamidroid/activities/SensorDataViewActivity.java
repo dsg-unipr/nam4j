@@ -13,7 +13,6 @@ import it.unipr.ce.dsg.s2p.centralized.utils.Resource;
 import it.unipr.ce.dsg.s2pchord.resource.ResourceDescriptor;
 import it.unipr.ce.dsg.s2pchord.resource.ResourceListener;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 
@@ -26,6 +25,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -59,6 +59,7 @@ import com.jjoe64.graphview.LineGraphView;
 public class SensorDataViewActivity extends Activity implements
 		ResourceListener, IEventListener {
 
+	public static String TAG = "SettingsActivity";
 	private Context mContext;
 	private Location location;
 	private String sensorName;
@@ -145,29 +146,22 @@ public class SensorDataViewActivity extends Activity implements
 			GamiNode.addMeshResourceListener(this);
 		}
 		
-		/* Initialize sensor data graph */
-
+		// Initialize sensor data graph
 		graphViewSeries = new GraphViewSeries(new GraphViewData[] {});
-
 		graphView = new LineGraphView(this, "Sensor Readings");
-
 		graphView.setPadding(3, 0, 0, 0);
-		
-		
 		graphView.getGraphViewStyle().setGridColor(Color.BLACK);
 		graphView.getGraphViewStyle().setHorizontalLabelsColor(Color.BLACK);
 		graphView.getGraphViewStyle().setVerticalLabelsColor(Color.BLACK);
 		graphView.getGraphViewStyle().setTextSize(16);
-		//width of the vertical labels
-		graphView.getGraphViewStyle().setVerticalLabelsWidth(40);
-	
+		graphView.getGraphViewStyle().setVerticalLabelsWidth(40); // width of the vertical labels
 	  
 	    Date d = new Date();
 	    String s  = (String) DateFormat.format("H:m:s ", d.getTime());
 	    
 	    System.out.println(s);
 		
-		//array of strings that are the horizontal labels
+		// Array of strings that are the horizontal labels
 		hLabels=new String[] {s};
 		graphView.setHorizontalLabels(hLabels);
 		
@@ -186,22 +180,22 @@ public class SensorDataViewActivity extends Activity implements
 	}
 	
 	/**
-	 * Method to process the JSon descriptor of the resource the node looked for, when it is received.
+	 * Method to process the JSon descriptor of the resource the node looked
+	 * for, when it is received.
 	 */
 	private void processSearchedResource(String jsonDescriptor) {
-		
 		System.out.println("\n--- Processing the sensor's data...\n");
 		
 		try {
 			JSONObject obj = new JSONObject(jsonDescriptor);
 
 			String name = obj.getString("name");
-			JSONObject subjectObj = obj.getJSONObject("subject");
+			// JSONObject subjectObj = obj.getJSONObject("subject");
 			JSONObject locationObj = obj.getJSONObject("location");
 
 			if (name.equalsIgnoreCase(temperatureMessageType)) {
 
-				final String subjectValue = subjectObj.getString("value");
+				// final String subjectValue = subjectObj.getString("value");
 
 				JSONObject locationValue = new JSONObject(
 						locationObj.getString("value"));
@@ -223,9 +217,7 @@ public class SensorDataViewActivity extends Activity implements
 
 					runOnUiThread(new Runnable() {
 						public void run() {
-
 							if (!stopThread) {
-								
 								TextView textBuilding = (TextView) findViewById(R.id.textAddress);
 								TextView textFloor = (TextView) findViewById(R.id.textFloor);
 								TextView textRoom = (TextView) findViewById(R.id.textRoom);
@@ -278,30 +270,20 @@ public class SensorDataViewActivity extends Activity implements
 
 	@Override
 	public void onReceivedResource(ResourceDescriptor rd, String reason) {
-
 		String attachment = rd.getAttachment();
 
 		if (attachment != null) {
-
 			processSearchedResource(attachment);
-
 		} else {
-
-			Toast.makeText(this, "No data received for the sensor",
-					Toast.LENGTH_LONG).show();
-
-			System.err
-					.println("\n--- The attachement of the resource is null\n");
+			Toast.makeText(this, "No data received for the sensor", Toast.LENGTH_LONG).show();
+			Log.e(SensorDataViewActivity.TAG, "The attachement of the resource is null\n");
 		}
 	}
 	
 	@Override
 	public void onFoundSearchedResource(Resource resource) {
-		
-		/*
-		 * Sensor descriptor will just include a single element, so the
-		 * following cycle will be executed just once
-		 */
+		// Sensor descriptor will just include a single element, so the
+		// following cycle will be executed just once
 		Set<String> keySet = resource.getKeySet();
 		for(String k : keySet) {
 			processSearchedResource(resource.getValue(k));
@@ -309,10 +291,7 @@ public class SensorDataViewActivity extends Activity implements
 	}
 
 	@Override
-	public void onReceivedResourceToBeResponsible(Resource resource) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void onReceivedResourceToBeResponsible(Resource resource) {}
 	
 	@Override
 	public void onReceivedMessage(String message) {
@@ -321,14 +300,9 @@ public class SensorDataViewActivity extends Activity implements
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-
 			stopThread();
-
-			GamiNode.getAndroidGamiNode(mContext).getRfm()
-					.stopTemperatureNotificationLookup();
-			
+			GamiNode.getAndroidGamiNode(mContext).getRfm().stopTemperatureNotificationLookup();
 			onBackPressed();
 		}
 		return super.onKeyDown(keyCode, event);

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">NAM4J</string>
+    <string name="app_name">GamiDroid</string>
     <string name="emptyList">Searching&#8230;</string>
     <string name="dsg_contacts">http://dsg.ce.unipr.it\n\ndsg@ce.unipr.it</string>
     <string name="bootstrap_ip">BootStrap IP</string>
@@ -119,10 +119,13 @@
     <string name="current_location">The current location is: </string>
     <string name="updates_started">Periodic location updates started.</string>
     <string name="updates_stopped">Periodic location updates stopped.</string>
+    <string name="updates_request_error">Error requesting periodic location updates.</string>
+    <string name="updates_stop_error">Error stopping periodic location updates.</string>
     <string name="menu_connect">onOptionsItemSelected MENU_CONNECT</string>
     <string name="menu_settings">onOptionsItemSelected MENU_SETTINGS</string>
     <string name="exitOnBackButtonPressed">Are you sure you want to exit?</string>
     <string name="noLocationInfoAvailable">Location information not available</string>
+    <string name="checkingGooglePlayServicesAvailability">Checking for Google Play services availability</string>
     
     <!-- Side Menu -->
     <string name="connectMenuTitle">Connect</string>

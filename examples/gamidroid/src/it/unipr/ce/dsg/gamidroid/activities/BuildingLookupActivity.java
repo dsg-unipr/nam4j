@@ -51,45 +51,30 @@ import com.google.gson.reflect.TypeToken;
  * 
  */
 public class BuildingLookupActivity extends ListActivity implements ResourceListener, IEventListener {
-
 	public static String TAG = "BuildingLookupActivity";
 	Context mContext;
 	private List<FloorStruct> floors;
 	private String address;
-	
 	TextView tv;
-
 	private static String buildingMessageType = "BuildingNotification";
-
 	Context context;
-
 	TextView titleTv;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.building_lookup);
-		
 		mContext = this;
 		
 		overridePendingTransition(R.anim.animate_left_in, R.anim.animate_left_out);
-		
 		Button backButton = (Button) findViewById(R.id.backButtonLookup);
-
 		backButton.setOnClickListener(new View.OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
-				
-				GamiNode.getAndroidGamiNode(mContext).getRfm()
-						.stopBuildingNotificationLookup();
-
+				GamiNode.getAndroidGamiNode(mContext).getRfm().stopBuildingNotificationLookup();
 				onBackPressed();
 			}
 		});
-
-		context = this;
 
 		Bundle b = this.getIntent().getExtras();
 		address = b.getString("AddressBuilding");
@@ -104,11 +89,9 @@ public class BuildingLookupActivity extends ListActivity implements ResourceList
 		titleTv.setText(address);
 		titleTv.setTextSize(18);
 
-		GamiNode.getAndroidGamiNode(mContext).getRfm()
-				.startBuildingNotificationLookup(address);
+		GamiNode.getAndroidGamiNode(mContext).getRfm().startBuildingNotificationLookup(address);
 		
-		SharedPreferences sharedPreferences = mContext.getSharedPreferences(
-				Constants.PREFERENCES, Context.MODE_PRIVATE);
+		SharedPreferences sharedPreferences = mContext.getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE);
 		String currentNetwork = sharedPreferences.getString(Constants.NETWORK, "");
 
 		if (currentNetwork.equalsIgnoreCase(Constants.CHORD)) {
@@ -116,7 +99,6 @@ public class BuildingLookupActivity extends ListActivity implements ResourceList
 		} else if (currentNetwork.equalsIgnoreCase(Constants.MESH)) {
 			GamiNode.addMeshResourceListener(this);
 		}
-
 	}
 
 	protected void onListItemClick(ListView l, View v, int position, long id) {
@@ -139,14 +121,9 @@ public class BuildingLookupActivity extends ListActivity implements ResourceList
 	 */
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-
-			GamiNode.getAndroidGamiNode(mContext).getRfm()
-					.stopBuildingNotificationLookup();
-			
+			GamiNode.getAndroidGamiNode(mContext).getRfm().stopBuildingNotificationLookup();
 			onBackPressed();
-			
 		}
 		return super.onKeyDown(keyCode, event);
 	}
@@ -155,51 +132,24 @@ public class BuildingLookupActivity extends ListActivity implements ResourceList
 	 * Method to process the JSon descriptor of the resource the node looked for, when it is received.
 	 */
 	private void processSearchedResource(String jsonDescriptor) {
-		
 		try {
-
 			JSONObject obj = new JSONObject(jsonDescriptor);
-
-			// String id = obj.getString("id");
 			String name = obj.getString("name");
-			// String timestamp = obj.getString("timestamp");
-
 			JSONObject subjectObj = obj.getJSONObject("subject");
-			// JSONObject locationObj = obj.getJSONObject("location");
-
-			// String subjectName = subjectObj.getString("name");
 
 			if (name.equalsIgnoreCase(buildingMessageType)) {
-
 				String subjectValue = subjectObj.getString("value");
-
-				// JSONArray locationValue = new
-				// JSONArray(locationObj.getString("value"));
-
 				Gson gson = new Gson();
-
-				floors = gson.fromJson(subjectValue,
-						new TypeToken<List<FloorStruct>>() {
-						}.getType());
+				floors = gson.fromJson(subjectValue, new TypeToken<List<FloorStruct>>() {}.getType());
 
 				runOnUiThread(new Runnable() {
 					public void run() {
-
-						// Toast.makeText(getApplicationContext(),
-						//		"Received data about the selected building",
-						//		Toast.LENGTH_LONG).show();
-
 						List<String> listString = new ArrayList<String>();
 						for (int i = 0; i < floors.size(); i++) {
-							listString.add(context.getString(R.string.floor)
-									+ " " + floors.get(i).getName());
+							listString.add(context.getString(R.string.floor) + " " + floors.get(i).getName());
 						}
-
-						ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-								context, R.layout.list_item_floor,
-								R.id.textItem, listString);
+						ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, R.layout.list_item_floor, R.id.textItem, listString);
 						setListAdapter(adapter);
-
 					}
 				});
 			}
@@ -216,9 +166,7 @@ public class BuildingLookupActivity extends ListActivity implements ResourceList
 	 */
 	@Override
 	public void onReceivedResource(ResourceDescriptor rd, String reason) {
-
 		String attachment = rd.getAttachment();
-
 		processSearchedResource(attachment);
 	}
 	
@@ -229,13 +177,10 @@ public class BuildingLookupActivity extends ListActivity implements ResourceList
 	 */
 	@Override
 	public void onFoundSearchedResource(Resource resource) {
-
 		System.out.println("I am BuildingLookupActivity and I received the building information I looked for");
 		
-		/*
-		 * Building descriptor will just include a single element, so the
-		 * following cycle will be executed just once
-		 */
+		// Building descriptor will just include a single element, so the
+		// following cycle will be executed just once
 		Set<String> keySet = resource.getKeySet();
 		for(String k : keySet) {
 			processSearchedResource(resource.getValue(k));
@@ -244,14 +189,11 @@ public class BuildingLookupActivity extends ListActivity implements ResourceList
 
 	@Override
 	public void onReceivedResourceToBeResponsible(Resource resource) {
-		// TODO Auto-generated method stub
 		System.out.println("I am BuildingLookupActivity and I received a building descriptor to be its responsible");
 	}
 	
 	@Override
-	public void onReceivedMessage(String message) {
-		// TODO Auto-generated method stub
-	}
+	public void onReceivedMessage(String message) {}
 	
 	@Override
 	public void onBackPressed() {

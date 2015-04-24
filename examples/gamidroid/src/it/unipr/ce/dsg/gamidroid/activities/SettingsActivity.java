@@ -69,7 +69,7 @@ public class SettingsActivity extends Activity implements INetworkChosen {
 		
 		mContext = this;
 
-		overridePendingTransition(R.anim.animate_left_in, R.anim.animate_right_out);
+		overridePendingTransition(R.anim.animate_left_in, R.anim.animate_left_out);
 
 		fileManager = FileManager.getFileManager();
 
@@ -85,7 +85,6 @@ public class SettingsActivity extends Activity implements INetworkChosen {
 		expListView.setAdapter(listAdapter);
 
 		Button buttonConfirm = (Button) findViewById(R.id.buttonConfirm);
-
 		buttonConfirm.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -99,7 +98,6 @@ public class SettingsActivity extends Activity implements INetworkChosen {
 		});
 
 		Button backButton = (Button) findViewById(R.id.backButtonSetting);
-
 		backButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -111,8 +109,7 @@ public class SettingsActivity extends Activity implements INetworkChosen {
 		textIp = (EditText) findViewById(R.id.editIpBoostrap);
 
 		// Load file containing bootstrap address
-		File sd = new File(Environment.getExternalStorageDirectory()
-				+ Constants.CONFIGURATION_FILES_PATH);
+		File sd = new File(Environment.getExternalStorageDirectory() + Constants.CONFIGURATION_FILES_PATH);
 		File file = new File(sd, Constants.PEER_CONFIGURATION_FILE_NAME);
 
 		Properties properties = new Properties();
@@ -121,20 +118,15 @@ public class SettingsActivity extends Activity implements INetworkChosen {
 			String ipBoostrap = properties.getProperty("bootstrap_peer");
 			textIp.setText(ipBoostrap);
 		} catch (FileNotFoundException e1) {
-			Log.e(SettingsActivity.TAG, e1.getMessage()
-					+ " (reading file containing bootstrap properties)");
+			Log.e(SettingsActivity.TAG, e1.getMessage() + " (reading file containing bootstrap properties)");
 			e1.printStackTrace();
 		} catch (IOException e1) {
-			Log.e(SettingsActivity.TAG, e1.getMessage()
-					+ " (reading file containing bootstrap properties)");
+			Log.e(SettingsActivity.TAG, e1.getMessage() + " (reading file containing bootstrap properties)");
 			e1.printStackTrace();
 		}
-
 	}
 
-	/*
-	 * Preparing the list data
-	 */
+	/** Method to prepare the list data */
 	private void createList() {
 		
 		listDataHeader = new ArrayList<String>();
@@ -145,44 +137,29 @@ public class SettingsActivity extends Activity implements INetworkChosen {
 		
 		// Adding child data
 		listDataHeader.add("Network" + "_" + currentNetwork);
-		// listDataHeader.add("Header 2");
-		// listDataHeader.add("Header 3");
 
 		// Adding child data
 		List<String> networks = new ArrayList<String>();
 		networks.add(Constants.MESH);
 		networks.add(Constants.CHORD);
 
-		// List<String> secondList = new ArrayList<String>();
-		// secondList.add("First element");
-		// secondList.add("Second element");
-
-		// List<String> thirdList = new ArrayList<String>();
-		// thirdList.add("Second element");
-		// thirdList.add("Second element");
-
 		listDataChild.put(listDataHeader.get(0), networks);
-		// listDataChild.put(listDataHeader.get(1), secondList);
-		// listDataChild.put(listDataHeader.get(2), thirdList);
 	}
 
 	@Override
 	public void networkChosen(String network, int expandedGroup) {
-		
 		expListView.collapseGroup(expandedGroup);
-		
 		SharedPreferences sharedPreferences = getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE);
 		Editor editor = sharedPreferences.edit();
 		editor.putString(Constants.NETWORK, network);
 		editor.commit();
-
 		createList();
 	}
 	
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		overridePendingTransition(R.anim.animate_left_in, R.anim.animate_right_out);
+		overridePendingTransition(R.anim.animate_right_in, R.anim.animate_right_out);
 	}
 
 }
