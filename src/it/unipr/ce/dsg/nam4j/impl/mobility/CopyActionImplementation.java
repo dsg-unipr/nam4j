@@ -121,10 +121,10 @@ public class CopyActionImplementation extends CopyActionHandler {
 			
 			File dependency = null;
 			
-			if (!pairs.getValue().equals("-1")) {
+			if (!(pairs.getValue().equals(MobilityUtils.INFO_FILE_ID) || pairs.getValue().equals(MobilityUtils.RESOURCE_FILE_ID))) {
 				dependency = MobilityUtils.getRequestedItem(pairs.getKey(), p, getMigrationStore());
 			} else {
-				// The file is a xml info file for a dependency
+				// The file is a xml info file for a dependency or a resource file
 				File f = new File(this.getMigrationStore() + pairs.getKey());
 				if (f.exists()) {
 					dependency = f;

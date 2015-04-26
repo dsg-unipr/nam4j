@@ -35,14 +35,17 @@ public class S2PMigrationTestNam extends NetworkedAutonomicMachine implements IM
 		this.setId("S2PMigrationNam");
 		this.setClientPlatform(Platform.ANDROID, 0);
 		
-		// peer = new MccNamPeer(pathConfig, key.toString(), key.toString(), port, this);
 		peer = new MccNamPeer(null, key.toString(), key.toString(), port, this);
 		peer.addMobilityItemAvailabilityListener(this);
 		System.out.println("Contact address: " + peer.getPeerDescriptor());
 	}
 	
+	/**
+	 * Sample method to test migration. Set peerToBeContactedAddress variable to
+	 * the address of the peer to be contacted.
+	 */
 	public void performTest() {
-		String peerToBeContactedAddress = "1101101101111110010100100001111010100010110100010001011110001110011110110011111101100100101111111011101011010001010010011011111011011111100111000001110100010001@192.168.1.146:6535";
+		String peerToBeContactedAddress = "0101111110010010001100000010001100001100000000101000010111100100110011000010000001100010010001001110110000010000011100100011000001110100101110011000101101011001@192.168.1.5:1856";
 		peer.requestService(peerToBeContactedAddress, "TestService", Platform.ANDROID, Action.COPY, "1.0");
 	}
 	
@@ -60,6 +63,9 @@ public class S2PMigrationTestNam extends NetworkedAutonomicMachine implements IM
 		return peer;
 	}
 
+	/**
+	 * Observer pattern implementation to manage event notifications.
+	 */
 	@Override
 	public void onItemIsAvailable(String fileFullPath, String mainClassName, MigrationSubject role, Action action, Object state) {
 		for(IMobilityItemIsAvailableObserver listener : listeners) {

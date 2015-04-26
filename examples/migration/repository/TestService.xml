@@ -25,4 +25,9 @@
 		<dependency_version>1.0</dependency_version>
 		<dependency_id>ChordFunctionalModule</dependency_id>
 	</dependency>
+	
+	<!-- List of files representing resources that have to be migrated - add a <file> element for each one -->
+	<file>
+	    <file_id>divina_commedia.txt</file_id>
+	</file>
 </lib>

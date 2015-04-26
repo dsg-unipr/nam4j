@@ -189,11 +189,14 @@ public class ManageDependencies {
 			String dependencyId = pairs.getKey();
 			String dependencyMinVersion = pairs.getValue();
 			
-			if (dependencyMinVersion.equals("-1")) {
+			if (dependencyMinVersion.equals(MobilityUtils.INFO_FILE_ID)) {
 				// Current file is the xml info file for a dependency, so it must be requested
-				// missingItems.put(dependencyId, dependencyMinVersion);
 				missingXmlFiles.put(dependencyId, dependencyMinVersion);
 				System.out.println("------ Dependency " + dependencyId + " is an info file, waiting to check if the associated FM is available");
+			} else if(dependencyMinVersion.equals(MobilityUtils.RESOURCE_FILE_ID)) {
+				// Current file is a resource file, so it must be requested
+				missingItems.put(dependencyId, dependencyMinVersion);
+				System.out.println("------ Dependency " + dependencyId + " is a resource file, so I am requesting it.");
 			} else {
 				
 				System.out.println("------ Analyzing dependency " + dependencyId);

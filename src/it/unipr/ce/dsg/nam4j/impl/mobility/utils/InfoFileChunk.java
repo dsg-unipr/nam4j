@@ -88,7 +88,7 @@ public class InfoFileChunk {
 
 	@Override
 	public boolean equals(Object arg0) {
-		DependencyChunk chunkObj = (DependencyChunk) arg0;
+		InfoFileChunk chunkObj = (InfoFileChunk) arg0;
 		
 		if (this.conversationId.equals(chunkObj.getConversationId()) && chunkObj.getChunkId() == this.chunkId && chunkObj.getChunkNumber() == this.chunkNumber)
 			return true;

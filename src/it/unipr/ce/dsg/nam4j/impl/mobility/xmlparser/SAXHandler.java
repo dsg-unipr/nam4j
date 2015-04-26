@@ -48,26 +48,31 @@ public class SAXHandler extends DefaultHandler {
 	}
 
 	@Override
-	public void startElement(String uri, String localName, String qName,
-			Attributes attributes) throws SAXException {
+	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 
 		switch (qName) {
 		
-		// Create a new LibraryInformation object when the opening tag is found
-		case "info":
-			libraryInformation = new LibraryInformation();
-			break;
-		
-			// Create a new object representing the functional module to which the migrated service has to be added
-		case "functional_module":
-			functionalModuleForService = new FunctionalModuleForService();
-			break;
+			// Create a new LibraryInformation object when the opening tag is found
+			case "info":
+				libraryInformation = new LibraryInformation();
+				break;
 			
-		// Create a new Dependency object when the opening tag is found
-		case "dependency":
-			dependency = new Dependency();
-			break;
-		
+			// Create a new object representing the functional module to which the migrated service has to be added
+			case "functional_module":
+				functionalModuleForService = new FunctionalModuleForService();
+				break;
+				
+			// Create a new Dependency object when the dependency opening tag is found
+			case "dependency":
+				dependency = new Dependency();
+				break;
+				
+			// Files representing resources that have to be migrated are treated as dependencies
+			case "file":
+				dependency = new Dependency();
+				break;
+				
+			default: break;
 		}
 	}
 
@@ -77,69 +82,81 @@ public class SAXHandler extends DefaultHandler {
 		
 		switch (qName) {
 		
-		// ******************* General info *******************
-		
-		case "id":
-			libraryInformation.setId(content);
-			break;
+			// ******************* General info *******************
 			
-		case "version":
-			libraryInformation.setVersion(content);
-			break;
+			case "id":
+				libraryInformation.setId(content);
+				break;
+				
+			case "version":
+				libraryInformation.setVersion(content);
+				break;
+				
+			case "type":
+				libraryInformation.setType(content);
+				break;
+				
+			case "main":
+				libraryInformation.setMainClass(content);
+				break;
+				
+			// ******************* The FM to which a migrating Service has to be linked *******************
+				
+			case "functional_module":
+				Dependency d = new Dependency();
+				d.setId(functionalModuleForService.getId());
+				d.setVersion(functionalModuleForService.getVersion());
+				dependencyList.add(d);
+				
+				Dependency dInfoFile = new Dependency();
+				dInfoFile.setId(functionalModuleForService.getId()+ MobilityUtils.INFO_FILE_EXTENSION);
+				dInfoFile.setVersion(MobilityUtils.INFO_FILE_ID); // Such a value is used to mark the item as a xml info file for a dependency, and not as a library
+				dependencyList.add(dInfoFile);
+				
+				break;
 			
-		case "type":
-			libraryInformation.setType(content);
-			break;
+			case "functional_module_id":
+				functionalModuleForService.setId(content);
+				break;
+				
+			case "functional_module_version":
+				functionalModuleForService.setVersion(content);
+				break;
 			
-		case "main":
-			libraryInformation.setMainClass(content);
-			break;
+			// ******************* Dependencies *******************
+				
+			// Add the dependency to list once closing tag is found
+			case "dependency":
+				dependencyList.add(dependency);
+				break;
+				
+			// Other closing tags update the dependency
 			
-		// ******************* The FM to which a migrating Service has to be linked *******************
+			case "dependency_id":
+				dependency.setId(content);
+				break;
+				
+			case "dependency_version":
+				dependency.setVersion(content);
+				break;
+				
+			// ******************* Resource files *******************
 			
-		case "functional_module":
-			Dependency d = new Dependency();
-			d.setId(functionalModuleForService.getId());
-			d.setVersion(functionalModuleForService.getVersion());
-			dependencyList.add(d);
-			
-			Dependency dInfoFile = new Dependency();
-			dInfoFile.setId(functionalModuleForService.getId()+ MobilityUtils.INFO_FILE_EXTENSION);
-			dInfoFile.setVersion("-1"); // Version -1 is used to mark the item as an xml info file and not as a library
-			dependencyList.add(dInfoFile);
-			
-			break;
-		
-		case "functional_module_id":
-			functionalModuleForService.setId(content);
-			break;
-			
-		case "functional_module_version":
-			functionalModuleForService.setVersion(content);
-			break;
-		
-		// ******************* Dependencies *******************
-			
-		// Add the dependency to list once closing tag is found
-		case "dependency":
-			dependencyList.add(dependency);
-			break;
-			
-		// For all other closing tags update the dependency
-		
-		case "dependency_id":
-			dependency.setId(content);
-			break;
-			
-		case "dependency_version":
-			dependency.setVersion(content);
-			break;
+			case "file":
+				dependency.setVersion(MobilityUtils.RESOURCE_FILE_ID); // Such a value is used to mark the item as a resource file
+				dependencyList.add(dependency);
+				break;
+				
+			case "file_id":
+				dependency.setId(content);
+				break;
+				
+			default: break;
 		}
 	}
 
 	@Override
-	public void characters(char[] ch, int start, int length)
-			throws SAXException {
+	public void characters(char[] ch, int start, int length) throws SAXException {
 		content = String.copyValueOf(ch, start, length).trim();
 	}
 	

@@ -4,9 +4,7 @@ import it.unipr.ce.dsg.nam4j.impl.service.Service;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
@@ -67,28 +65,14 @@ public class TestService extends Service implements Serializable {
 		transient private BufferedReader bufferedReader = null;
 		transient private FileReader fileReader = null;
 		
-		// Attributes used for saving the execution state
-		transient private FileInputStream fileInputStream = null;
-		private byte[] bFile = null;
-		
 		/** Class constructor. */
 		public ServiceRunnableImplementation() {}
 		
-		// Saving execution state
+		// No need to save non-serializable attributes in that the number of
+		// parsed lines is serializable and is used by restoreState method to
+		// move the cursor to the next line
 		@Override
-		public void saveState() {
-			try {
-				// Convert the file into an array of bytes
-				bFile = new byte[(int) file.length()];
-				fileInputStream = new FileInputStream(file);
-				fileInputStream.read(bFile);
-				fileInputStream.close();
-				
-				System.out.println("State saved");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		public void saveState() {}
 		
 		@Override
 		public void restoreState() {
@@ -97,16 +81,9 @@ public class TestService extends Service implements Serializable {
 			
 			if (filePath != null) {
 				try {
-					// Convert array of bytes into file
+					// Restore the file and buffer readers that could not get serialized
 					file = new File(filePath + fileName);
-					if (!file.exists()) {
-						file.createNewFile();
-					}
-					FileOutputStream fileOuputStream = new FileOutputStream(file);
-					fileOuputStream.write(bFile);
-					fileOuputStream.close();
-					
-					// FileReader and BufferedReader cannot be serialized and therefore have to be redefined
+
 					try {
 			        	fileReader = new FileReader(file);
 						bufferedReader = new BufferedReader(fileReader);
@@ -139,62 +116,65 @@ public class TestService extends Service implements Serializable {
 			
 			System.out.println("I am " + service.getId() + " ; I am associated to " + service.getFunctionalModule().getId() + " FM which is associated to " + service.getFunctionalModule().getNam().getId() + " NAM ---");
 			
-			filePath = service.getFunctionalModule().getNam().getMigrationStore();
-			
-			if (filePath != null) {
-				try {
-					file = new File(filePath + fileName);
-					if (file.exists()) {
-						fileReader = new FileReader(file);
-						bufferedReader = new BufferedReader(fileReader);
-							
-			            while ((inputLine = bufferedReader.readLine()) != null) {
-			            
-			            	System.out.print("Examining line " + ++parsedLines + ": \"" + inputLine + "\"\r");
-			            	
-			            	String[] words = inputLine.split("[ \n\t\r.,;:!?(){}]");
-			 
-			                for (int counter = 0; counter < words.length; counter++) {
-			                    String key = words[counter].toLowerCase(); // remove .toLowerCase for Case Sensitive result.
-			                    if (key.length() > 0) {
-			                        if (map.get(key) == null) {
-			                            map.put(key, 1);
-			                        }
-			                        else {
-			                            int value = map.get(key).intValue();
-			                            value++;
-			                            map.put(key, value);
-			                        }
-			                    }
-			                 }
-			                
-			                synchronized (this) {
-								while (isSuspended()) {
-									wait();
-								}
-							}
-			            }
-			            
-			            bufferedReader.close();
-			            
-			            Set<Map.Entry<String, Integer>> entrySet = map.entrySet();
-			            System.out.println("--- The five most used words ---\n\n" + "Word" + "\t\t" + "number of occurances");
-			            int i = 1;
-			            for (Map.Entry<String, Integer> entry : entrySet) {
-			                System.out.println(entry.getKey() + "\t\t" + entry.getValue());
-			                if ((i++) == 5)
-			                	break;
-			            }
-			            
-					} else System.out.println("The file to be parsed (" + (filePath + fileName) + " does not exist");
+			if(fileReader == null || bufferedReader == null) {
+				filePath = service.getFunctionalModule().getNam().getMigrationStore();
+				if (filePath != null) {
+					try {
+						file = new File(filePath + fileName);
+						if (file.exists()) {
+							fileReader = new FileReader(file);
+							bufferedReader = new BufferedReader(fileReader);
+						} else System.out.println("The file to be parsed (" + (filePath + fileName) + " does not exist");
+						
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 					
-				} catch (InterruptedException e) {
-					 System.out.println("Thread interrupted.");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				
-			} else System.err.println("The file path retrieved from the associated FM is null");
+				} else System.err.println("The file path retrieved from the associated FM is null");
+			}
+			
+			try {
+	            while ((inputLine = bufferedReader.readLine()) != null) {
+	            
+	            	System.out.print("Examining line " + ++parsedLines + ": \"" + inputLine + "\"\r");
+	            	
+	            	String[] words = inputLine.split("[ \n\t\r.,;:!?(){}]");
+	 
+	                for (int counter = 0; counter < words.length; counter++) {
+	                    String key = words[counter].toLowerCase(); // remove .toLowerCase for Case Sensitive result
+						if (key.length() > 0) {
+							if (map.get(key) == null) {
+								map.put(key, 1);
+							} else {
+								int value = map.get(key).intValue();
+								value++;
+								map.put(key, value);
+							}
+						}
+					}
+	                
+	                synchronized (this) {
+						while (isSuspended()) {
+							wait();
+						}
+					}
+	            }
+	            
+	            bufferedReader.close();
+	            
+	            Set<Map.Entry<String, Integer>> entrySet = map.entrySet();
+	            System.out.println("--- The five most used words ---\n\n" + "Word" + "\t\t" + "number of occurances");
+	            int i = 1;
+	            for (Map.Entry<String, Integer> entry : entrySet) {
+	                System.out.println(entry.getKey() + "\t\t" + entry.getValue());
+	                if ((i++) == 5)
+	                	break;
+	            }
+			} catch (InterruptedException e) {
+				 System.out.println("Thread interrupted.");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

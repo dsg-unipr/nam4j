@@ -106,6 +106,10 @@ public class MobilityUtils {
 	public static final String DESKTOP_FILE_EXTENSION = ".jar";
 	public static final String ANDROID_FILE_EXTENSION = ".dex";
 	
+	/** Identifiers */
+	public static final String INFO_FILE_ID = "INFO_FILE";
+	public static final String RESOURCE_FILE_ID = "RESOURCE_FILE";
+	
 	/**
 	 * Method to check if current node has a given file.
 	 * 
