@@ -55,7 +55,7 @@ public class TestService extends Service implements Serializable {
 		private int sleepingTime = 1000;
 		private File file = null;
 		private String filePath = null;
-		private String fileName = "divina_commedia.txt";
+		private String fileName = "romeo_and_juliet.txt";
 		private String inputLine = null;
 		private TreeMap<String, Integer> map = new TreeMap<String, Integer>();
 		private int parsedLines = 0;

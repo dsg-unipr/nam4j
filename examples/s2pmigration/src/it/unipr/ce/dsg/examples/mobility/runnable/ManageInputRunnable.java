@@ -120,7 +120,7 @@ public class ManageInputRunnable implements Runnable {
 				ts.setFunctionalModule(tfm);
 				ts.getServiceRunnable().start();
 				try {
-					Thread.sleep(10);
+					Thread.sleep(20);
 				} catch (InterruptedException e) {}
 				ts.getServiceRunnable().saveState();
 				ts.getServiceRunnable().suspend();

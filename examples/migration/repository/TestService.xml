@@ -28,6 +28,6 @@
 	
 	<!-- List of files representing resources that have to be migrated - add a <file> element for each one -->
 	<file>
-	    <file_id>divina_commedia.txt</file_id>
+	    <file_id>romeo_and_juliet.txt</file_id>
 	</file>
 </lib>
