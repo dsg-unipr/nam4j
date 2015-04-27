@@ -28,7 +28,7 @@ import org.xml.sax.SAXException;
 
 /**
  * <p>
- * This class includes utility methods used by mobility actions.
+ * This class includes utility methods and strings used by mobility actions.
  * </p>
  * 
  * <p>
@@ -94,6 +94,8 @@ public class MobilityUtils {
 	public static final String ACTION_SUCCESSFUL = "action succesfully completed";
 	public static final String SERVER_ITEM_NOT_AVAILABLE = "The requested item is not available";
 	public static final String RECEIVED_INFO_FILE = "------ Received an info file for a dependency";
+	public static final String CREATING_FILE = "Creating file...";
+	public static final String PATH_SEPARATOR = "/";
 	
 	/** Error strings */
 	public static final String INFO_FILE_DOES_NOT_INCLUDE_DESCRIPTION = "The info file does not include the item description";
@@ -122,19 +124,17 @@ public class MobilityUtils {
 	 *            requesting node
 	 * 
 	 * @param migrationStore
-	 *            The path where dependancies are stored
+	 *            The path where dependencies are stored
 	 * 
 	 * @return the requested file
 	 */
 	public static File getRequestedItem(String requestedClassname, Platform platform, String migrationStore) {
-		
-		// Get the list of all files
+		// Get the list of all files in the migration repository
 		String filename = "";
 		File folder = new File(migrationStore);
 		File[] listOfFiles = folder.listFiles();
 
 		for (int i = 0; i < listOfFiles.length; i++) {
-
 			String ext = null;
 			
 			if (platform == Platform.DESKTOP) {
@@ -149,125 +149,13 @@ public class MobilityUtils {
 			if (listOfFiles[i].isFile() && listOfFiles[i].getName().endsWith(ext)) {
 				filename = listOfFiles[i].getAbsolutePath();
 				
-				System.out.println("------- Comparing " + listOfFiles[i].getName() + " with " + requestedClassname);
-				
 				if (filename.contains(requestedClassname)) {
-					System.out.println("Found requested file: \"" + listOfFiles[i].getName() + "\"");
+					// Found the item to be migrated: listOfFiles[i].getAbsolutePath()
 					return new File(listOfFiles[i].getAbsolutePath());
 				}
 			}
 		}
 		return null;
-	
-		// The following code opens all jar files in the migration storage path
-		// and checks in each if a class with the same name of the id
-		// (requestedClassname) exists. If found, such a file is returned, else
-		// null is.
-		/*
-		try {
-			// Get the list of all files
-			String filename = "";
-			File folder = new File(migrationStore);
-			File[] listOfFiles = folder.listFiles();
-			
-			// Set to true when the file to be migrated is found
-			boolean found = false;
-
-			// Data of the file to be migrated
-			String fileToBeMigrated = "";
-			File file = null;
-
-			for (int i = 0; i < listOfFiles.length; i++) {
-
-				if (listOfFiles[i].isFile() && listOfFiles[i].getName().endsWith(MobilityUtils.DESKTOP_FILE_EXTENSION)) {
-					filename = listOfFiles[i].getAbsolutePath();
-					JarFile jarFile = new JarFile(filename, false);
-					Enumeration<JarEntry> entries = jarFile.entries();
-
-					while (entries.hasMoreElements()) {
-						JarEntry entry = entries.nextElement();
-						String entryName = entry.getName();
-
-						if (entryName.endsWith(".class")) {
-							String[] currentClassName = entryName.split("/");
-							String justClassName = currentClassName[currentClassName.length - 1].replace(".class", "");
-
-							if (requestedClassname.equalsIgnoreCase(justClassName)) {
-
-								 // listOfFiles[i] is the file to be migrated
-								 // 
-								 // Using BCEL class parser to get the package
-								 // name for the class: a temporary copy of the
-								 // class file is created locally and then parsed
-								 // to get the package
-								 
-
-								// Generating a pseudo-random name for the temp file
-								int fileNameLength = 20;
-								char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-								StringBuilder sb = new StringBuilder();
-								Random random = new Random();
-								for (int y = 0; y < fileNameLength; y++) {
-									char c = chars[random.nextInt(chars.length)];
-									sb.append(c);
-								}
-								String output = sb.toString() + ".class";
-
-								// Creating a temp file
-								File f = new File(output);
-
-								// Copying the content of the class in the new
-								InputStream inputS = jarFile.getInputStream(entry);
-								java.io.FileOutputStream fos = new FileOutputStream(f);
-								while (inputS.available() > 0) {
-									fos.write(inputS.read());
-								}
-								fos.close();
-								inputS.close();
-
-								if (f.exists()) {
-									// System.out.println("Found requested file: \"" + filename + "\"");
-
-									found = true;
-									fileToBeMigrated = listOfFiles[i].getAbsolutePath();
-
-									// Deleting the copy of the class
-									boolean success = f.delete();
-									if (!success)
-										throw new IllegalArgumentException("Temp file delete failed");
-
-									break;
-								}
-							}
-						}
-					}
-					
-					jarFile.close();
-				}
-
-				if (found)
-					break;
-			}
-
-			if (found) {
-				
-				if (platform == Platform.DESKTOP) {
-					file = new File(fileToBeMigrated);
-				} else {
-					file = new File(fileToBeMigrated.replace(MobilityUtils.DESKTOP_FILE_EXTENSION, MobilityUtils.ANDROID_FILE_EXTENSION));
-				}
-				
-				return file;
-
-			} else {
-				// System.out.println("I do not have the requested item");
-				return null;
-			}
-		} catch (IOException e) {
-			System.err.println(e.getMessage());
-			return null;
-		}
-		*/
 	}
 
 	/**
@@ -287,14 +175,10 @@ public class MobilityUtils {
 	 */
 	public static ArrayList<StateChunk> generateStateChunksFromByteArray(String conversationId, byte[] bObject) {
 		try {
-	
 			ArrayList<StateChunk> chunkList = new ArrayList<StateChunk>();
-	
 			double chunkNumber = Math.ceil((double) bObject.length / (double) MobilityUtils.CHUNK_SIZE);
 	
 			for (int chunkIndex = 0; chunkIndex < chunkNumber; chunkIndex++) {
-	
-				// byte chunkBuffer[] = new byte[MobilityUtils.CHUNK_SIZE];
 				int length;
 	
 				if (chunkIndex + 1 < chunkNumber)
@@ -303,11 +187,8 @@ public class MobilityUtils {
 					length = bObject.length - chunkIndex * MobilityUtils.CHUNK_SIZE;
 				
 				byte chunkBuffer[] = new byte[length];
-	
 				System.arraycopy(bObject, chunkIndex * MobilityUtils.CHUNK_SIZE, chunkBuffer, 0, length);
-	
 				StateChunk newChunk = new StateChunk(conversationId, (int) chunkNumber, chunkIndex, chunkBuffer);
-	
 				chunkList.add(newChunk);
 			}
 	
@@ -345,12 +226,9 @@ public class MobilityUtils {
 		try {
 	
 			ArrayList<DependencyChunk> chunkList = new ArrayList<DependencyChunk>();
-	
 			double chunkNumber = Math.ceil((double) bObject.length / (double) MobilityUtils.CHUNK_SIZE);
 	
 			for (int chunkIndex = 0; chunkIndex < chunkNumber; chunkIndex++) {
-	
-				// byte chunkBuffer[] = new byte[MobilityUtils.CHUNK_SIZE];
 				int length;
 	
 				if (chunkIndex + 1 < chunkNumber)
@@ -359,11 +237,8 @@ public class MobilityUtils {
 					length = bObject.length - chunkIndex * MobilityUtils.CHUNK_SIZE;
 				
 				byte chunkBuffer[] = new byte[length];
-	
 				System.arraycopy(bObject, chunkIndex * MobilityUtils.CHUNK_SIZE, chunkBuffer, 0, length);
-	
 				DependencyChunk newChunk = new DependencyChunk(conversationId, dependencyId, fileName, (int) chunkNumber, chunkIndex, chunkBuffer);
-	
 				chunkList.add(newChunk);
 			}
 	
@@ -404,14 +279,10 @@ public class MobilityUtils {
 	 */
 	public static ArrayList<ItemChunk> generateItemChunksFromByteArray(String conversationId, byte[] bObject, String mainClass, String functionalModuleIdForService, String fileName) {
 		try {
-	
 			ArrayList<ItemChunk> chunkList = new ArrayList<ItemChunk>();
-	
 			double chunkNumber = Math.ceil((double) bObject.length / (double) MobilityUtils.CHUNK_SIZE);
 	
 			for (int chunkIndex = 0; chunkIndex < chunkNumber; chunkIndex++) {
-	
-				// byte chunkBuffer[] = new byte[MobilityUtils.CHUNK_SIZE];
 				int length;
 	
 				if (chunkIndex + 1 < chunkNumber)
@@ -420,11 +291,8 @@ public class MobilityUtils {
 					length = bObject.length - chunkIndex * MobilityUtils.CHUNK_SIZE;
 				
 				byte chunkBuffer[] = new byte[length];
-				
 				System.arraycopy(bObject, chunkIndex * MobilityUtils.CHUNK_SIZE, chunkBuffer, 0, length);
-	
 				ItemChunk newChunk = new ItemChunk(conversationId, (int) chunkNumber, chunkIndex, chunkBuffer, mainClass, functionalModuleIdForService, fileName);
-				
 				chunkList.add(newChunk);
 			}
 	
@@ -461,12 +329,9 @@ public class MobilityUtils {
 	public static ArrayList<InfoFileChunk> generateInfoFileChunksFromByteArray(String conversationId, byte[] bObject, String infoFileId, String fileName) {
 		try {
 			ArrayList<InfoFileChunk> chunkList = new ArrayList<InfoFileChunk>();
-	
 			double chunkNumber = Math.ceil((double) bObject.length / (double) MobilityUtils.CHUNK_SIZE);
 	
 			for (int chunkIndex = 0; chunkIndex < chunkNumber; chunkIndex++) {
-	
-				// byte chunkBuffer[] = new byte[MobilityUtils.CHUNK_SIZE];
 				int length;
 	
 				if (chunkIndex + 1 < chunkNumber)
@@ -475,11 +340,8 @@ public class MobilityUtils {
 					length = bObject.length - chunkIndex * MobilityUtils.CHUNK_SIZE;
 				
 				byte chunkBuffer[] = new byte[length];
-	
 				System.arraycopy(bObject, chunkIndex * MobilityUtils.CHUNK_SIZE, chunkBuffer, 0, length);
-	
 				InfoFileChunk newChunk = new InfoFileChunk(conversationId, infoFileId, fileName, (int) chunkNumber, chunkIndex, chunkBuffer);
-	
 				chunkList.add(newChunk);
 			}
 	
@@ -506,7 +368,7 @@ public class MobilityUtils {
 	 * @param completeClassName
 	 *            a String representing the complete name of the file's main
 	 *            class (null if the method does not have to instantiate any
-	 *            class, but only to add the file to classpath)
+	 *            class, but only to add the file to class path)
 	 * 
 	 * @param fType
 	 *            the type of the class to be added - SERVICE or FM (Functional
@@ -517,8 +379,7 @@ public class MobilityUtils {
 	 * @throws IOException
 	 */
 	public static Object addToClassPath(NetworkedAutonomicMachine nam, String fileToAddToClassPath, String completeClassName, MigrationSubject fType) {
-	
-		System.out.println("Adding file " + fileToAddToClassPath + " to classpath");
+		System.out.println("Adding file " + fileToAddToClassPath + " to class path");
 		
 		Object obj = null;
 	
@@ -528,9 +389,8 @@ public class MobilityUtils {
 	
 			if (nam.getClientPlatform(0) == Platform.DESKTOP) {
 	
-				// Adding to classpath on a desktop node
+				// Adding to the class path on a desktop node
 				URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-	
 				Class<?> sysclass = URLClassLoader.class;
 	
 				try {
@@ -541,8 +401,8 @@ public class MobilityUtils {
 					t.printStackTrace();
 					throw new IOException("Error, could not add URL to system classloader");
 				}
-			} else {
-				// Adding to the classpath on an Android node happens locally on the device
+			} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
+				// Adding to the class path on Android nodes happens locally on the device
 			}
 	
 		} catch (IOException e1) {
@@ -616,6 +476,7 @@ public class MobilityUtils {
 		} catch (SAXException e) {
 			e.printStackTrace();
 		}
+		
 		return null;
 	}
 
@@ -650,6 +511,7 @@ public class MobilityUtils {
 			FunctionalModule fm = (FunctionalModule) fmObj;
 			fm.setNam(nam);
 			fm.addProvidedService(s.getId(), s);
+
 			return fm;
 			
 		} catch (NoSuchMethodException e) {

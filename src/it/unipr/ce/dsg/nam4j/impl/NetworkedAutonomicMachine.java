@@ -475,9 +475,9 @@ public abstract class NetworkedAutonomicMachine implements
 	 * Add to a HashMap the address of a NAM which sent a FM.
 	 * 
 	 *  @param sender
-	 *            The address of the sender's socket
+	 *            The address of the sender
 	 * @param fm
-	 *            The file name and extension of the received FM
+	 *            The identifier of the received FM
 	 *            
 	 */
 	public void addFmSender(String sender, String fm) {
@@ -488,7 +488,7 @@ public abstract class NetworkedAutonomicMachine implements
 	 * Remove from the HashMap the address of a NAM which sent a FM.
 	 * 
 	 * @param sender
-	 *            The socket's address of the node to be removed
+	 *            The address of the node to be removed
 	 */
 	public void removeFmSender(String sender) {
 		fmSender.remove(sender);
@@ -498,9 +498,9 @@ public abstract class NetworkedAutonomicMachine implements
 	 * Add to a HashMap the address of a NAM which sent a Service.
 	 * 
 	 * @param sender
-	 *            The address of the sender's socket 
+	 *            The address of the sender 
 	 * @param service
-	 *            The file name and extension of the received Service
+	 *            The identifier of the received Service
 	 *            
 	 */
 	public void addServiceSender(String sender, String service) {
@@ -511,7 +511,7 @@ public abstract class NetworkedAutonomicMachine implements
 	 * Remove from the HashMap the address of a NAM which sent a Service.
 	 * 
 	 * @param sender
-	 *            The socket's address of the node to be removed
+	 *            The address of the node to be removed
 	 */
 	public void removeServiceSender(String sender) {
 		serviceSender.remove(sender);
@@ -521,9 +521,9 @@ public abstract class NetworkedAutonomicMachine implements
 	 * Add to a HashMap the address of a NAM to which a FM was sent.
 	 * 
 	 * @param receiver
-	 *            The address of the receiver's socket
+	 *            The address of the receiver
 	 * @param fm
-	 *            The file name and extension of the sent FM
+	 *            The identifier of the sent FM
 	 * 
 	 */
 	public void addFmReceiver(String receiver, String fm) {
@@ -534,7 +534,7 @@ public abstract class NetworkedAutonomicMachine implements
 	 * Remove from the HashMap the address of a NAM to which a FM was sent.
 	 * 
 	 * @param receiver
-	 *            The socket's address of the node to be removed
+	 *            The address of the node to be removed
 	 */
 	public void removeFmReceiver(String receiver) {
 		fmReceiver.remove(receiver);
@@ -544,9 +544,9 @@ public abstract class NetworkedAutonomicMachine implements
 	 * Add to a HashMap the address of a NAM to which a Service was sent.
 	 * 
 	 * @param receiver
-	 *            The address of the receiver's socket
+	 *            The address of the receiver
 	 * @param service
-	 *            The file name and extension of the sent Service
+	 *            The identifier of the sent Service
 	 */
 	public void addServiceReceiver(String receiver, String service) {
 		serviceReceiver.put(receiver, service);
@@ -556,7 +556,7 @@ public abstract class NetworkedAutonomicMachine implements
 	 * Remove from the HashMap the address of a NAM to which a Service was sent.
 	 * 
 	 * @param receiver
-	 *            The socket's address of the node to be removed
+	 *            The address of the node to be removed
 	 */
 	public void removeServiceReceiver(String receiver) {
 		serviceReceiver.remove(receiver);

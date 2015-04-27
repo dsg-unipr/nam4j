@@ -2,6 +2,7 @@ package it.unipr.ce.dsg.nam4j.impl.socketmobility;
 
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -115,7 +116,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 
 						if (entryName.endsWith(".class")) {
 
-							String[] currentClassName = entryName.split("/");
+							String[] currentClassName = entryName.split(MobilityUtils.PATH_SEPARATOR);
 							String justClassName = currentClassName[currentClassName.length - 1]
 									.replace(".class", "");
 							
@@ -298,7 +299,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 							+ Thread.currentThread().getId()
 							+ " is checking file " + filename);
 
-					String[] currentClassName = filename.split("/");
+					String[] currentClassName = filename.split(MobilityUtils.PATH_SEPARATOR);
 					String justClassName = currentClassName[currentClassName.length - 1]
 							.replace(".java", "");
 

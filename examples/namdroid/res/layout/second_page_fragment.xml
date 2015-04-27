@@ -2,21 +2,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/grey_white_1000"
+    android:gravity="center"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:background="@color/grey_white_1000" > <!-- android:background="@drawable/gradient_bg" -->
+    android:paddingTop="@dimen/activity_vertical_margin" > <!-- android:background="@drawable/gradient_bg" -->
 
     <ImageView
         android:id="@+id/imgLogo"
-        android:contentDescription="@string/dsgLogoDescription"
-        style="@style/SplashLogoStyle" />
- 
+        style="@style/SplashLogoStyle"
+        android:contentDescription="@string/dsgLogoDescription" />
+
     <TextView
         android:id="@+id/dsg_contacts"
+        style="@style/SplashTextStyle"
         android:layout_below="@+id/imgLogo"
-        android:text="@string/dsg_contacts"
-        style="@style/SplashTextStyle" />
+        android:text="@string/aboutApp" />
 
 </RelativeLayout>

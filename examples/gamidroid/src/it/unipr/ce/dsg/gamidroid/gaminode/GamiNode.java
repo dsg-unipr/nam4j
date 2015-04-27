@@ -35,8 +35,7 @@ public class GamiNode extends NetworkedAutonomicMachine {
 
 	private static NetworkedAutonomicMachine thisNam;
 
-	private static String pathToSaveFile = Environment
-			.getExternalStorageDirectory().toString() + "/";
+	private static String pathToSaveFile = Environment.getExternalStorageDirectory().toString() + "/";
 
 	private GamiNode(Context mContext, String configuration, String confFile) {
 		super(10, pathToSaveFile, 3);

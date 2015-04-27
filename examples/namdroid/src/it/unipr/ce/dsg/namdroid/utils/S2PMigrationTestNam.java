@@ -2,6 +2,7 @@ package it.unipr.ce.dsg.namdroid.utils;
 
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 import it.unipr.ce.dsg.nam4j.impl.mobility.peer.MccNamPeer;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 import it.unipr.ce.dsg.nam4j.interfaces.IMobilityItemAvailability;
 import it.unipr.ce.dsg.namdroid.interfaces.IMobilityItemIsAvailableObserver;
 import it.unipr.ce.dsg.s2p.centralized.utils.Key;
@@ -15,9 +16,12 @@ import android.os.Environment;
 public class S2PMigrationTestNam extends NetworkedAutonomicMachine implements IMobilityItemAvailability {
 	
 	private static S2PMigrationTestNam s2PMigrationTestNam = null;
-	private static String pathToSaveFile = Environment.getExternalStorageDirectory().toString() + "/";
+	private static String pathToSaveFile = Environment.getExternalStorageDirectory().toString() + MobilityUtils.PATH_SEPARATOR;
 	private MccNamPeer peer;
 	private ArrayList<IMobilityItemIsAvailableObserver> listeners;
+	
+	/** Set the variable to the address of the peer to be contacted */
+	String peerToBeContactedAddress = "0011100111111110101001010110001011100110001110101101100111100010101001110010010110110011111100010100010001011111111111011010001010111000000001001000101001101101@192.168.1.146:6461";
 
 	private S2PMigrationTestNam(Context mContext, String confFile) {
 		super(10, pathToSaveFile, 3);
@@ -40,13 +44,14 @@ public class S2PMigrationTestNam extends NetworkedAutonomicMachine implements IM
 		System.out.println("Contact address: " + peer.getPeerDescriptor());
 	}
 	
-	/**
-	 * Sample method to test migration. Set peerToBeContactedAddress variable to
-	 * the address of the peer to be contacted.
-	 */
-	public void performTest() {
-		String peerToBeContactedAddress = "0101111110010010001100000010001100001100000000101000010111100100110011000010000001100010010001001110110000010000011100100011000001110100101110011000101101011001@192.168.1.5:1856";
+	/** Sample method to test Service requests. */
+	public void performRequestServiceTest() {
 		peer.requestService(peerToBeContactedAddress, "TestService", Platform.ANDROID, Action.COPY, "1.0");
+	}
+	
+	/** Sample method to test FM requests. */
+	public void performRequestFMTest() {
+		peer.requestFM(peerToBeContactedAddress, "TestFunctionalModule", Platform.ANDROID, Action.COPY, "1.0");
 	}
 	
 	public void addIMobilityItemIsAvailableObserver(IMobilityItemIsAvailableObserver iMobilityItemIsAvailableObserver) {

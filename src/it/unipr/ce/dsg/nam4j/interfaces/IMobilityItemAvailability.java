@@ -7,7 +7,7 @@ import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
  * <p>
  * Interface for the implementation of the OBSERVER pattern. Such an interface
  * is intended to be used by nodes needing to get notified when an item is
- * available and can be added to the classpath and possibly has to start its
+ * available and can be added to the class path and possibly has to start its
  * execution. It is mainly used when items are received by Android nodes.
  * </p>
  * 
@@ -28,20 +28,20 @@ public interface IMobilityItemAvailability {
 
 	/**
 	 * Method that notifies observers that an item is available and has to be
-	 * added to the classpath.
+	 * added to the class path.
 	 * 
 	 * @param fileFullPath
-	 *            The path of the file that has to be added to the classpath,
+	 *            The path of the file that has to be added to the class path,
 	 *            including the file's name and extension
 	 * 
 	 * @param mainClassName
 	 *            The main class name of the file that has to be added to the
-	 *            classpath if it is a FM or a Service. Null if it is a
+	 *            class path if it is a FM or a Service. Null if it is a
 	 *            dependency.
 	 * 
 	 * @param role
 	 *            The {@link MigrationSubject} of the file that has to be added
-	 *            to the classpath.
+	 *            to the class path.
 	 * 
 	 * @param state
 	 *            The execution state to notify observer it has been received.

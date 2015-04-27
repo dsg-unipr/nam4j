@@ -2166,10 +2166,11 @@ containing a value of this type.
         public static final int abc_textfield_search_activated_mtrl_alpha=0x7f020038;
         public static final int abc_textfield_search_default_mtrl_alpha=0x7f020039;
         public static final int abc_textfield_search_material=0x7f02003a;
-        public static final int dsg_logo=0x7f02003b;
-        public static final int gradient_bg=0x7f02003c;
-        public static final int ic_launcher=0x7f02003d;
-        public static final int listview_selector=0x7f02003e;
+        public static final int button_shape=0x7f02003b;
+        public static final int dsg_logo=0x7f02003c;
+        public static final int gradient_bg=0x7f02003d;
+        public static final int ic_launcher=0x7f02003e;
+        public static final int listview_selector=0x7f02003f;
     }
     public static final class id {
         public static final int action_bar=0x7f090040;
@@ -2206,7 +2207,7 @@ containing a value of this type.
         public static final int disableHome=0x7f09000d;
         public static final int drawer_layout=0x7f090050;
         public static final int dropdown=0x7f09001f;
-        public static final int dsg_contacts=0x7f090059;
+        public static final int dsg_contacts=0x7f09005b;
         public static final int edit_query=0x7f090042;
         public static final int end=0x7f090021;
         public static final int expand_activities_button=0x7f090027;
@@ -2216,8 +2217,8 @@ containing a value of this type.
         public static final int icon=0x7f09002b;
         public static final int ifRoom=0x7f09001b;
         public static final int image=0x7f090028;
-        public static final int imgLogo=0x7f090058;
-        public static final int infoTextView=0x7f090057;
+        public static final int imgLogo=0x7f09005a;
+        public static final int infoTextView=0x7f090059;
         public static final int listMode=0x7f09000a;
         public static final int list_item=0x7f09002a;
         public static final int middle=0x7f090022;
@@ -2231,6 +2232,8 @@ containing a value of this type.
         public static final int progress_circular=0x7f090007;
         public static final int progress_horizontal=0x7f090008;
         public static final int radio=0x7f09003a;
+        public static final int requestFMButton=0x7f090058;
+        public static final int requestServiceButton=0x7f090057;
         public static final int screen=0x7f090015;
         public static final int scrollView=0x7f090032;
         public static final int search_badge=0x7f090044;
@@ -2393,14 +2396,17 @@ containing a value of this type.
         public static final int aboutApp=0x7f0a0016;
         public static final int action_settings=0x7f0a0012;
         public static final int app_name=0x7f0a0011;
+        /**  FirstPageFragment buttons titles 
+         */
+        public static final int button1_title=0x7f0a0019;
+        public static final int button2_title=0x7f0a001a;
         /**  NavigationDrawer buttons titles 
          */
-        public static final int drawer_button1_title=0x7f0a0018;
-        public static final int drawer_button2_title=0x7f0a0019;
+        public static final int drawer_button1_title=0x7f0a0017;
+        public static final int drawer_button2_title=0x7f0a0018;
         public static final int drawer_close=0x7f0a0014;
         public static final int drawer_open=0x7f0a0013;
         public static final int dsgLogoDescription=0x7f0a0015;
-        public static final int dsg_contacts=0x7f0a0017;
     }
     public static final class style {
         public static final int AlertDialog_AppCompat=0x7f0b0040;

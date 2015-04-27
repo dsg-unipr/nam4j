@@ -56,6 +56,15 @@ public class CopyActionImplementation extends CopyActionHandler {
 	
 	private MccNamPeer peer;
 	
+	/**
+	 * Class constructor.
+	 * 
+	 * @param migrationStore
+	 *            The path where files are stored
+	 * 
+	 * @param peer
+	 *            The {@link MccNamPeer} performing the mobility action
+	 */
 	public CopyActionImplementation(String migrationStore, MccNamPeer peer) {
 		setMigrationStore(migrationStore);
 		setPeer(peer);
@@ -80,10 +89,21 @@ public class CopyActionImplementation extends CopyActionHandler {
 		this.migrationStore = migrationStore;
 	}
 	
+	/**
+	 * Method to get the {@link MccNamPeer} performing the mobility action.
+	 * 
+	 * @return the {@link MccNamPeer} performing the mobility action
+	 */
 	public MccNamPeer getPeer() {
 		return peer;
 	}
 
+	/**
+	 * Method to set the {@link MccNamPeer} performing the mobility action.
+	 * 
+	 * @param peer
+	 *            The {@link MccNamPeer} performing the mobility action
+	 */
 	public void setPeer(MccNamPeer peer) {
 		this.peer = peer;
 	}
@@ -149,7 +169,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 				ArrayList<DependencyChunk> chunkList = MobilityUtils.generateDependencyChunksFromByteArray(conversationKey, bDependencyFile, pairs.getKey(), dependency.getName());
 				
 				for(DependencyChunk chunk : chunkList) {
-					System.out.println(MobilityUtils.SENDING_DEPENDENCY_CHUNK + (chunk.getChunkId() + 1) + "/" + chunk.getChunkNumber() + " for file " + dependency.getName() + " (" + pairs.getKey() + ")");
+					System.out.println(MobilityUtils.SENDING_DEPENDENCY_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file " + dependency.getName() + " (" + pairs.getKey() + ")");
 				
 					DependencyChunkTransferMessage dependencyChunkTransferMessage = new DependencyChunkTransferMessage(peerDescriptor, chunk);
 					this.getPeer().sendMessageToPeer(new Address(senderContactAddress), dependencyChunkTransferMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
@@ -231,7 +251,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 						ArrayList<ItemChunk> chunkList = MobilityUtils.generateItemChunksFromByteArray(conversationKey, bFile, mainClass, functionalModuleIdForService, file.getName());
 						
 						for(ItemChunk chunk : chunkList) {
-							System.out.println(MobilityUtils.SENDING_ITEM_CHUNK + (chunk.getChunkId() + 1) + "/" + chunk.getChunkNumber());
+							System.out.println(MobilityUtils.SENDING_ITEM_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber());
 						
 							ItemChunkTransferMessage itemChunkTransferMessage = new ItemChunkTransferMessage(peerDescriptor, chunk);
 							this.getPeer().sendMessageToPeer(new Address(senderContactAddress), itemChunkTransferMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
@@ -300,7 +320,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 				ArrayList<InfoFileChunk> chunkList = MobilityUtils.generateInfoFileChunksFromByteArray(conversationKey, bInfoFile, itemId, infoFile.getName());
 				
 				for(InfoFileChunk chunk : chunkList) {
-					System.out.println(MobilityUtils.SENDING_INFO_FILE_CHUNK + (chunk.getChunkId() + 1) + "/" + chunk.getChunkNumber());
+					System.out.println(MobilityUtils.SENDING_INFO_FILE_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber());
 				
 					InfoFileChunkTransferMessage infoFileChunkTransferMessage = new InfoFileChunkTransferMessage(peerDescriptor, chunk);
 					this.getPeer().sendMessageToPeer(new Address(senderContactAddress), infoFileChunkTransferMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);

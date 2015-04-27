@@ -5,6 +5,7 @@ import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 import it.unipr.ce.dsg.nam4j.impl.service.Service;
 import it.unipr.ce.dsg.nam4j.interfaces.IMigrationListener;
 
@@ -170,7 +171,7 @@ public class ClientCopyActionManager implements Runnable {
 
 			if (nam.getClientPlatform(0) == Platform.DESKTOP) {
 
-				// Adding to classpath on a desktop node
+				// Adding to the class path on a desktop node
 				URLClassLoader sysloader = (URLClassLoader) ClassLoader
 						.getSystemClassLoader();
 
@@ -187,8 +188,7 @@ public class ClientCopyActionManager implements Runnable {
 							"Error, could not add URL to system classloader");
 				}
 			} else {
-				// Adding to the classpath on an Android node happens locally on
-				// the device
+				// Adding to the class path on Android nodes happens locally on the device
 			}
 
 		} catch (IOException e1) {
@@ -320,8 +320,7 @@ public class ClientCopyActionManager implements Runnable {
 					byte[] mybytearray = new byte[filesize];
 					InputStream inputStr = s.getInputStream();
 
-					String receivedFilename = nam.getMigrationStore() + "/"
-							+ fileName + "." + ext;
+					String receivedFilename = nam.getMigrationStore() + MobilityUtils.PATH_SEPARATOR + fileName + "." + ext;
 
 					FileOutputStream fos = new FileOutputStream(
 							receivedFilename);

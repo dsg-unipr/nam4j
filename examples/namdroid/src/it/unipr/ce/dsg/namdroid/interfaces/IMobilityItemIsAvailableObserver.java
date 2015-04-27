@@ -28,20 +28,20 @@ public interface IMobilityItemIsAvailableObserver {
 
 	/**
 	 * Method that notifies observers that an item is available and has to be
-	 * added to the classpath.
+	 * added to the class path.
 	 * 
 	 * @param itemName
-	 *            The path of the file that has to be added to the classpath,
+	 *            The path of the file that has to be added to the class path,
 	 *            including the file's name and extension
 	 * 
 	 * @param completeClassName
 	 *            The main class name of the file that has to be added to the
-	 *            classpath if it is a FM or a Service. Null if it is a
+	 *            class path if it is a FM or a Service. Null if it is a
 	 *            dependency.
 	 * 
 	 * @param fileType
 	 *            The {@link MigrationSubject} of the file that has to be added
-	 *            to the classpath.
+	 *            to the class path.
 	 * 
 	 * @param action
 	 *            The mobility action which generated the notification

@@ -5,6 +5,7 @@ import it.unipr.ce.dsg.nam4j.impl.context.ContextBus;
 import it.unipr.ce.dsg.nam4j.impl.context.ContextEvent;
 import it.unipr.ce.dsg.nam4j.impl.logger.Logger;
 import it.unipr.ce.dsg.nam4j.impl.messages.ContextEventActionRequestMessage;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 import it.unipr.ce.dsg.nam4j.impl.peer.PeerList;
 import it.unipr.ce.dsg.nam4j.interfaces.IService;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
@@ -85,7 +86,7 @@ public class MeshContextBus extends ContextBus {
 			
 			// Full mesh structure in use
 			
-			String eventModule = contextEventName + ":" + functionalModuleId + "/" + peer.getPeerDescriptor().getContactAddress();
+			String eventModule = contextEventName + ":" + functionalModuleId + MobilityUtils.PATH_SEPARATOR + peer.getPeerDescriptor().getContactAddress();
 
 			eventModuleList.add(eventModule);
 			logger.log("Added " + eventModule + " to eventModuleList");
@@ -112,8 +113,8 @@ public class MeshContextBus extends ContextBus {
 						
 						String eventModule = contextEventName + ":" + functionalModuleId;
 						
-						if (!eventModuleList.contains(eventModule + "/" + peer.getPeerDescriptor().getContactAddress())) {
-							eventModuleList.add(eventModule + "/" + peer.getPeerDescriptor().getContactAddress());
+						if (!eventModuleList.contains(eventModule + MobilityUtils.PATH_SEPARATOR + peer.getPeerDescriptor().getContactAddress())) {
+							eventModuleList.add(eventModule + MobilityUtils.PATH_SEPARATOR + peer.getPeerDescriptor().getContactAddress());
 							logger.log("added " + eventModule + " from " + peer.getPeerDescriptor().getContactAddress() + " to eventModuleList");
 						}	
 						
@@ -160,7 +161,7 @@ public class MeshContextBus extends ContextBus {
 			
 			// Full Mesh structure
 			
-			String eventModule = contextEventName + ":" + functionalModuleId + "/" + peer.getPeerDescriptor().getContactAddress();
+			String eventModule = contextEventName + ":" + functionalModuleId + MobilityUtils.PATH_SEPARATOR + peer.getPeerDescriptor().getContactAddress();
 			
 			eventModuleList.remove(eventModule);
 			logger.log("removed " + eventModule + " from eventModuleList");
@@ -188,8 +189,8 @@ public class MeshContextBus extends ContextBus {
 						
 						String eventModule = contextEventName + ":" + functionalModuleId;
 						
-						if (eventModuleList.contains(eventModule + "/" + peer.getPeerDescriptor().getContactAddress())) {
-							eventModuleList.remove(eventModule + "/" + peer.getPeerDescriptor().getContactAddress());
+						if (eventModuleList.contains(eventModule + MobilityUtils.PATH_SEPARATOR + peer.getPeerDescriptor().getContactAddress())) {
+							eventModuleList.remove(eventModule + MobilityUtils.PATH_SEPARATOR + peer.getPeerDescriptor().getContactAddress());
 							logger.log("Removed " + eventModule + " from " + peer.getPeerDescriptor().getContactAddress() + " to eventModuleList");			
 						}
 	
@@ -220,8 +221,8 @@ public class MeshContextBus extends ContextBus {
 		
 		for (String s : eventModuleList) {
 			if (s.startsWith(peer.getContextEventName())) {
-				if (!s.substring(s.indexOf("/") + 1).equals(peer.getPeerDescriptor().getContactAddress())) {
-					interestedNam.add(s.substring(s.indexOf("/") + 1));
+				if (!s.substring(s.indexOf(MobilityUtils.PATH_SEPARATOR) + 1).equals(peer.getPeerDescriptor().getContactAddress())) {
+					interestedNam.add(s.substring(s.indexOf(MobilityUtils.PATH_SEPARATOR) + 1));
 				}
 			}
 		}
@@ -290,7 +291,7 @@ public class MeshContextBus extends ContextBus {
 			String sender = peerMsg.get("sender").getAsString();
 			int hops = peerMsg.get("hops").getAsInt();
 			
-			String infoReceived = name + "/" + sender;
+			String infoReceived = name + MobilityUtils.PATH_SEPARATOR + sender;
 	
 			if (type.equals(Utils.SUBSCRIBE_REQUEST)) {
 								

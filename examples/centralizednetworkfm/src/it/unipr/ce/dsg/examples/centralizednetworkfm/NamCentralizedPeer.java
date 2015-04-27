@@ -37,10 +37,8 @@ public class NamCentralizedPeer extends CentralizedPeer implements IEventListene
 		super(pathConfig, key, name, port);
 		namCentralizedPeer = this;
 
-		/*
-		 * Registering for the observer pattern so that when the required
-		 * resource is received, this node gets notified
-		 */
+		// Registering for the observer pattern so that when the required
+		// resource is received this node gets notified
 		namCentralizedPeer.addEventListener(namCentralizedPeer);
 
 		PeerConfig peerConfig = new PeerConfig(pathConfig);

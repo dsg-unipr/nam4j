@@ -7,10 +7,13 @@
     <string name="drawer_close">drawer_close</string>
     <string name="dsgLogoDescription">DSG Logo</string>
     <string name="aboutApp">Developed by the Distributed Systems Group of the University of Parma, Italy.\n\nhttp://dsg.ce.unipr.it/\n\ndsg@ce.unipr.it</string>
-    <string name="dsg_contacts">http://dsg.ce.unipr.it\ndsg@ce.unipr.it</string>
-    
+
     <!-- NavigationDrawer buttons titles -->
     <string name="drawer_button1_title">Main</string>
     <string name="drawer_button2_title">About</string>
+
+    <!-- FirstPageFragment buttons titles -->
+    <string name="button1_title">Request parse text Service</string>
+    <string name="button2_title">Request counter FM</string>
 
 </resources>

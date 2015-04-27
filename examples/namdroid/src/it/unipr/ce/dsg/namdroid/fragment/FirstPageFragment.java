@@ -10,6 +10,8 @@ import it.unipr.ce.dsg.namdroid.R;
 import it.unipr.ce.dsg.namdroid.interfaces.IMobilityItemIsAvailableObserver;
 import it.unipr.ce.dsg.namdroid.utils.MobilityUtilsAndroid;
 import it.unipr.ce.dsg.namdroid.utils.S2PMigrationTestNam;
+import it.unipr.ce.dsg.namdroid.utils.Utils;
+import it.unipr.ce.dsg.namdroid.utils.Utils.SupportedFonts;
 
 import java.io.File;
 
@@ -17,18 +19,27 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class FirstPageFragment extends Fragment implements IMobilityItemIsAvailableObserver {
 
 	private S2PMigrationTestNam nam;
 	TextView numberTextView;
+	Button requestService;
+	Button requestFM;
 	
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.first_page_fragment, container, false);
-        numberTextView = (TextView)rootView.findViewById(R.id.infoTextView);
+        numberTextView = (TextView) rootView.findViewById(R.id.infoTextView);
+        numberTextView.setTypeface(Utils.getCustomFont(getActivity(), SupportedFonts.HELVETICA_THIN));
+        requestService = (Button) rootView.findViewById(R.id.requestServiceButton);
+        requestService.setTypeface(Utils.getCustomFont(getActivity(), SupportedFonts.HELVETICA_THIN));
+        requestFM = (Button) rootView.findViewById(R.id.requestFMButton);
+        requestFM.setTypeface(Utils.getCustomFont(getActivity(), SupportedFonts.HELVETICA_THIN));
         init();
         return rootView;
     }
@@ -39,8 +50,21 @@ public class FirstPageFragment extends Fragment implements IMobilityItemIsAvaila
 		// Register for item availability events
 		this.nam.addIMobilityItemIsAvailableObserver(this);
 		
-		// Perform the test
-		this.nam.performTest();
+		requestService.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				nam.performRequestServiceTest();
+			}
+		});
+		
+		requestFM.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				nam.performRequestFMTest();
+			}
+		});
 	}
     
     @Override
@@ -73,9 +97,6 @@ public class FirstPageFragment extends Fragment implements IMobilityItemIsAvaila
 				String fmCompleteMainClassName = infoFmHandler.getLibraryInformation().getMainClass();
 				
 				System.out.println("--------- The main class name for the FM to which the Service is associated is " + fmCompleteMainClassName + " - instantiating it and adding the Service to such a Functional Module...");
-				
-				// TODO: the conversationItem must be update on the class that owns it
-				// conversationItem.setFunctionalModuleId(functionalModuleId);
 				
 				// Adding the service to the associated functional module
 				FunctionalModule fm = MobilityUtilsAndroid.addServiceToFm(getActivity(), s, functionalModuleId, this.nam, fmCompleteMainClassName);
@@ -113,9 +134,6 @@ public class FirstPageFragment extends Fragment implements IMobilityItemIsAvaila
 						String fmCompleteMainClassName = infoFmHandler.getLibraryInformation().getMainClass();
 						
 						System.out.println("--------- The main class name for the FM to which the Service is associated is " + fmCompleteMainClassName + " - instantiating it and adding the Service to such a Functional Module...");
-						
-						// TODO: the conversationItem must be update on the class that owns it
-						// conversationItem.setFunctionalModuleId(functionalModuleId);
 						
 						// Adding the service to the associated functional module
 						FunctionalModule fm = MobilityUtilsAndroid.addServiceToFm(getActivity(), s, functionalModuleId, this.nam, fmCompleteMainClassName);

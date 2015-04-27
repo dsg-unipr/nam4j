@@ -352,21 +352,21 @@ public class MccNamPeer extends NamPeer {
 	
 	/**
 	 * Method that notifies observers that an item (FM, Service or dependency)
-	 * is available and has to be added to the classpath. FM and Services will
+	 * is available and has to be added to the class path. FM and Services will
 	 * start the execution as well.
 	 * 
 	 * @param fileFullPath
-	 *            The path of the file that has to be added to the classpath,
+	 *            The path of the file that has to be added to the class path,
 	 *            including the file's name and extension
 	 * 
 	 * @param mainClassName
 	 *            The main class name of the file that has to be added to the
-	 *            classpath if it is a FM or a Service. Null if it is a
+	 *            class path if it is a FM or a Service. Null if it is a
 	 *            dependency.
 	 * 
 	 * @param role
 	 *            The {@link MigrationSubject} of the file that has to be added
-	 *            to the classpath.
+	 *            to the class path.
 	 */
 	public void notifyObservers(String fileFullPath, String mainClassName, MigrationSubject role, Action action, Object state) {
 		for (IMobilityItemAvailability listener : listeners) {
@@ -646,7 +646,7 @@ public class MccNamPeer extends NamPeer {
 									
 								} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
 									
-									// Use observer pattern for Android
+									// Use observer pattern for notifications
 									notifyObservers(this.nam.getMigrationStore() + itemFile.getName(), mainClassName, role, conversationItem.getAction(), null);
 								}
 								
@@ -658,7 +658,7 @@ public class MccNamPeer extends NamPeer {
 									MobilityUtils.addToClassPath(this.nam, itemFile.getAbsolutePath(), null, conversationItem.getRole());
 								} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
 									
-									// Use observer pattern for Android
+									// Use observer pattern for notifications
 									notifyObservers(itemFile.getAbsolutePath(), null, conversationItem.getRole(), conversationItem.getAction(), null);
 								}
 							}
@@ -775,7 +775,7 @@ public class MccNamPeer extends NamPeer {
 						} else {
 							System.out.println(MobilityUtils.ITEM_AVAILABLE_WAITING_FOR_STATE);
 							
-							// Adding the item to the classpath before receiving the state
+							// Adding the item to the class path before receiving the state
 							if (p == Platform.DESKTOP) {
 								System.out.println(MobilityUtils.ADDING_ITEM_TO_CP_BEFORE_RECEIVING_STATE);
 								MobilityUtils.addToClassPath(this.nam, itemFile.getAbsolutePath(), null, null);
@@ -825,7 +825,7 @@ public class MccNamPeer extends NamPeer {
 
 			ConversationItem conversationItem = this.conversations.getConversationItem(chunk.getConversationId());
 			
-			System.out.println(MobilityUtils.RECEIVED_DEPENDENCY_CHUNK + (chunk.getChunkId() + 1) + "/" + chunk.getChunkNumber() + " for file: " + chunk.getFileName() + " (ID: " + chunk.getDependencyId() + ")");
+			System.out.println(MobilityUtils.RECEIVED_DEPENDENCY_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file: " + chunk.getFileName() + " (ID: " + chunk.getDependencyId() + ")");
 			
 			if (!this.receivedDependencyChunkList.containsKey(chunk.getDependencyId()))
 				this.receivedDependencyChunkList.put(chunk.getDependencyId(), new ArrayList<DependencyChunk>());
@@ -835,7 +835,7 @@ public class MccNamPeer extends NamPeer {
 
 			if (this.receivedDependencyChunkList.get(chunk.getDependencyId()).size() == chunk.getChunkNumber()) {
 				System.out.println("Received all chunks for dependency file " + chunk.getFileName() + " (ID: " + chunk.getDependencyId() + ")");
-				System.out.println("Creating file...");
+				System.out.println(MobilityUtils.CREATING_FILE);
 
 				ArrayList<DependencyChunk> fileChunks = this.receivedDependencyChunkList.get(chunk.getDependencyId());
 
@@ -878,13 +878,13 @@ public class MccNamPeer extends NamPeer {
 
 				this.receivedDependencyChunkList.remove(chunk.getFileName());
 				
-				// Add dependency to classpath only if it is not an xml info file
+				// Add dependency to class path only if it is not an xml info file
 				if (chunk.getFileName().indexOf(MobilityUtils.INFO_FILE_EXTENSION) == -1) {
 					if (nam.getClientPlatform(0) == Platform.DESKTOP) {
 						MobilityUtils.addToClassPath(this.nam, dirPath + chunk.getFileName(), null, null);
 					} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
 						
-						// Use observer pattern to add dependency to classpath for Android
+						// Use observer pattern to add dependency to class path for Android
 						notifyObservers(dirPath + chunk.getFileName(), null, null, conversationItem.getAction(), null);
 					}
 				} else {
@@ -972,7 +972,7 @@ public class MccNamPeer extends NamPeer {
 									
 								} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
 									
-									// Use observer pattern for Android
+									// Use observer pattern for notifications
 									notifyObservers(this.nam.getMigrationStore() + itemFile.getName(), mainClassName, role, conversationItem.getAction(), null);
 								}
 								
@@ -984,7 +984,7 @@ public class MccNamPeer extends NamPeer {
 									MobilityUtils.addToClassPath(this.nam, itemFile.getAbsolutePath(), null, conversationItem.getRole());
 								} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
 									
-									// Use observer pattern for Android
+									// Use observer pattern for notifications
 									notifyObservers(itemFile.getAbsolutePath(), null, conversationItem.getRole(), conversationItem.getAction(), null);
 								}
 							}
@@ -1009,7 +1009,7 @@ public class MccNamPeer extends NamPeer {
 
 			ConversationItem conversationItem = this.conversations.getConversationItem(chunk.getConversationId());
 			
-			System.out.println(MobilityUtils.RECEIVED_ITEM_CHUNK + (chunk.getChunkId() + 1) + "/" + chunk.getChunkNumber() + " for file: " + chunk.getFileName());
+			System.out.println(MobilityUtils.RECEIVED_ITEM_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file: " + chunk.getFileName());
 			
 			if (!this.receivedInfoFileChunkList.containsKey(chunk.getInfoFileId()))
 				this.receivedInfoFileChunkList.put(chunk.getInfoFileId(), new ArrayList<InfoFileChunk>());
@@ -1019,7 +1019,7 @@ public class MccNamPeer extends NamPeer {
 
 			if (this.receivedInfoFileChunkList.get(chunk.getInfoFileId()).size() == chunk.getChunkNumber()) {
 				System.out.println("Received all chunks for item " + chunk.getFileName());
-				System.out.println("Creating file...");
+				System.out.println(MobilityUtils.CREATING_FILE);
 
 				ArrayList<InfoFileChunk> fileChunks = this.receivedInfoFileChunkList.get(chunk.getInfoFileId());
 
@@ -1115,7 +1115,7 @@ public class MccNamPeer extends NamPeer {
 
 			ConversationItem conversationItem = this.conversations.getConversationItem(chunk.getConversationId());
 			
-			System.out.println(MobilityUtils.RECEIVED_ITEM_CHUNK + (chunk.getChunkId() + 1) + "/" + chunk.getChunkNumber() + " for file: " + chunk.getFileName() + " (ID: " + chunk.getMainClassName() + ")");
+			System.out.println(MobilityUtils.RECEIVED_ITEM_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file: " + chunk.getFileName() + " (ID: " + chunk.getMainClassName() + ")");
 			
 			if (!this.receivedItemChunkList.containsKey(chunk.getMainClassName()))
 				this.receivedItemChunkList.put(chunk.getMainClassName(), new ArrayList<ItemChunk>());
@@ -1125,7 +1125,7 @@ public class MccNamPeer extends NamPeer {
 
 			if (this.receivedItemChunkList.get(chunk.getMainClassName()).size() == chunk.getChunkNumber()) {
 				System.out.println("Received all chunks for item " + chunk.getFileName() + " (ID: " + chunk.getMainClassName() + ")");
-				System.out.println("Creating file...");
+				System.out.println(MobilityUtils.CREATING_FILE);
 
 				ArrayList<ItemChunk> fileChunks = this.receivedItemChunkList.get(chunk.getMainClassName());
 
@@ -1187,7 +1187,8 @@ public class MccNamPeer extends NamPeer {
 							FunctionalModule fm = (FunctionalModule) obj;
 							fm.getFunctionalModuleRunnable().start();
 							
-							// TODO: store that the FM has been received from the peer
+							// Store the address of the peer that sent the FM
+							this.nam.addFmSender(conversationItem.getPartnerContactAddress(), conversationItem.getItemId());
 						}
 						else if (role.equals(MigrationSubject.SERVICE)) {
 							String functionalModuleId = chunk.getFunctionalModuleIdForService();
@@ -1212,11 +1213,12 @@ public class MccNamPeer extends NamPeer {
 								System.err.println("The info file for the FM to which the Service is associated is not available");
 							}
 							
-							// TODO: store that the Service has been received from the peer
+							// Store the address of the peer that sent the Service
+							this.nam.addServiceSender(conversationItem.getPartnerContactAddress(), conversationItem.getItemId());
 						}
 					} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
 						
-						// Use observer pattern for Android
+						// Use observer pattern for notifications
 						notifyObservers(this.nam.getMigrationStore() + fileName, mainClassName, role, action, null);
 					}
 					
@@ -1238,7 +1240,7 @@ public class MccNamPeer extends NamPeer {
 						MobilityUtils.addToClassPath(this.nam, this.nam.getMigrationStore() + fileName, null, role);
 					} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
 						
-						// Use observer pattern for Android
+						// Use observer pattern for notifications
 						notifyObservers(this.nam.getMigrationStore() + fileName, null, role, action, null);
 					}
 
@@ -1258,7 +1260,7 @@ public class MccNamPeer extends NamPeer {
 			
 			String senderContactAddress = conversationItem.getPartnerContactAddress();
 			
-			System.out.println(MobilityUtils.RECEIVED_STATE_CHUNK + (chunk.getChunkId() + 1) + "/" + chunk.getChunkNumber() + " for conversation: " + chunk.getConversationId());
+			System.out.println(MobilityUtils.RECEIVED_STATE_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for conversation: " + chunk.getConversationId());
 			
 			if (!this.receivedStateChunkList.containsKey(chunk.getConversationId()))
 				this.receivedStateChunkList.put(chunk.getConversationId(), new ArrayList<StateChunk>());
@@ -1335,7 +1337,8 @@ public class MccNamPeer extends NamPeer {
 							tfm.getFunctionalModuleRunnable().restoreState();
 							tfm.getFunctionalModuleRunnable().resume();
 							
-							// TODO: store that the FM has been received from the peer
+							// Store the address of the peer that sent the FM
+							this.nam.addFmSender(conversationItem.getPartnerContactAddress(), conversationItem.getItemId());
 						}
 						else if (conversationItem.getRole().equals(MigrationSubject.SERVICE)) {
 							SAXHandler handler = MobilityUtils.parseXMLFile(conversationItem.getItemId(), this.nam);
@@ -1362,7 +1365,8 @@ public class MccNamPeer extends NamPeer {
 								System.err.println("The info file for the FM to which the Service is associated is not available");
 							}
 							
-							// TODO: store that the Service has been received from the peer
+							// Store the address of the peer that sent the Service
+							this.nam.addServiceSender(conversationItem.getPartnerContactAddress(), conversationItem.getItemId());
 						}
 						
 						// Remove conversation item from conversations list
@@ -1370,13 +1374,13 @@ public class MccNamPeer extends NamPeer {
 					
 					} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
 						
-						// Use observer pattern for Android
-						// Notify that the state has been received
+						// Use observer pattern for notifications - notify that the state has been received
 						SAXHandler handler = MobilityUtils.parseXMLFile(conversationItem.getItemId(), this.nam);
 						String mainClassName = handler.getLibraryInformation().getMainClass();
 						notifyObservers(this.nam.getMigrationStore() + conversationItem.getItemId() + MobilityUtils.ANDROID_FILE_EXTENSION, mainClassName, conversationItem.getRole(), conversationItem.getAction(), state);
 						
-						// TODO: remove conversationItem from the list of conversations
+						// Remove conversation item from conversations list
+						this.conversations.remove(chunk.getConversationId());
 					}
 
 					ReceivedStateMessage receivedStateMessage = new ReceivedStateMessage(chunk.getConversationId());
@@ -1431,7 +1435,7 @@ public class MccNamPeer extends NamPeer {
 				} else {
 					// Send state chunks
 					for(StateChunk chunk : chunkList) {
-						System.out.println(MobilityUtils.SENDING_STATE_CHUNK + (chunk.getChunkId() + 1) + "/" + chunk.getChunkNumber());
+						System.out.println(MobilityUtils.SENDING_STATE_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber());
 					
 						StateChunkTransferMessage stateChunkTransferMessage = new StateChunkTransferMessage(this.getPeerDescriptor(), chunk);
 						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), stateChunkTransferMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
