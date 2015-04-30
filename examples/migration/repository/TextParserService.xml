@@ -2,7 +2,7 @@
 <lib>
 	<info>
 		<!-- Library id -->
-		<id>TestService</id>
+		<id>TextParserService</id>
 		
 		<!-- Library version -->
 		<version>1.0</version>
@@ -11,7 +11,7 @@
 		<type>SERVICE</type>
 		
 		<!-- Complete name of the library's main class -->
-		<main>it.unipr.ce.dsg.examples.migration.TestService</main>
+		<main>it.unipr.ce.dsg.examples.migration.TextParserService</main>
 	</info>
 	
 	<!-- Functional Module to which the service has to be added -->

@@ -230,9 +230,9 @@ public class ManageDependencies {
 							System.out.println(MobilityUtils.CLIENT_DEPENDENCY_AVAILABLE + dependencyId);
 								
 							// Add dependency to class path
-							if (mccNamPeer.getNam().getClientPlatform(0) == Platform.DESKTOP) {
+							if (mccNamPeer.getNam().getPlatform() == Platform.DESKTOP) {
 								MobilityUtils.addToClassPath(mccNamPeer.getNam(), this.getMigrationStore() + dependencyId + MobilityUtils.DESKTOP_FILE_EXTENSION, null, null);
-							} else if (mccNamPeer.getNam().getClientPlatform(0) == Platform.ANDROID) {
+							} else if (mccNamPeer.getNam().getPlatform() == Platform.ANDROID) {
 								
 								// Use observer pattern to add dependency to class path for Android
 								mccNamPeer.notifyObservers(this.getMigrationStore() + dependencyId + MobilityUtils.ANDROID_FILE_EXTENSION, null, null, null, null);
@@ -251,9 +251,9 @@ public class ManageDependencies {
 							System.out.println("I already have the library, so I will not request it.");
 							
 							// Add dependency to class path
-							if (mccNamPeer.getNam().getClientPlatform(0) == Platform.DESKTOP) {
+							if (mccNamPeer.getNam().getPlatform() == Platform.DESKTOP) {
 								MobilityUtils.addToClassPath(mccNamPeer.getNam(), this.getMigrationStore() + dependencyId + MobilityUtils.DESKTOP_FILE_EXTENSION, null, null);
-							} else if (mccNamPeer.getNam().getClientPlatform(0) == Platform.ANDROID) {
+							} else if (mccNamPeer.getNam().getPlatform() == Platform.ANDROID) {
 								
 								// Use observer pattern to add dependency to class path for Android
 								mccNamPeer.notifyObservers(this.getMigrationStore() + dependencyId + MobilityUtils.ANDROID_FILE_EXTENSION, null, null, null, null);

@@ -49,7 +49,7 @@ public class GalileoDemoNam extends NetworkedAutonomicMachine {
 	}
 
 	public GalileoDemoNam(String[] args) {
-		super(10, "", 3);
+		super(10, "", 3, Platform.DESKTOP);
 
 		this.setId("galileoMccDemonam");
 

@@ -49,7 +49,7 @@ public class KademliaDemoNam extends NetworkedAutonomicMachine {
 	}
 
 	public KademliaDemoNam(String configuration, String configPath) {
-		super(10, "", 3);
+		super(10, "", 3, Platform.DESKTOP);
 
 		this.setId("mccdemonam");
 

@@ -28,7 +28,9 @@ public class FirstPageFragment extends Fragment implements IMobilityItemIsAvaila
 
 	private S2PMigrationTestNam nam;
 	TextView numberTextView;
-	Button requestService;
+	Button requestTextParserService;
+	Button requestSudokuService;
+	Button requestEightQueensProblemService;
 	Button requestFM;
 	
     @Override
@@ -36,8 +38,12 @@ public class FirstPageFragment extends Fragment implements IMobilityItemIsAvaila
         View rootView = inflater.inflate(R.layout.first_page_fragment, container, false);
         numberTextView = (TextView) rootView.findViewById(R.id.infoTextView);
         numberTextView.setTypeface(Utils.getCustomFont(getActivity(), SupportedFonts.HELVETICA_THIN));
-        requestService = (Button) rootView.findViewById(R.id.requestServiceButton);
-        requestService.setTypeface(Utils.getCustomFont(getActivity(), SupportedFonts.HELVETICA_THIN));
+        requestTextParserService = (Button) rootView.findViewById(R.id.requestTextParserServiceButton);
+        requestTextParserService.setTypeface(Utils.getCustomFont(getActivity(), SupportedFonts.HELVETICA_THIN));
+        requestSudokuService = (Button) rootView.findViewById(R.id.requestSudokuServiceButton);
+        requestSudokuService.setTypeface(Utils.getCustomFont(getActivity(), SupportedFonts.HELVETICA_THIN));
+        requestEightQueensProblemService = (Button) rootView.findViewById(R.id.requestEightQueensProblemServiceButton);
+        requestEightQueensProblemService.setTypeface(Utils.getCustomFont(getActivity(), SupportedFonts.HELVETICA_THIN));
         requestFM = (Button) rootView.findViewById(R.id.requestFMButton);
         requestFM.setTypeface(Utils.getCustomFont(getActivity(), SupportedFonts.HELVETICA_THIN));
         init();
@@ -50,16 +56,28 @@ public class FirstPageFragment extends Fragment implements IMobilityItemIsAvaila
 		// Register for item availability events
 		this.nam.addIMobilityItemIsAvailableObserver(this);
 		
-		requestService.setOnClickListener(new OnClickListener() {
-			
+		requestTextParserService.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				nam.performRequestServiceTest();
+				nam.requestTextParseService();
+			}
+		});
+		
+		requestSudokuService.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				nam.requestSudokuService();
+			}
+		});
+		
+		requestEightQueensProblemService.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				nam.requestNQueensProblemService();
 			}
 		});
 		
 		requestFM.setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
 				nam.performRequestFMTest();

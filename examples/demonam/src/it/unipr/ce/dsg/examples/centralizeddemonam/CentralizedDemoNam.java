@@ -49,7 +49,7 @@ public class CentralizedDemoNam extends NetworkedAutonomicMachine {
 	}
 	
 	public CentralizedDemoNam(String configuration, String configPath) {
-		super(10, "", 3);
+		super(10, "", 3, Platform.DESKTOP);
 		
 		this.setId("mccdemonam");
 		

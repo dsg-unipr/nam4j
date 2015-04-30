@@ -56,7 +56,7 @@ public class Utils {
 				.getTop();
 		int titleHeight = contentViewTop - statusHeight;
 
-		/* Getting screen size */
+		// Getting screen size
 		int screenWidth = metrics.widthPixels;
 		int screenHeight = metrics.heightPixels - titleHeight - statusHeight;
 

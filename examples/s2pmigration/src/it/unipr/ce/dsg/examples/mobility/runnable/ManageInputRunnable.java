@@ -1,12 +1,15 @@
 package it.unipr.ce.dsg.examples.mobility.runnable;
 
+import it.unipr.ce.dsg.examples.migration.EightQueensProblemService;
+import it.unipr.ce.dsg.examples.migration.SudokuService;
 import it.unipr.ce.dsg.examples.migration.TestFunctionalModule;
-import it.unipr.ce.dsg.examples.migration.TestService;
+import it.unipr.ce.dsg.examples.migration.TextParserService;
 import it.unipr.ce.dsg.examples.mobility.S2PMigrationTestNam;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
 import it.unipr.ce.dsg.nam4j.impl.mobility.peer.MccNamPeer;
+import it.unipr.ce.dsg.nam4j.impl.service.Service;
 
 import java.io.InputStreamReader;
 import java.util.Scanner;
@@ -112,20 +115,32 @@ public class ManageInputRunnable implements Runnable {
 			else if (choice.equals("ss")) {
 				System.out.print("Please provide the contact address of the peer to which the request has to be sent: ");
 				String ca = scanner.nextLine().trim();
-				// System.out.print("Please provide the service id: ");
-				// String sId = scanner.nextLine().trim();
+				System.out.print("Please provide the service id: ");
+				String sId = scanner.nextLine().trim();
 				
 				TestFunctionalModule tfm = new TestFunctionalModule(s2PMigrationTestNam);
-				TestService ts = new TestService();
-				ts.setFunctionalModule(tfm);
-				ts.getServiceRunnable().start();
-				try {
-					Thread.sleep(20);
-				} catch (InterruptedException e) {}
-				ts.getServiceRunnable().saveState();
-				ts.getServiceRunnable().suspend();
+
+				Service ts = null;
 				
-				String sId = "TestService";
+				if (sId.equals("TextParserService")) {
+					ts = new TextParserService();
+				} else if (sId.equals("SudokuService")) {
+					ts = new SudokuService();
+				} else if (sId.equals("EightQueensProblemService")) {
+					ts = new EightQueensProblemService();
+				}
+
+				if (ts != null) {
+					ts.setFunctionalModule(tfm);
+					ts.getServiceRunnable().start();
+					try {
+						Thread.sleep(20);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					ts.getServiceRunnable().saveState();
+					ts.getServiceRunnable().suspend();
+				}
 				
 				peer.migrateService(ca, sId, Platform.ANDROID, Action.MIGRATE, ts, MigrationSubject.SERVICE, "1.0");
 			}

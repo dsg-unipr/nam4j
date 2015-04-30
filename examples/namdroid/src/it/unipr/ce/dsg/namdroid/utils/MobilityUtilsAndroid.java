@@ -54,9 +54,9 @@ public class MobilityUtilsAndroid extends MobilityUtils {
 	 * 
 	 * @throws Exception
 	 */
-    private static void setDexClassLoaderElements(BaseDexClassLoader classLoader, Object elements) throws Exception {
-        Class<BaseDexClassLoader> dexClassLoaderClass = BaseDexClassLoader.class;
-        Field pathListField = dexClassLoaderClass.getDeclaredField("pathList");
+    private static void setDexClassLoader(BaseDexClassLoader classLoader, Object elements) throws Exception {
+        Class<BaseDexClassLoader> dexClassLoader = BaseDexClassLoader.class;
+        Field pathListField = dexClassLoader.getDeclaredField("pathList");
         pathListField.setAccessible(true);
         Object pathList = pathListField.get(classLoader);
         Field dexElementsField = pathList.getClass().getDeclaredField("dexElements");
@@ -74,9 +74,9 @@ public class MobilityUtilsAndroid extends MobilityUtils {
 	 * 
 	 * @throws Exception
 	 */
-    private static Object getDexClassLoaderElements(BaseDexClassLoader classLoader) throws Exception {
-        Class<BaseDexClassLoader> dexClassLoaderClass = BaseDexClassLoader.class;
-        Field pathListField = dexClassLoaderClass.getDeclaredField("pathList");
+    private static Object getDexClassLoader(BaseDexClassLoader classLoader) throws Exception {
+        Class<BaseDexClassLoader> dexClassLoader = BaseDexClassLoader.class;
+        Field pathListField = dexClassLoader.getDeclaredField("pathList");
         pathListField.setAccessible(true);
         Object pathList = pathListField.get(classLoader);
         Field dexElementsField = pathList.getClass().getDeclaredField("dexElements");
@@ -88,30 +88,30 @@ public class MobilityUtilsAndroid extends MobilityUtils {
 	/**
 	 * Method to merge two arrays.
 	 * 
-	 * @param o1
+	 * @param firstObject
 	 *            The first array to be merged
 	 * 
-	 * @param o2
+	 * @param secondObject
 	 *            The second array to be merged
 	 * 
 	 * @return an object containing the elements of the merged arrays
 	 */
-    private static Object joinArrays(Object o1, Object o2) {
-        Class<?> o1Type = o1.getClass().getComponentType();
-        Class<?> o2Type = o2.getClass().getComponentType();
+    private static Object joinArrays(Object firstObject, Object secondObject) {
+        Class<?> o1Type = firstObject.getClass().getComponentType();
+        Class<?> o2Type = secondObject.getClass().getComponentType();
  
         if(o1Type != o2Type)
             throw new IllegalArgumentException();
  
-        int o1Size = Array.getLength(o1);
-        int o2Size = Array.getLength(o2);
-        Object array = Array.newInstance(o1Type, o1Size + o2Size);
+        int firstObjectSize = Array.getLength(firstObject);
+        int secondObjectSize = Array.getLength(secondObject);
+        Object array = Array.newInstance(o1Type, firstObjectSize + secondObjectSize);
  
         int offset = 0, i;
-        for(i = 0; i < o1Size; i++, offset++)
-            Array.set(array, offset, Array.get(o1, i));
-        for(i = 0; i < o2Size; i++, offset++)
-            Array.set(array, offset, Array.get(o2, i));
+        for(i = 0; i < firstObjectSize; i++, offset++)
+            Array.set(array, offset, Array.get(firstObject, i));
+        for(i = 0; i < secondObjectSize; i++, offset++)
+            Array.set(array, offset, Array.get(secondObject, i));
  
         return array;
     }
@@ -166,16 +166,16 @@ public class MobilityUtilsAndroid extends MobilityUtils {
 			if (localClassLoader instanceof BaseDexClassLoader) {
 				try {
 					// Getting all elements in system class loader
-					Object existing = getDexClassLoaderElements((BaseDexClassLoader) localClassLoader);
+					Object existing = getDexClassLoader((BaseDexClassLoader) localClassLoader);
 					
 					// Getting the element in the new class loader (the dex to be added)
-					Object incoming = getDexClassLoaderElements(classLoader);
+					Object incoming = getDexClassLoader(classLoader);
 					
 					// Merging the system class loader elements with the one in the new class loader
 					Object joined = joinArrays(incoming, existing);
 
 					// Setting the merging result as the set of elements in the system class loader
-					setDexClassLoaderElements((BaseDexClassLoader) localClassLoader, joined);
+					setDexClassLoader((BaseDexClassLoader) localClassLoader, joined);
 					
 				} catch (Exception e) {
 					e.printStackTrace();

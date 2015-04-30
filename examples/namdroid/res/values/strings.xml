@@ -14,6 +14,8 @@
 
     <!-- FirstPageFragment buttons titles -->
     <string name="button1_title">Request parse text Service</string>
-    <string name="button2_title">Request counter FM</string>
+    <string name="button2_title">Request Sudoku Service</string>
+    <string name="button3_title">Request 8 Queens Service</string>
+    <string name="button4_title">Request counter FM</string>
 
 </resources>

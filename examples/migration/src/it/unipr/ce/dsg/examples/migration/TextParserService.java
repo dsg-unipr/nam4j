@@ -14,8 +14,9 @@ import java.util.TreeMap;
 
 /**
  * <p>
- * This class represents an example of a service with a thread providing methods
- * to get started, suspended, resumed and stopped.
+ * This class represents an example of a {@link Service} with a thread providing
+ * methods to get started, suspended, resumed and stopped. Such a
+ * {@link Service} parses a text file and displays the 5 most used words.
  * </p>
  * 
  * <p>
@@ -31,16 +32,16 @@ import java.util.TreeMap;
  * 
  */
 
-public class TestService extends Service implements Serializable {
+public class TextParserService extends Service implements Serializable {
 
 	private static final long serialVersionUID = -2513137456274951312L;
 	private ServiceRunnableImplementation serviceRunnableImplementation = null;
 	private Service service; // Reference to the Service used by the Runnable
 
-	public TestService() {
+	public TextParserService() {
 		super();
-		this.setId("TestService");
-		this.setName("TestService");
+		this.setId("TextParserService");
+		this.setName("TextParserService");
 		service = this;
 		serviceRunnableImplementation = new ServiceRunnableImplementation();
 	}

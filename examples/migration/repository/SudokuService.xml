@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lib>
+	<info>
+		<!-- Library id -->
+		<id>SudokuService</id>
+		
+		<!-- Library version -->
+		<version>1.0</version>
+		
+		<!-- Library type -->
+		<type>SERVICE</type>
+		
+		<!-- Complete name of the library's main class -->
+		<main>it.unipr.ce.dsg.examples.migration.SudokuService</main>
+	</info>
+	
+	<!-- Functional Module to which the service has to be added -->
+	<functional_module>
+		<functional_module_version>1.0</functional_module_version>
+		<functional_module_id>TestFunctionalModule</functional_module_id>
+	</functional_module>
+	
+	<!-- List of dependencies - add a <dependency> element for each one -->
+	<!--
+	<dependency>
+		<dependency_version></dependency_version>
+		<dependency_id></dependency_id>
+	</dependency>
+	-->
+	
+	<!-- List of files representing resources that have to be migrated - add a <file> element for each one -->
+	<!--
+	<file>
+	    <file_id></file_id>
+	</file>
+	-->
+</lib>

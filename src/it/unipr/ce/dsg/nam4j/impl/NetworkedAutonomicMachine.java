@@ -202,6 +202,11 @@ public abstract class NetworkedAutonomicMachine implements
 	 * The number of times a client tries to connect to the server
 	 */
 	private int trialsNumber = 3;
+	
+	/**
+	 * The platform of current node
+	 */
+	private Platform platform;
 
 	/**
 	 * Address of the server to which the migration requests should be sent.
@@ -236,11 +241,15 @@ public abstract class NetworkedAutonomicMachine implements
 	 * 
 	 * @param trials
 	 *            the number of times a client tries to connect to a server
+	 * 
+	 * @param platform
+	 *            the {@link Platform} of current node
 	 */
-	public NetworkedAutonomicMachine(int poolSize, String migrationStorePath, int trials) {
+	public NetworkedAutonomicMachine(int poolSize, String migrationStorePath, int trials, Platform platform) {
 		setPoolSize(poolSize);
 		setMigrationStore(migrationStorePath);
 		setTrialsNumber(trials);
+		setPlatform(platform);
 
 		// Creation of the thread pools to manage incoming mobility action requests.
 		createPoolForServerMobilityAction();
@@ -417,6 +426,25 @@ public abstract class NetworkedAutonomicMachine implements
 	 */
 	public int getTrialsNumber() {
 		return trialsNumber;
+	}
+	
+	/**
+	 * Set the {@link Platform} of current node.
+	 * 
+	 * @param platform
+	 *            the {@link Platform} of current node
+	 */
+	public void setPlatform(Platform platform) {
+		this.platform = platform;
+	}
+	
+	/**
+	 * Get the {@link Platform} of current node.
+	 * 
+	 * @return the {@link Platform} of current node
+	 */
+	public Platform getPlatform() {
+		return this.platform;
 	}
 
 	/**

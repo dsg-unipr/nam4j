@@ -2,6 +2,7 @@ package it.unipr.ce.dsg.nam4j.impl.mobility.utils;
 
 import it.unipr.ce.dsg.nam4j.impl.FunctionalModule;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
+import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
 import it.unipr.ce.dsg.nam4j.impl.mobility.peer.MccNamPeer;
@@ -387,7 +388,7 @@ public class MobilityUtils {
 			File f = new File(fileToAddToClassPath);
 			URL u = f.toURI().toURL();
 	
-			if (nam.getClientPlatform(0) == Platform.DESKTOP) {
+			if (nam.getPlatform() == Platform.DESKTOP) {
 	
 				// Adding to the class path on a desktop node
 				URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
@@ -401,7 +402,7 @@ public class MobilityUtils {
 					t.printStackTrace();
 					throw new IOException("Error, could not add URL to system classloader");
 				}
-			} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
+			} else if (nam.getPlatform() == Platform.ANDROID) {
 				// Adding to the class path on Android nodes happens locally on the device
 			}
 	
@@ -411,7 +412,7 @@ public class MobilityUtils {
 		
 		// Check if it has to instantiate an object of the main class
 		if (completeClassName != null) {
-			if (nam.getClientPlatform(0) == Platform.DESKTOP) {
+			if (nam.getPlatform() == Platform.DESKTOP) {
 				
 				try {
 					if (fType == MigrationSubject.SERVICE && completeClassName != null) {
@@ -531,6 +532,10 @@ public class MobilityUtils {
 		}
 		
 		return null;
+	}
+	
+	public static boolean decideWhetherToAcceptRequest(Action action) {
+		return true;
 	}
 
 }

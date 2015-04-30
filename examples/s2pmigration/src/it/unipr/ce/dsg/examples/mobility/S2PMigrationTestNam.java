@@ -12,7 +12,7 @@ public class S2PMigrationTestNam extends NetworkedAutonomicMachine {
 	private MccNamPeer peer;
 
 	public S2PMigrationTestNam(int poolSize, String migrationStorePath, int trialsNumber, String pathConfig) {
-		super(poolSize, migrationStorePath, trialsNumber);
+		super(poolSize, migrationStorePath, trialsNumber, Platform.DESKTOP);
 
 		Key key = new Key((new Random().nextInt()) + "");
 
@@ -23,7 +23,6 @@ public class S2PMigrationTestNam extends NetworkedAutonomicMachine {
 		int port = 1024 + ran.nextInt(9999 - 1024);
 		
 		this.setId("S2PMigrationNam");
-		this.setClientPlatform(Platform.DESKTOP, 0);
 		
 		peer = new MccNamPeer(pathConfig, key.toString(), key.toString(), port, this);
 	}

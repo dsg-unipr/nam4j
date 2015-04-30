@@ -607,7 +607,7 @@ public class MccNamPeer extends NamPeer {
 								String mainClassName = handler.getLibraryInformation().getMainClass();
 								MigrationSubject role = conversationItem.getRole();
 								
-								if (nam.getClientPlatform(0) == Platform.DESKTOP) {
+								if (nam.getPlatform() == Platform.DESKTOP) {
 									System.out.println(MobilityUtils.STARTING_EXECUTION);
 									
 									Object obj = MobilityUtils.addToClassPath(this.nam, this.nam.getMigrationStore() + itemFile.getName(), mainClassName, role);
@@ -644,7 +644,7 @@ public class MccNamPeer extends NamPeer {
 									
 									System.out.println("COPY " + MobilityUtils.ACTION_SUCCESSFUL);
 									
-								} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
+								} else if (nam.getPlatform() == Platform.ANDROID) {
 									
 									// Use observer pattern for notifications
 									notifyObservers(this.nam.getMigrationStore() + itemFile.getName(), mainClassName, role, conversationItem.getAction(), null);
@@ -654,9 +654,9 @@ public class MccNamPeer extends NamPeer {
 								System.out.println(MobilityUtils.ITEM_AVAILABLE_WAITING_FOR_STATE);
 								
 								// The class is added to the class path, but not instantiated (the second argument is null)
-								if (nam.getClientPlatform(0) == Platform.DESKTOP) {
+								if (nam.getPlatform() == Platform.DESKTOP) {
 									MobilityUtils.addToClassPath(this.nam, itemFile.getAbsolutePath(), null, conversationItem.getRole());
-								} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
+								} else if (nam.getPlatform() == Platform.ANDROID) {
 									
 									// Use observer pattern for notifications
 									notifyObservers(itemFile.getAbsolutePath(), null, conversationItem.getRole(), conversationItem.getAction(), null);
@@ -716,86 +716,87 @@ public class MccNamPeer extends NamPeer {
 			}
 			
 			// TODO: decide whether to accept or not a MIGRATE request
-			
-			HashMap<String, String> missingItems = manageDependencies.getMissingDependenciesList(p, dependencies, r, this);
-			
-			if (missingItems.size() > 0) {
-				conversationItem.addMissingDependencies(missingItems);
+			if(MobilityUtils.decideWhetherToAcceptRequest(a)) {
+				HashMap<String, String> missingItems = manageDependencies.getMissingDependenciesList(p, dependencies, r, this);
 				
-				RequestDependenciesMessage dependencyMessage = new RequestDependenciesMessage(conversationId);
-				
-				// Add dependencies
-				Iterator<Entry<String, String>> missingIt = missingItems.entrySet().iterator();
-				while(missingIt.hasNext()) {
-					Entry<String, String> pairs = (Entry<String, String>) missingIt.next();
-					dependencyMessage.addItem(pairs.getKey(), pairs.getValue());
-				}
-				String jsonMessage = dependencyMessage.getJSONString();
-				
-				if (jsonMessage != null) {
-					sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), jsonMessage, MobilityUtils.JSON_MESSAGE_FORMAT);
-				} else {
-					System.err.println(MobilityUtils.ERROR_REQUEST_MIGRATE_MESSAGE);
+				if (missingItems.size() > 0) {
+					conversationItem.addMissingDependencies(missingItems);
 					
-					// Notify sender that the mobility operation failed
-					MigrationFailedMessage migrationFailedMessage = new MigrationFailedMessage(conversationId, MobilityUtils.ERROR_REQUEST_MIGRATE_MESSAGE);
-					sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), migrationFailedMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
-				
-					manageError(conversationId);
-				}
-			} else {
-				System.out.println(MobilityUtils.CLIENT_ALL_DEPENDENCIES_AVAILABLE);
-				
-				boolean infoFileIsAvailable = (new File(this.nam.getMigrationStore() + conversationItem.getItemId() + MobilityUtils.INFO_FILE_EXTENSION)).exists();
-				if (infoFileIsAvailable) {
-					System.out.println(MobilityUtils.INFO_FILE_AVAILABLE);
-				
-					File itemFile = MobilityUtils.getRequestedItem(itemId, p, this.nam.getMigrationStore());
+					RequestDependenciesMessage dependencyMessage = new RequestDependenciesMessage(conversationId);
 					
-					if (itemFile != null && itemFile.exists()) {
-						
-						SAXHandler handler = MobilityUtils.parseXMLFile(itemId, this.nam);
-						
-						String libVersion = handler.getLibraryInformation().getVersion();
-						String mainClassName = handler.getLibraryInformation().getMainClass();
-						
-						// Compare the version of the library the peer wants to send
-						// with the version of the available one. If the version
-						// is >= than the required one, an
-						// ItemIsAvailableMessage message is sent to ask for the
-						// execution state, otherwise an
-						// AllDependenciesAreAvailableMessage message is sent to
-						// inform that all dependencies are available but not
-						// the item.
-						if (Float.compare(Float.parseFloat(libVersion), Float.parseFloat(requiredLibVersion)) < 0) {
-							// Requesting the updated info file
-							AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId);
-							sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
-							System.out.println(MobilityUtils.OLD_ITEM_AVAILABLE);
-						} else {
-							System.out.println(MobilityUtils.ITEM_AVAILABLE_WAITING_FOR_STATE);
-							
-							// Adding the item to the class path before receiving the state
-							if (p == Platform.DESKTOP) {
-								System.out.println(MobilityUtils.ADDING_ITEM_TO_CP_BEFORE_RECEIVING_STATE);
-								MobilityUtils.addToClassPath(this.nam, itemFile.getAbsolutePath(), null, null);
-							}
-							
-							notifyObservers(itemFile.getAbsolutePath(), mainClassName, r, a, null);
-							
-							ItemIsAvailableMessage itemIsAvailable = new ItemIsAvailableMessage(conversationId);
-							sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), itemIsAvailable.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
-						}
+					// Add dependencies
+					Iterator<Entry<String, String>> missingIt = missingItems.entrySet().iterator();
+					while(missingIt.hasNext()) {
+						Entry<String, String> pairs = (Entry<String, String>) missingIt.next();
+						dependencyMessage.addItem(pairs.getKey(), pairs.getValue());
+					}
+					String jsonMessage = dependencyMessage.getJSONString();
+					
+					if (jsonMessage != null) {
+						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), jsonMessage, MobilityUtils.JSON_MESSAGE_FORMAT);
 					} else {
-						System.out.println(MobilityUtils.ITEM_NOT_AVAILABLE);
-						InfoFileIsAvailableMessage infoFileIsAvailableMessage = new InfoFileIsAvailableMessage(conversationId);
-						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), infoFileIsAvailableMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
+						System.err.println(MobilityUtils.ERROR_REQUEST_MIGRATE_MESSAGE);
+						
+						// Notify sender that the mobility operation failed
+						MigrationFailedMessage migrationFailedMessage = new MigrationFailedMessage(conversationId, MobilityUtils.ERROR_REQUEST_MIGRATE_MESSAGE);
+						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), migrationFailedMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
+					
+						manageError(conversationId);
 					}
 				} else {
-					// Requesting info file
-					System.out.println(MobilityUtils.INFO_FILE_NOT_AVAILABLE);
-					AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId);
-					sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
+					System.out.println(MobilityUtils.CLIENT_ALL_DEPENDENCIES_AVAILABLE);
+					
+					boolean infoFileIsAvailable = (new File(this.nam.getMigrationStore() + conversationItem.getItemId() + MobilityUtils.INFO_FILE_EXTENSION)).exists();
+					if (infoFileIsAvailable) {
+						System.out.println(MobilityUtils.INFO_FILE_AVAILABLE);
+					
+						File itemFile = MobilityUtils.getRequestedItem(itemId, p, this.nam.getMigrationStore());
+						
+						if (itemFile != null && itemFile.exists()) {
+							
+							SAXHandler handler = MobilityUtils.parseXMLFile(itemId, this.nam);
+							
+							String libVersion = handler.getLibraryInformation().getVersion();
+							String mainClassName = handler.getLibraryInformation().getMainClass();
+							
+							// Compare the version of the library the peer wants to send
+							// with the version of the available one. If the version
+							// is >= than the required one, an
+							// ItemIsAvailableMessage message is sent to ask for the
+							// execution state, otherwise an
+							// AllDependenciesAreAvailableMessage message is sent to
+							// inform that all dependencies are available but not
+							// the item.
+							if (Float.compare(Float.parseFloat(libVersion), Float.parseFloat(requiredLibVersion)) < 0) {
+								// Requesting the updated info file
+								AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId);
+								sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
+								System.out.println(MobilityUtils.OLD_ITEM_AVAILABLE);
+							} else {
+								System.out.println(MobilityUtils.ITEM_AVAILABLE_WAITING_FOR_STATE);
+								
+								// Adding the item to the class path before receiving the state
+								if (p == Platform.DESKTOP) {
+									System.out.println(MobilityUtils.ADDING_ITEM_TO_CP_BEFORE_RECEIVING_STATE);
+									MobilityUtils.addToClassPath(this.nam, itemFile.getAbsolutePath(), null, null);
+								}
+								
+								notifyObservers(itemFile.getAbsolutePath(), mainClassName, r, a, null);
+								
+								ItemIsAvailableMessage itemIsAvailable = new ItemIsAvailableMessage(conversationId);
+								sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), itemIsAvailable.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
+							}
+						} else {
+							System.out.println(MobilityUtils.ITEM_NOT_AVAILABLE);
+							InfoFileIsAvailableMessage infoFileIsAvailableMessage = new InfoFileIsAvailableMessage(conversationId);
+							sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), infoFileIsAvailableMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
+						}
+					} else {
+						// Requesting info file
+						System.out.println(MobilityUtils.INFO_FILE_NOT_AVAILABLE);
+						AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId);
+						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
+					}
 				}
 			}
 		} else if (messageType.equals(RequestDependenciesMessage.MSG_KEY)) {
@@ -880,9 +881,9 @@ public class MccNamPeer extends NamPeer {
 				
 				// Add dependency to class path only if it is not an xml info file
 				if (chunk.getFileName().indexOf(MobilityUtils.INFO_FILE_EXTENSION) == -1) {
-					if (nam.getClientPlatform(0) == Platform.DESKTOP) {
+					if (nam.getPlatform() == Platform.DESKTOP) {
 						MobilityUtils.addToClassPath(this.nam, dirPath + chunk.getFileName(), null, null);
-					} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
+					} else if (nam.getPlatform() == Platform.ANDROID) {
 						
 						// Use observer pattern to add dependency to class path for Android
 						notifyObservers(dirPath + chunk.getFileName(), null, null, conversationItem.getAction(), null);
@@ -933,7 +934,7 @@ public class MccNamPeer extends NamPeer {
 								String mainClassName = handler.getLibraryInformation().getMainClass();
 								MigrationSubject role = conversationItem.getRole();
 								
-								if (nam.getClientPlatform(0) == Platform.DESKTOP) {
+								if (nam.getPlatform() == Platform.DESKTOP) {
 									System.out.println("The item is available; starting execution...");
 									
 									Object obj = MobilityUtils.addToClassPath(this.nam, this.nam.getMigrationStore() + itemFile.getName(), mainClassName, role);
@@ -970,7 +971,7 @@ public class MccNamPeer extends NamPeer {
 									
 									System.out.println("COPY " + MobilityUtils.ACTION_SUCCESSFUL);
 									
-								} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
+								} else if (nam.getPlatform() == Platform.ANDROID) {
 									
 									// Use observer pattern for notifications
 									notifyObservers(this.nam.getMigrationStore() + itemFile.getName(), mainClassName, role, conversationItem.getAction(), null);
@@ -980,9 +981,9 @@ public class MccNamPeer extends NamPeer {
 								System.out.println(MobilityUtils.ITEM_AVAILABLE_WAITING_FOR_STATE);
 								
 								// The class is added to the class path, but not instantiated (the second argument is null)
-								if (nam.getClientPlatform(0) == Platform.DESKTOP) {
+								if (nam.getPlatform() == Platform.DESKTOP) {
 									MobilityUtils.addToClassPath(this.nam, itemFile.getAbsolutePath(), null, conversationItem.getRole());
-								} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
+								} else if (nam.getPlatform() == Platform.ANDROID) {
 									
 									// Use observer pattern for notifications
 									notifyObservers(itemFile.getAbsolutePath(), null, conversationItem.getRole(), conversationItem.getAction(), null);
@@ -1180,7 +1181,7 @@ public class MccNamPeer extends NamPeer {
 			
 					System.out.println("The file is a " + role + " and its main class is " + mainClassName);
 					
-					if (nam.getClientPlatform(0) == Platform.DESKTOP) {
+					if (nam.getPlatform() == Platform.DESKTOP) {
 						Object obj = MobilityUtils.addToClassPath(this.nam, this.nam.getMigrationStore() + fileName, mainClassName, role);
 						
 						if (role.equals(MigrationSubject.FM)) {
@@ -1216,7 +1217,7 @@ public class MccNamPeer extends NamPeer {
 							// Store the address of the peer that sent the Service
 							this.nam.addServiceSender(conversationItem.getPartnerContactAddress(), conversationItem.getItemId());
 						}
-					} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
+					} else if (nam.getPlatform() == Platform.ANDROID) {
 						
 						// Use observer pattern for notifications
 						notifyObservers(this.nam.getMigrationStore() + fileName, mainClassName, role, action, null);
@@ -1236,9 +1237,9 @@ public class MccNamPeer extends NamPeer {
 					System.out.println("--- The file is a " + role + " and its main class is " + mainClassName);
 					
 					// The class is added to the class path, but not instantiated (the second argument is null)
-					if (nam.getClientPlatform(0) == Platform.DESKTOP) {
+					if (nam.getPlatform() == Platform.DESKTOP) {
 						MobilityUtils.addToClassPath(this.nam, this.nam.getMigrationStore() + fileName, null, role);
-					} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
+					} else if (nam.getPlatform() == Platform.ANDROID) {
 						
 						// Use observer pattern for notifications
 						notifyObservers(this.nam.getMigrationStore() + fileName, null, role, action, null);
@@ -1330,7 +1331,7 @@ public class MccNamPeer extends NamPeer {
 					
 					conversationItem.setObject(state);
 				
-					if (nam.getClientPlatform(0) == Platform.DESKTOP) {
+					if (nam.getPlatform() == Platform.DESKTOP) {
 						
 						if (conversationItem.getRole().equals(MigrationSubject.FM)) {
 							FunctionalModule tfm = (FunctionalModule) state;
@@ -1372,7 +1373,7 @@ public class MccNamPeer extends NamPeer {
 						// Remove conversation item from conversations list
 						this.conversations.remove(chunk.getConversationId());
 					
-					} else if (nam.getClientPlatform(0) == Platform.ANDROID) {
+					} else if (nam.getPlatform() == Platform.ANDROID) {
 						
 						// Use observer pattern for notifications - notify that the state has been received
 						SAXHandler handler = MobilityUtils.parseXMLFile(conversationItem.getItemId(), this.nam);

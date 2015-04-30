@@ -52,7 +52,7 @@ public class ContextBusTestNam extends NetworkedAutonomicMachine {
 	 * @param pathConfig
 	 */
 	public ContextBusTestNam(int poolSize, String migrationStorePath, int trialsNumber, String pathConfig, String contextEventName, String contextEventLocation, String contextEventValue) {
-		super(poolSize, migrationStorePath, trialsNumber);
+		super(poolSize, migrationStorePath, trialsNumber, Platform.DESKTOP);
 		
 		Key key = new Key((new Random().nextInt()) + "");
 

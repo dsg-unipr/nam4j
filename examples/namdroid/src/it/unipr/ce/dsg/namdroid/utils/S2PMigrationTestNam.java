@@ -21,10 +21,10 @@ public class S2PMigrationTestNam extends NetworkedAutonomicMachine implements IM
 	private ArrayList<IMobilityItemIsAvailableObserver> listeners;
 	
 	/** Set the variable to the address of the peer to be contacted */
-	String peerToBeContactedAddress = "0011100111111110101001010110001011100110001110101101100111100010101001110010010110110011111100010100010001011111111111011010001010111000000001001000101001101101@192.168.1.146:6461";
+	String peerToBeContactedAddress = "1111110100001110010110111000100011110110100110101100100001010111011000010010011100011000011110100000000111011110000110111001110110000011010100111011101011010111@160.78.27.183:4846";
 
 	private S2PMigrationTestNam(Context mContext, String confFile) {
-		super(10, pathToSaveFile, 3);
+		super(10, pathToSaveFile, 3, Platform.ANDROID);
 		
 		this.listeners = new ArrayList<IMobilityItemIsAvailableObserver>();
 
@@ -41,12 +41,22 @@ public class S2PMigrationTestNam extends NetworkedAutonomicMachine implements IM
 		
 		peer = new MccNamPeer(null, key.toString(), key.toString(), port, this);
 		peer.addMobilityItemAvailabilityListener(this);
-		System.out.println("Contact address: " + peer.getPeerDescriptor());
+		System.out.println(peer.getPeerDescriptor());
 	}
 	
-	/** Sample method to test Service requests. */
-	public void performRequestServiceTest() {
-		peer.requestService(peerToBeContactedAddress, "TestService", Platform.ANDROID, Action.COPY, "1.0");
+	/** Method to request a text parser Service. */
+	public void requestTextParseService() {
+		peer.requestService(peerToBeContactedAddress, "TextParserService", Platform.ANDROID, Action.COPY, "1.0");
+	}
+	
+	/** Method to request a Sudoku solver Service. */
+	public void requestSudokuService() {
+		peer.requestService(peerToBeContactedAddress, "SudokuService", Platform.ANDROID, Action.COPY, "1.0");
+	}
+	
+	/** Method to request a Sudoku solver Service. */
+	public void requestNQueensProblemService() {
+		peer.requestService(peerToBeContactedAddress, "EightQueensProblemService", Platform.ANDROID, Action.COPY, "1.0");
 	}
 	
 	/** Sample method to test FM requests. */

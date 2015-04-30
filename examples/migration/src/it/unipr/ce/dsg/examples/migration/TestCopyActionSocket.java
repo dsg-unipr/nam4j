@@ -5,7 +5,7 @@ import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 public class TestCopyActionSocket extends NetworkedAutonomicMachine {
 
 	public TestCopyActionSocket(String configuration) {
-		super(10, "examples/migration", 3);
+		super(10, "examples/migration", 3, Platform.DESKTOP);
 		this.setId("migration");
 	}
 
