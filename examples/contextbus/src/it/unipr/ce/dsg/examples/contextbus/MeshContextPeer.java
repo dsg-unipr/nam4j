@@ -6,6 +6,7 @@ import it.unipr.ce.dsg.nam4j.impl.messages.ContextEventActionRequestMessage;
 import it.unipr.ce.dsg.nam4j.impl.messages.ContextEventNotificationMessage;
 import it.unipr.ce.dsg.nam4j.impl.messages.PeerListMessage;
 import it.unipr.ce.dsg.nam4j.impl.messages.PingMessage;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 import it.unipr.ce.dsg.nam4j.impl.peer.NamPeer;
 import it.unipr.ce.dsg.nam4j.impl.service.Parameter;
 import it.unipr.ce.dsg.nam4j.interfaces.IContextEventObserver;
@@ -135,7 +136,7 @@ public class MeshContextPeer extends NamPeer implements IContextEventSubject {
 		ContextEventNotificationMessage peerMsg = new ContextEventNotificationMessage(null, Utils.PUBLISH_REQUEST, Utils.PUBLISH_REQUEST, contextEvent);
 		
 		for(String interestedPeer : list) {
-			sendMessageToPeer(new Address(interestedPeer), peerMsg.getJSONString(), Utils.JSON_MESSAGE_FORMAT);
+			sendMessageToPeer(new Address(interestedPeer), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 		}		
 	}
 	

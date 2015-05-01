@@ -5,6 +5,7 @@ import it.unipr.ce.dsg.nam4j.impl.messages.LeaveRequestMessage;
 import it.unipr.ce.dsg.nam4j.impl.messages.PeerListMessage;
 import it.unipr.ce.dsg.nam4j.impl.messages.PeerListRequestMessage;
 import it.unipr.ce.dsg.nam4j.impl.messages.PingMessage;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 import it.unipr.ce.dsg.nam4j.impl.peer.NamPeer;
 import it.unipr.ce.dsg.s2p.centralized.message.PongMessage;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
@@ -148,7 +149,7 @@ public class ContextBusBootstrap extends NamPeer {
 						peerDescriptors.add(currentPeerDescriptor);
 					
 						PeerListMessage newPLMsg = new PeerListMessage(peerDescriptors);
-						sendMessage(new Address(pd.getAddress()), new Address(pd.getContactAddress()), this.getAddress(), newPLMsg.getJSONString(), Utils.JSON_MESSAGE_FORMAT);
+						sendMessage(new Address(pd.getAddress()), new Address(pd.getContactAddress()), this.getAddress(), newPLMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 					}
 				} else if (networkStructure.equalsIgnoreCase(Utils.RANDOM_GRAPH)) {
 					
@@ -157,7 +158,7 @@ public class ContextBusBootstrap extends NamPeer {
 					Set<PeerDescriptor> peerDescriptors = this.getPeerList().getRandomPeerDescriptors(Utils.PEER_LIST_ANSWER_SIZE, senderPeerDescriptor);
 
 					PeerListMessage newPLMsg = new PeerListMessage(peerDescriptors);
-					sendMessage(new Address(senderPeerDescriptor.getAddress()), new Address(senderPeerDescriptor.getContactAddress()), this.getAddress(), newPLMsg.getJSONString(), Utils.JSON_MESSAGE_FORMAT);
+					sendMessage(new Address(senderPeerDescriptor.getAddress()), new Address(senderPeerDescriptor.getContactAddress()), this.getAddress(), newPLMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 				}
 				
 				this.getPeerList().printPeerList();
@@ -182,7 +183,7 @@ public class ContextBusBootstrap extends NamPeer {
 			Set<PeerDescriptor> peerDescriptors = this.getPeerList().getRandomPeerDescriptors(Utils.PEER_LIST_ANSWER_SIZE, senderPeerDescriptor);
 
 			PeerListMessage newPLMsg = new PeerListMessage(peerDescriptors);
-			sendMessage(new Address(senderPeerDescriptor.getAddress()), new Address(senderPeerDescriptor.getContactAddress()), this.getAddress(), newPLMsg.getJSONString(), Utils.JSON_MESSAGE_FORMAT);
+			sendMessage(new Address(senderPeerDescriptor.getAddress()), new Address(senderPeerDescriptor.getContactAddress()), this.getAddress(), newPLMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 			
 		} else if (messageType.equalsIgnoreCase(LeaveRequestMessage.MSG_KEY)) {
 			

@@ -31,6 +31,7 @@ import it.unipr.ce.dsg.nam4j.impl.mobility.utils.ItemChunk;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.ManageDependencies;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.StateChunk;
+import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.MinimumRequirements;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.SAXHandler;
 import it.unipr.ce.dsg.nam4j.impl.peer.NamPeer;
 import it.unipr.ce.dsg.nam4j.impl.service.Service;
@@ -223,7 +224,12 @@ public class MccNamPeer extends NamPeer {
 		HashMap<String, String> items = manageDependencies.getDependenciesForItem(r, fmId, platform);
 		
 		if (items != null) {
-			RequestMigrateMessage peerMsg = new RequestMigrateMessage(conversationKey, peerDescriptor, platform, fmId, MigrationSubject.FM, action, items, version);
+			
+			// Get minimum requirements from the info file
+			SAXHandler handler = MobilityUtils.parseXMLFile(fmId, this.nam);
+			MinimumRequirements minimumRequirements = handler.getMinimumRequirements();
+			
+			RequestMigrateMessage peerMsg = new RequestMigrateMessage(conversationKey, peerDescriptor, platform, fmId, MigrationSubject.FM, action, items, version, minimumRequirements);
 			sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 		} else {
 			System.err.println(MobilityUtils.ERROR_PARSING_XML_FILE_FOR_DEPENDENCIES);
@@ -273,7 +279,12 @@ public class MccNamPeer extends NamPeer {
 		HashMap<String, String> items = manageDependencies.getDependenciesForItem(r, serviceId, platform);
 		
 		if (items != null) {
-			RequestMigrateMessage peerMsg = new RequestMigrateMessage(conversationKey, peerDescriptor, platform, serviceId, MigrationSubject.SERVICE, action, items, version);
+			
+			// Get minimum requirements from the info file
+			SAXHandler handler = MobilityUtils.parseXMLFile(serviceId, this.nam);
+			MinimumRequirements minimumRequirements = handler.getMinimumRequirements();
+			
+			RequestMigrateMessage peerMsg = new RequestMigrateMessage(conversationKey, peerDescriptor, platform, serviceId, MigrationSubject.SERVICE, action, items, version, minimumRequirements);
 			sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 		}  else {
 			System.err.println(MobilityUtils.ERROR_PARSING_XML_FILE_FOR_DEPENDENCIES);
@@ -692,6 +703,11 @@ public class MccNamPeer extends NamPeer {
 			String itemId = peerMsg.get("itemId").getAsString();
 			String requiredLibVersion = peerMsg.get("version").getAsString();
 			
+			// Getting minimum requirements if specified (the object is null otherwise)
+			MinimumRequirements minimumRequirements = null;
+			if(peerMsg.get("minimumRequirements") != null)
+				minimumRequirements = gson.fromJson(peerMsg.get("minimumRequirements").toString(), MinimumRequirements.class);
+			
 			Platform p = Platform.toPlatform(platform);
 			MigrationSubject r = MigrationSubject.toMigrationSubject(role);
 			Action a = Action.toAction(action);
@@ -711,12 +727,14 @@ public class MccNamPeer extends NamPeer {
 		    }
 			System.out.print("\n");
 			
-			if (manageDependencies == null) {
-				manageDependencies = new ManageDependencies(this.nam.getMigrationStore());
-			}
-			
-			// TODO: decide whether to accept or not a MIGRATE request
-			if(MobilityUtils.decideWhetherToAcceptRequest(a)) {
+			// TODO: decide whether to accept or not a MIGRATE request by
+			// implementing MobilityUtils.decideWhetherToAcceptRequest method
+			if(MobilityUtils.decideWhetherToAcceptMobilityRequest(a, minimumRequirements)) {
+				
+				if (manageDependencies == null) {
+					manageDependencies = new ManageDependencies(this.nam.getMigrationStore());
+				}
+				
 				HashMap<String, String> missingItems = manageDependencies.getMissingDependenciesList(p, dependencies, r, this);
 				
 				if (missingItems.size() > 0) {
@@ -798,7 +816,10 @@ public class MccNamPeer extends NamPeer {
 						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 					}
 				}
-			}
+				
+			} else
+				System.out.println(MobilityUtils.REFUSING_MIGRATION_BECAUSE_REQUIREMENTS_ARE_NOT_MET);
+			
 		} else if (messageType.equals(RequestDependenciesMessage.MSG_KEY)) {
 			
 			String conversationId = peerMsg.get("conversationKey").getAsString();

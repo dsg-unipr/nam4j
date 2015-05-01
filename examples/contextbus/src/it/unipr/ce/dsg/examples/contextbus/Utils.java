@@ -58,7 +58,4 @@ public class Utils {
 	/** The number of hops a message has to be forwarded. */
 	public static int HOPS_NUMBER = 3;
 
-	/** The format identifier for JSON messages. */
-	public static String JSON_MESSAGE_FORMAT = "application/json";
-
 }

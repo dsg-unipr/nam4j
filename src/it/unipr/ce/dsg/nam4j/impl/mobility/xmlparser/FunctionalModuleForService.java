@@ -2,10 +2,10 @@ package it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser;
 
 /**
  * <p>
- * Class used by {@link SAXPArser} to parse {@link FunctionalModule} element in
- * the XML file which describes the library. Such an element exists only for
- * {@link Service}s and identifies the {@link FunctionalModule} to which it is
- * bound.
+ * Class used by {@link SAXPArser} to parse the functional_module element in the
+ * XML file which describes an item (a {@link FunctionalModule} or a
+ * {@link Service}). Such an element exists only for {@link Service}s and
+ * identifies the {@link FunctionalModule} to which it is bound.
  * </p>
  * 
  * <p>

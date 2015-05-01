@@ -30,4 +30,15 @@
 	<file>
 	    <file_id>romeo_and_juliet.txt</file_id>
 	</file>
+	
+	<!-- Minimum requirements -->
+	<requirements>
+		<cores>1</cores>
+		<clock>300</clock>
+		<ram>50</ram>
+		<storage>1</storage>
+		<network>false</network>
+		<location>false</location>
+		<camera>false</camera>
+	</requirements>
 </lib>

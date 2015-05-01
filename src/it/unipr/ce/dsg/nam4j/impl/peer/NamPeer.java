@@ -1,11 +1,11 @@
 package it.unipr.ce.dsg.nam4j.impl.peer;
 
-import it.unipr.ce.dsg.examples.contextbus.Utils;
 import it.unipr.ce.dsg.nam4j.impl.messages.JoinRequestMessage;
 import it.unipr.ce.dsg.nam4j.impl.messages.LeaveRequestMessage;
 import it.unipr.ce.dsg.nam4j.impl.messages.PeerListRequestMessage;
 import it.unipr.ce.dsg.nam4j.impl.messages.PingMessage;
 import it.unipr.ce.dsg.nam4j.impl.messages.PongMessage;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 import it.unipr.ce.dsg.nam4j.interfaces.IPeer;
 import it.unipr.ce.dsg.s2p.peer.Peer;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
@@ -114,7 +114,7 @@ public abstract class NamPeer extends Peer implements IPeer {
 	@Override
 	public void join(String peerToBeContactedAddress) {
 		JoinRequestMessage peerMsg = new JoinRequestMessage(peerDescriptor);		
-		sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), Utils.JSON_MESSAGE_FORMAT);
+		sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 	}
 
 	/**
@@ -126,7 +126,7 @@ public abstract class NamPeer extends Peer implements IPeer {
 	@Override
 	public void leave(String peerToBeContactedAddress) {
 		LeaveRequestMessage peerMsg = new LeaveRequestMessage(peerDescriptor);
-		sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), Utils.JSON_MESSAGE_FORMAT);
+		sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 	}
 
 	/**
@@ -148,7 +148,7 @@ public abstract class NamPeer extends Peer implements IPeer {
 	@Override
 	public void requestPeers(String peerToBeContactedAddress) {
 		PeerListRequestMessage peerMsg = new PeerListRequestMessage(peerDescriptor);
-		sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), Utils.JSON_MESSAGE_FORMAT);
+		sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 	}
 	
 	/**
@@ -160,7 +160,7 @@ public abstract class NamPeer extends Peer implements IPeer {
 	@Override
 	public void ping(String peerToBeContactedAddress) {
 		PingMessage peerMsg = new PingMessage(peerDescriptor);
-		sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), Utils.JSON_MESSAGE_FORMAT);
+		sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 	}
 	
 	/**
@@ -172,7 +172,7 @@ public abstract class NamPeer extends Peer implements IPeer {
 	@Override
 	public void pong(String peerToBeContactedAddress) {
 		PongMessage peerMsg = new PongMessage(peerDescriptor);
-		sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), Utils.JSON_MESSAGE_FORMAT);
+		sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 	}
 
 	/**

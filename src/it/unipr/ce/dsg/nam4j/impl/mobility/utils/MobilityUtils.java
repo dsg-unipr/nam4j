@@ -6,6 +6,7 @@ import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
 import it.unipr.ce.dsg.nam4j.impl.mobility.peer.MccNamPeer;
+import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.MinimumRequirements;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.SAXHandler;
 import it.unipr.ce.dsg.nam4j.impl.service.Service;
 
@@ -61,7 +62,7 @@ public class MobilityUtils {
 	public static final String ERROR_GENERATING_STATE_CHUNKS = "An error occurred during state chunks generation";
 	public static final String ERROR_PARSING_XML_FILE_FOR_DEPENDENCIES = "An error occurred while trying to parse the XML file to get the list of dependencies";
 	public static final String ERROR_IN_RESOURCE_TYPE = "The type of the resource I have is different than the requested one";
-	public static final String MISSING_XML_FILE = "The archive does not include the dependencies XML file";
+	public static final String MISSING_XML_FILE = "The info file for the item is not available";
 	
 	/** General strings */
 	public static final String DEPENDENCY_ADDED = "--- Added dependency to the class path";
@@ -97,6 +98,7 @@ public class MobilityUtils {
 	public static final String RECEIVED_INFO_FILE = "------ Received an info file for a dependency";
 	public static final String CREATING_FILE = "Creating file...";
 	public static final String PATH_SEPARATOR = "/";
+	public static final String REFUSING_MIGRATION_BECAUSE_REQUIREMENTS_ARE_NOT_MET = "Refusing migration because minimum requirements are not met";
 	
 	/** Error strings */
 	public static final String INFO_FILE_DOES_NOT_INCLUDE_DESCRIPTION = "The info file does not include the item description";
@@ -534,8 +536,67 @@ public class MobilityUtils {
 		return null;
 	}
 	
-	public static boolean decideWhetherToAcceptRequest(Action action) {
-		return true;
+	/**
+	 * Method to check whether available resources are enough to accept a
+	 * mobility {@link Action} request. It applies to MIGRATE, OFFLOAD, GO
+	 * actions.
+	 * 
+	 * @param action
+	 *            The received mobility {@link Action} request
+	 * 
+	 * @param minimumRequirements
+	 *            The minimum requirements specified in the info file for the
+	 *            item to be migrated. Null if no requirement is specified in
+	 *            such a file.
+	 * 
+	 * @return true if the {@link Action} is accepted, false otherwise
+	 */
+	public static boolean decideWhetherToAcceptMobilityRequest(Action action, MinimumRequirements minimumRequirements) {
+		
+		// TODO: check if available resources are enough for the migrated module's execution
+		
+		int availableProcessors = Runtime.getRuntime().availableProcessors();
+		
+		// Amount of free memory available to the JVM
+		long freeJvmMemory = Runtime.getRuntime().freeMemory();
+
+		// Max amount of memory the JVM will attempt to use (returns Long.MAX_VALUE if there is no preset limit)
+		long maxJvmMemory = Runtime.getRuntime().maxMemory();
+		
+		// Total memory currently available to the JVM (it may change over time depending on the environment)
+		long totalJvmMemory = Runtime.getRuntime().totalMemory();
+		
+		System.out.println("Available processors (cores): " + availableProcessors);
+		System.out.println("Free memory (bytes): " + freeJvmMemory);
+		System.out.println("Maximum memory (bytes): " + (maxJvmMemory == Long.MAX_VALUE ? "no limit" : maxJvmMemory));
+		System.out.println("Total memory available to JVM (bytes): " + totalJvmMemory);
+
+		// Get a list of all file system roots and print info
+		File[] roots = File.listRoots();
+		for (File root : roots) {
+			System.out.println("File system root: " + root.getAbsolutePath());
+			System.out.println("Total space (bytes): " + root.getTotalSpace());
+			System.out.println("Free space (bytes): " + root.getFreeSpace());
+			System.out.println("Usable space (bytes): " + root.getUsableSpace());
+		}
+		
+		if (minimumRequirements != null) {
+			System.out.println("Minimum requirements are specified");
+			
+			System.out.println("--- Cores: " + minimumRequirements.getNumProcessors());
+			System.out.println("--- Ram (MB): " + minimumRequirements.getRam());
+			System.out.println("--- Clock (Hz): " + minimumRequirements.getClockFrequency());
+			System.out.println("--- Disk space (Hz): " + minimumRequirements.getStorage());
+			System.out.println("--- Network connection is requested: " + minimumRequirements.isNetworkRequested());
+			System.out.println("--- Location sensor is requested: " + minimumRequirements.isLocationSensorRequested());
+			System.out.println("--- Camera is requested: " + minimumRequirements.isCameraRequested());
+			
+			return true;
+			
+		} else {
+			System.out.println("--- Minimum requirements are not specified");
+			return true;
+		}
 	}
 
 }

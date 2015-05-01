@@ -33,6 +33,7 @@ public class SAXHandler extends DefaultHandler {
 	private List<Dependency> dependencyList = new ArrayList<Dependency>();
 	private Dependency dependency = null;
 	private FunctionalModuleForService functionalModuleForService = null;
+	private MinimumRequirements minimumRequirements = null;
 	private String content = null;
 
 	public LibraryInformation getLibraryInformation() {
@@ -45,6 +46,10 @@ public class SAXHandler extends DefaultHandler {
 	
 	public FunctionalModuleForService getFunctionalModuleForService() {
 		return functionalModuleForService;
+	}
+
+	public MinimumRequirements getMinimumRequirements() {
+		return minimumRequirements;
 	}
 
 	@Override
@@ -71,6 +76,10 @@ public class SAXHandler extends DefaultHandler {
 			case "file":
 				dependency = new Dependency();
 				break;
+				
+			// Minimum requirements
+			case "requirements":
+				minimumRequirements = new MinimumRequirements();
 				
 			default: break;
 		}
@@ -149,6 +158,33 @@ public class SAXHandler extends DefaultHandler {
 				
 			case "file_id":
 				dependency.setId(content);
+				break;
+				
+			// ******************* Minimum requirements *******************
+				
+			case "cores":
+				minimumRequirements.setNumProcessors(Integer.parseInt(content));
+				break;
+				
+			case "clock":
+				minimumRequirements.setClockFrequency(Integer.parseInt(content));
+				break;
+				
+			case "ram":
+				minimumRequirements.setRam(Integer.parseInt(content));
+				break;
+				
+			case "storage":
+				minimumRequirements.setStorage(Integer.parseInt(content));
+				
+			case "network":
+				minimumRequirements.setNetworkRequested(Boolean.parseBoolean(content));
+				
+			case "location":
+				minimumRequirements.setLocationSensorRequested(Boolean.parseBoolean(content));
+				
+			case "camera":
+				minimumRequirements.setCameraRequested(Boolean.parseBoolean(content));
 				break;
 				
 			default: break;

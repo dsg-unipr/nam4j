@@ -96,7 +96,7 @@ public class MeshContextBus extends ContextBus {
 					
 					ContextEventActionRequestMessage contextMsg = new ContextEventActionRequestMessage(null, eventModule, Utils.SUBSCRIBE_REQUEST, -1, null);
 					
-					peer.sendMessageToPeer(new Address(pd.getContactAddress()), contextMsg.getJSONString(), Utils.JSON_MESSAGE_FORMAT);
+					peer.sendMessageToPeer(new Address(pd.getContactAddress()), contextMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 				}
 			}
 			
@@ -124,7 +124,7 @@ public class MeshContextBus extends ContextBus {
 						contextMsg = new ContextEventActionRequestMessage(null, contextEventName, Utils.SUBSCRIBE_REQUEST, hops, sender);
 					}
 
-					peer.sendMessageToPeer(new Address(s.getContactAddress()), contextMsg.getJSONString(), Utils.JSON_MESSAGE_FORMAT);
+					peer.sendMessageToPeer(new Address(s.getContactAddress()), contextMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 				}			
 			}
 		}
@@ -172,7 +172,7 @@ public class MeshContextBus extends ContextBus {
 					
 					ContextEventActionRequestMessage contextMsg = new ContextEventActionRequestMessage(null, eventModule, Utils.UNSUBSCRIBE_REQUEST, -1, null);
 					
-					peer.sendMessageToPeer(new Address(pd.getContactAddress()), contextMsg.getJSONString(), Utils.JSON_MESSAGE_FORMAT);
+					peer.sendMessageToPeer(new Address(pd.getContactAddress()), contextMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 				}
 			}
 			
@@ -200,7 +200,7 @@ public class MeshContextBus extends ContextBus {
 						contextMsg = new ContextEventActionRequestMessage(null, contextEventName, Utils.UNSUBSCRIBE_REQUEST, hops, sender);
 					}
 	
-					peer.sendMessageToPeer(new Address(s.getContactAddress()), contextMsg.getJSONString(), Utils.JSON_MESSAGE_FORMAT);
+					peer.sendMessageToPeer(new Address(s.getContactAddress()), contextMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 				}
 			}
 		}

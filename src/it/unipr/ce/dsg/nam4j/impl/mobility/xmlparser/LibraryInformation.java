@@ -4,8 +4,8 @@ import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 
 /**
  * <p>
- * Class used by {@link SAXPArser} to parse the XML file which describes a
- * library.
+ * Class used by {@link SAXPArser} to parse the info element in the XML file
+ * which describes an item (a {@link FunctionalModule} or a {@link Service}).
  * </p>
  * 
  * <p>

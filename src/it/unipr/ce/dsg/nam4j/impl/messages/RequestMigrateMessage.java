@@ -1,13 +1,14 @@
 package it.unipr.ce.dsg.nam4j.impl.messages;
 
-import java.util.HashMap;
-
-import com.google.gson.Gson;
-
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
+import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.MinimumRequirements;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
+
+import java.util.HashMap;
+
+import com.google.gson.Gson;
 
 /**
  * <p>
@@ -40,6 +41,7 @@ public class RequestMigrateMessage {
 	private String type;
 	private PeerDescriptor peer;
 	private String version;
+	private MinimumRequirements minimumRequirements;
 	
 	// The role of the requested item, either Functional Module or Service
 	private MigrationSubject role;
@@ -47,11 +49,12 @@ public class RequestMigrateMessage {
 	// The list of dependencies id and version
 	private HashMap<String, String> items;
 	
-	public RequestMigrateMessage(String conversationKey, PeerDescriptor peer, Platform platform, String itemId, MigrationSubject role, Action action, HashMap<String, String> items, String version) {
+	public RequestMigrateMessage(String conversationKey, PeerDescriptor peer, Platform platform, String itemId, MigrationSubject role, Action action, HashMap<String, String> items, String version, MinimumRequirements minimumRequirements) {
 		setType(MSG_KEY);
 		setConversationKey(conversationKey);
 		setPeer(peer);
 		setVersion(version);
+		setMinimumRequirements(minimumRequirements);
 		setAction(action);
 		setPlatform(platform);
 		setItemId(itemId);
@@ -121,6 +124,14 @@ public class RequestMigrateMessage {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	public MinimumRequirements getMinimumRequirements() {
+		return minimumRequirements;
+	}
+
+	public void setMinimumRequirements(MinimumRequirements minimumRequirements) {
+		this.minimumRequirements = minimumRequirements;
 	}
 
 	public HashMap<String, String> getItems() {
