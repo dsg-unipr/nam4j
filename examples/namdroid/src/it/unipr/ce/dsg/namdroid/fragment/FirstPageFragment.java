@@ -15,6 +15,9 @@ import it.unipr.ce.dsg.namdroid.utils.Utils.SupportedFonts;
 
 import java.io.File;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -32,6 +35,7 @@ public class FirstPageFragment extends Fragment implements IMobilityItemIsAvaila
 	Button requestSudokuService;
 	Button requestEightQueensProblemService;
 	Button requestFM;
+	SharedPreferences sharedPreferences;
 	
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,6 +50,7 @@ public class FirstPageFragment extends Fragment implements IMobilityItemIsAvaila
         requestEightQueensProblemService.setTypeface(Utils.getCustomFont(getActivity(), SupportedFonts.HELVETICA_THIN));
         requestFM = (Button) rootView.findViewById(R.id.requestFMButton);
         requestFM.setTypeface(Utils.getCustomFont(getActivity(), SupportedFonts.HELVETICA_THIN));
+		sharedPreferences = getActivity().getSharedPreferences(Utils.PREFERENCES, Context.MODE_PRIVATE);
         init();
         return rootView;
     }
@@ -55,6 +60,11 @@ public class FirstPageFragment extends Fragment implements IMobilityItemIsAvaila
 		
 		// Register for item availability events
 		this.nam.addIMobilityItemIsAvailableObserver(this);
+		
+		// Save the contact address in the shared preferences
+		Editor editor = sharedPreferences.edit();
+		editor.putString(Utils.PEER_DESCRIPTOR, this.nam.getPeer().getPeerDescriptor().getContactAddress());
+		editor.commit();
 		
 		requestTextParserService.setOnClickListener(new OnClickListener() {
 			@Override

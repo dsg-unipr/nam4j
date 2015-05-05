@@ -9,7 +9,8 @@ import java.io.Serializable;
 /**
  * <p>
  * This class represents an example of a functional module with a thread
- * providing methods to get started, suspended, resumed and stopped.
+ * providing methods to get started, suspended, resumed and stopped. Such a
+ * module is a simple counter.
  * </p>
  * 
  * <p>
@@ -52,27 +53,17 @@ public class TestFunctionalModule extends FunctionalModule implements Serializab
 	@Override
 	public void addProvidedService(String id, IService service) {}
 	
-	/**
-	 * A counter.
-	 */
+	/** A simple counter. */
 	public class FunctionalModuleRunnableImplementation extends FunctionalModuleRunnable {
 		private static final long serialVersionUID = -2465563711866309028L;
 		private int sleepingTime = 1000;
 		private int counter = 0;
 		
 		@Override
-		public void saveState() {
-			
-		}
+		public void saveState() {}
 		
 		@Override
-		public void restoreState() {
-			
-		}
-		
-		public int getSleepingTime() {
-			return sleepingTime;
-		}
+		public void restoreState() {}
 
 		public void setSleepingTime(int sleepingTime) {
 			this.sleepingTime = sleepingTime;
@@ -83,7 +74,7 @@ public class TestFunctionalModule extends FunctionalModule implements Serializab
 			try {
 				while (true) {
 					System.out.println(++counter);
-					Thread.sleep(getSleepingTime());
+					Thread.sleep(sleepingTime);
 					
 					synchronized (this) {
 						while (isSuspended()) {
@@ -95,6 +86,6 @@ public class TestFunctionalModule extends FunctionalModule implements Serializab
 				 System.out.println("Thread interrupted.");
 			}
 		}
-		
 	}
+
 }

@@ -96,6 +96,9 @@ public class MobilityUtils {
 	public static final String ACTION_SUCCESSFUL = "action succesfully completed";
 	public static final String SERVER_ITEM_NOT_AVAILABLE = "The requested item is not available";
 	public static final String RECEIVED_INFO_FILE = "------ Received an info file for a dependency";
+	public static final String RECEIVED_RESOURCE_FILE = "------ Received a resource file for a dependency";
+	public static final String RECEIVED_FM_FILE = "------ Received a FM file for a dependency";
+	public static final String RECEIVED_LIB_FILE = "------ Received a library file for a dependency";
 	public static final String CREATING_FILE = "Creating file...";
 	public static final String PATH_SEPARATOR = "/";
 	public static final String REFUSING_MIGRATION_BECAUSE_REQUIREMENTS_ARE_NOT_MET = "Refusing migration because minimum requirements are not met";
@@ -112,8 +115,11 @@ public class MobilityUtils {
 	public static final String ANDROID_FILE_EXTENSION = ".dex";
 	
 	/** Identifiers */
-	public static final String INFO_FILE_ID = "INFO_FILE";
-	public static final String RESOURCE_FILE_ID = "RESOURCE_FILE";
+	public static final String INFO_FILE_ID = "INFO";
+	public static final String RESOURCE_FILE_ID = "RESOURCE";
+	public static final String FM_ID = "FM";
+	public static final String SERVICE_ID = "SERVICE";
+	public static final String LIB_ID = "LIB";
 	
 	/**
 	 * Method to check if current node has a given file.

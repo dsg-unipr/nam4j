@@ -31,6 +31,7 @@ import it.unipr.ce.dsg.nam4j.impl.mobility.utils.ItemChunk;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.ManageDependencies;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.StateChunk;
+import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.Dependency;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.MinimumRequirements;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.SAXHandler;
 import it.unipr.ce.dsg.nam4j.impl.peer.NamPeer;
@@ -54,8 +55,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map.Entry;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -221,7 +220,7 @@ public class MccNamPeer extends NamPeer {
 		if (manageDependencies == null) {
 			manageDependencies = new ManageDependencies(this.nam.getMigrationStore());
 		}
-		HashMap<String, String> items = manageDependencies.getDependenciesForItem(r, fmId, platform);
+		ArrayList<Dependency> items = manageDependencies.getDependenciesForItem(r, fmId, platform);
 		
 		if (items != null) {
 			
@@ -276,7 +275,7 @@ public class MccNamPeer extends NamPeer {
 		if (manageDependencies == null) {
 			manageDependencies = new ManageDependencies(this.nam.getMigrationStore());
 		}
-		HashMap<String, String> items = manageDependencies.getDependenciesForItem(r, serviceId, platform);
+		ArrayList<Dependency> items = manageDependencies.getDependenciesForItem(r, serviceId, platform);
 		
 		if (items != null) {
 			
@@ -548,25 +547,31 @@ public class MccNamPeer extends NamPeer {
 			MigrationSubject r = conversationItem.getRole();
 			
 			// Get the list of dependencies from the message
-			Type type = new TypeToken<HashMap<String, String>>(){}.getType();
-			HashMap<String, String> dependencies = gson.fromJson(peerMsg.get("items").toString(), type);
+			Type type = new TypeToken<ArrayList<Dependency>>(){}.getType();
+			ArrayList<Dependency> dependencies = gson.fromJson(peerMsg.get("items").toString(), type);
 	
 			if (manageDependencies == null) {
 				manageDependencies = new ManageDependencies(this.nam.getMigrationStore());
 			}
 			
-			HashMap<String, String> missingItems = manageDependencies.getMissingDependenciesList(p, dependencies, r, this);
+			// HashMap<String, String> missingItems = manageDependencies.getMissingDependenciesList(p, dependencies, r, this);
+			ArrayList<Dependency> missingItems = manageDependencies.getMissingDependenciesList(p, dependencies, r, this);
 			
 			if (missingItems.size() > 0) {
 				conversationItem.addMissingDependencies(missingItems);
 				
 				RequestDependenciesMessage dependencyMessage = new RequestDependenciesMessage(conversationId);
 				
-				Iterator<Entry<String, String>> missingIt = missingItems.entrySet().iterator();
-				while(missingIt.hasNext()) {
-					Entry<String, String> pairs = (Entry<String, String>) missingIt.next();
-					dependencyMessage.addItem(pairs.getKey(), pairs.getValue());
+//				Iterator<Entry<String, String>> missingIt = missingItems.entrySet().iterator();
+//				while(missingIt.hasNext()) {
+//					Entry<String, String> pairs = (Entry<String, String>) missingIt.next();
+//					dependencyMessage.addItem(pairs.getKey(), pairs.getValue());
+//				}
+				
+				for (Dependency dependency : missingItems) {
+					dependencyMessage.addItem(dependency);
 				}
+				
 				String jsonMessage = dependencyMessage.getJSONString();
 				
 				if (jsonMessage != null) {
@@ -717,14 +722,18 @@ public class MccNamPeer extends NamPeer {
 			this.conversations.add(conversationItem);
 			
 			// Get the list of dependencies from the message
-			Type type = new TypeToken<HashMap<String, String>>(){}.getType();
-			HashMap<String, String> dependencies = gson.fromJson(peerMsg.get("items").toString(), type);
+			Type type = new TypeToken<ArrayList<Dependency>>(){}.getType();
+			ArrayList<Dependency> dependencies = gson.fromJson(peerMsg.get("items").toString(), type);
 	
 			System.out.println("--- Received a " + action + " request for item " + itemId + " from a " + platform + " node whose dependencies are: ");
 			
-			for (String key : dependencies.keySet()) {
-		        System.out.print(key + "; ");
-		    }
+			for (Dependency dependency : dependencies) {
+				System.out.print(dependency.getId() + "; ");
+			}
+			
+//			for (String key : dependencies.keySet()) {
+//		        System.out.print(key + "; ");
+//		    }
 			System.out.print("\n");
 			
 			// TODO: decide whether to accept or not a MIGRATE request by
@@ -735,7 +744,8 @@ public class MccNamPeer extends NamPeer {
 					manageDependencies = new ManageDependencies(this.nam.getMigrationStore());
 				}
 				
-				HashMap<String, String> missingItems = manageDependencies.getMissingDependenciesList(p, dependencies, r, this);
+				// HashMap<String, String> missingItems = manageDependencies.getMissingDependenciesList(p, dependencies, r, this);
+				ArrayList<Dependency> missingItems = manageDependencies.getMissingDependenciesList(p, dependencies, r, this);
 				
 				if (missingItems.size() > 0) {
 					conversationItem.addMissingDependencies(missingItems);
@@ -743,11 +753,16 @@ public class MccNamPeer extends NamPeer {
 					RequestDependenciesMessage dependencyMessage = new RequestDependenciesMessage(conversationId);
 					
 					// Add dependencies
-					Iterator<Entry<String, String>> missingIt = missingItems.entrySet().iterator();
-					while(missingIt.hasNext()) {
-						Entry<String, String> pairs = (Entry<String, String>) missingIt.next();
-						dependencyMessage.addItem(pairs.getKey(), pairs.getValue());
+//					Iterator<Entry<String, String>> missingIt = missingItems.entrySet().iterator();
+//					while(missingIt.hasNext()) {
+//						Entry<String, String> pairs = (Entry<String, String>) missingIt.next();
+//						dependencyMessage.addItem(pairs.getKey(), pairs.getValue());
+//					}
+					
+					for (Dependency dependency : missingItems) {
+						dependencyMessage.addItem(dependency);
 					}
+					
 					String jsonMessage = dependencyMessage.getJSONString();
 					
 					if (jsonMessage != null) {
@@ -831,8 +846,8 @@ public class MccNamPeer extends NamPeer {
 			String senderContactAddress = conversationItem.getPartnerContactAddress();
 			
 			// Get the list of dependencies from the message
-			Type type = new TypeToken<HashMap<String, String>>(){}.getType();
-			HashMap<String, String> dependencies = gson.fromJson(peerMsg.get("dependencies").toString(), type);
+			Type type = new TypeToken<ArrayList<Dependency>>(){}.getType();
+			ArrayList<Dependency> dependencies = gson.fromJson(peerMsg.get("dependencies").toString(), type);
 			
 			// The item get copied in spite of the mobility action, so a CopyActionImplementation method is used
 			if (copyActionImplementation == null) {
@@ -900,8 +915,20 @@ public class MccNamPeer extends NamPeer {
 
 				this.receivedDependencyChunkList.remove(chunk.getFileName());
 				
-				// Add dependency to class path only if it is not an xml info file
-				if (chunk.getFileName().indexOf(MobilityUtils.INFO_FILE_EXTENSION) == -1) {
+				Dependency dependency = conversationItem.getMissingDependency(chunk.getDependencyId());
+				String type = dependency.getType();
+				if(type.equals(MobilityUtils.INFO_FILE_ID)) {
+					System.out.println(MobilityUtils.RECEIVED_INFO_FILE);
+				} else if(type.equals(MobilityUtils.RESOURCE_FILE_ID)) {
+					System.out.println(MobilityUtils.RECEIVED_RESOURCE_FILE);
+				} else if(type.equals(MobilityUtils.LIB_ID) || type.equals(MobilityUtils.FM_ID)) {
+					
+					// Add dependency to class path only if it is not an info file nor a resource file
+					
+					String message = type.equals(MobilityUtils.LIB_ID) ? MobilityUtils.RECEIVED_LIB_FILE : MobilityUtils.RECEIVED_FM_FILE;
+					System.out.println(message);
+					
+					// Adding the library to the class path 
 					if (nam.getPlatform() == Platform.DESKTOP) {
 						MobilityUtils.addToClassPath(this.nam, dirPath + chunk.getFileName(), null, null);
 					} else if (nam.getPlatform() == Platform.ANDROID) {
@@ -909,8 +936,6 @@ public class MccNamPeer extends NamPeer {
 						// Use observer pattern to add dependency to class path for Android
 						notifyObservers(dirPath + chunk.getFileName(), null, null, conversationItem.getAction(), null);
 					}
-				} else {
-					System.out.println(MobilityUtils.RECEIVED_INFO_FILE);
 				}
 				
 				// Removing the missing dependency from the conversation

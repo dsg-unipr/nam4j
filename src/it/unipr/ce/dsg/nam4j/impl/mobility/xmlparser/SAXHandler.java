@@ -115,11 +115,13 @@ public class SAXHandler extends DefaultHandler {
 				Dependency d = new Dependency();
 				d.setId(functionalModuleForService.getId());
 				d.setVersion(functionalModuleForService.getVersion());
+				d.setType(MobilityUtils.FM_ID);
 				dependencyList.add(d);
 				
 				Dependency dInfoFile = new Dependency();
-				dInfoFile.setId(functionalModuleForService.getId()+ MobilityUtils.INFO_FILE_EXTENSION);
-				dInfoFile.setVersion(MobilityUtils.INFO_FILE_ID); // Such a value is used to mark the item as a xml info file for a dependency, and not as a library
+				dInfoFile.setId(functionalModuleForService.getId() + MobilityUtils.INFO_FILE_EXTENSION);
+				dInfoFile.setVersion(functionalModuleForService.getVersion());
+				dInfoFile.setType(MobilityUtils.INFO_FILE_ID); // Such a value is used to mark the item as a xml info file for a dependency, and not as a library
 				dependencyList.add(dInfoFile);
 				
 				break;
@@ -141,6 +143,10 @@ public class SAXHandler extends DefaultHandler {
 				
 			// Other closing tags update the dependency
 			
+			case "dependency_type":
+				dependency.setType(content);
+				break;
+				
 			case "dependency_id":
 				dependency.setId(content);
 				break;
@@ -152,7 +158,7 @@ public class SAXHandler extends DefaultHandler {
 			// ******************* Resource files *******************
 			
 			case "file":
-				dependency.setVersion(MobilityUtils.RESOURCE_FILE_ID); // Such a value is used to mark the item as a resource file
+				dependency.setType(MobilityUtils.RESOURCE_FILE_ID); // Such a value is used to mark the item as a resource file
 				dependencyList.add(dependency);
 				break;
 				

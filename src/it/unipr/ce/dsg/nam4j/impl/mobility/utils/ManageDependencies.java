@@ -14,9 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map.Entry;
+import java.util.ArrayList;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -80,14 +78,13 @@ public class ManageDependencies {
 	}
 	
 	public String answerToCopyRequest(String conversationKey, String itemId, Platform p, MigrationSubject r, PeerDescriptor peerDescriptor, PeerDescriptor senderPeerDescriptor) {
-		
-		HashMap<String, String> items = getDependenciesForItem(r, itemId, p);
+		ArrayList<Dependency> items = getDependenciesForItem(r, itemId, p);
 		
 		if (items != null) {
 			RequestItemAnswerMessage requestMigrationAnswerMessage = new RequestItemAnswerMessage(conversationKey);
 			
-			for(String key : items.keySet()) {
-				requestMigrationAnswerMessage.addItem(key, items.get(key));
+			for (Dependency dependency : items) {
+				requestMigrationAnswerMessage.addItem(dependency);
 			}
 			
 			return requestMigrationAnswerMessage.getJSONString();
@@ -111,8 +108,8 @@ public class ManageDependencies {
 	 * 
 	 * @return the list of dependencies for the item to be migrated
 	 */
-	public HashMap<String, String> getDependenciesForItem(MigrationSubject r, String itemId, Platform p) {
-		HashMap<String, String> items = new HashMap<String, String>();
+	public ArrayList<Dependency> getDependenciesForItem(MigrationSubject r, String itemId, Platform p) {
+		ArrayList<Dependency> items = new ArrayList<Dependency>();
 		
 		System.out.println("--- Getting the list of dependencies");
 		
@@ -138,8 +135,41 @@ public class ManageDependencies {
 			}
 			
 			for (Dependency dependency : handler.getDependencyList()) {
-				System.out.println("\tDependency " + dependency.getId() + " (v. " + dependency.getVersion() + ")");
-				items.put(dependency.getId(), dependency.getVersion());
+				System.out.println("\tDependency " + dependency.getId() + " ; v. " + dependency.getVersion() + " ; " + dependency.getType());
+				
+				boolean found = false;
+				
+				if(dependency.getType() == null) {
+					System.err.println("Dependency " + dependency.getId() + " type is not set in info file");
+				} else if(dependency.getType().equals(MobilityUtils.FM_ID)) {
+					// The dependency is a Functional Module, so its associated info file is also a dependency
+					Dependency infoFileDependency = new Dependency();
+					infoFileDependency.setType(MobilityUtils.INFO_FILE_ID);
+					infoFileDependency.setId(dependency.getId() + MobilityUtils.INFO_FILE_EXTENSION);
+					infoFileDependency.setVersion(dependency.getVersion());
+					
+					// Check if the dependency is already present
+					for (Dependency item : items) {
+						if (item.getId().equals(infoFileDependency.getId())) {
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+						items.add(infoFileDependency);
+				}
+				
+				found = false;
+				
+				// Check if the dependency is already present
+				for (Dependency item : items) {
+					if (item.getId().equals(dependency.getId())) {
+						found = true;
+						break;
+					}
+				}
+				if (!found)
+					items.add(dependency);
 			}
 			
 			System.out.println("General info: " + handler.getLibraryInformation().getId() + " ; " + handler.getLibraryInformation().getMainClass() + " (v. " + handler.getLibraryInformation().getVersion() + ")");
@@ -175,27 +205,26 @@ public class ManageDependencies {
 	 * 
 	 * @return the list of missing dependencies as pairs (library_id, library_version)
 	 */
-	public HashMap<String, String> getMissingDependenciesList(Platform p, HashMap<String, String> dependencies, MigrationSubject r, MccNamPeer mccNamPeer) {
+	public ArrayList<Dependency> getMissingDependenciesList(Platform p, ArrayList<Dependency> dependencies, MigrationSubject r, MccNamPeer mccNamPeer) {
 		
 		System.out.println("Received the list of dependencies for the requested item (size = " + dependencies.size() + ")");
 		
-		HashMap<String, String> missingItems = new HashMap<String, String>();
-		HashMap<String, String> missingXmlFiles = new HashMap<String, String>();
+		ArrayList<Dependency> missingItems = new ArrayList<Dependency>();
+		ArrayList<Dependency> missingXmlFiles = new ArrayList<Dependency>();
 		
-		Iterator<Entry<String, String>> it = dependencies.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry<String, String> pairs = (Entry<String, String>) it.next();
+		for (Dependency dependency : dependencies) {
 			
-			String dependencyId = pairs.getKey();
-			String dependencyMinVersion = pairs.getValue();
+			String dependencyMinVersion = dependency.getVersion();
+			String dependencyType = dependency.getType();
+			String dependencyId = dependency.getId();
 			
-			if (dependencyMinVersion.equals(MobilityUtils.INFO_FILE_ID)) {
+			if (dependencyType.equals(MobilityUtils.INFO_FILE_ID)) {
 				// Current file is the xml info file for a dependency, so it must be requested
-				missingXmlFiles.put(dependencyId, dependencyMinVersion);
-				System.out.println("------ Dependency " + dependencyId + " is an info file, waiting to check if the associated FM is available");
-			} else if(dependencyMinVersion.equals(MobilityUtils.RESOURCE_FILE_ID)) {
+				missingXmlFiles.add(dependency);
+				System.out.println("------ Dependency " + dependencyId + " is an info file, waiting to check if the associated FM is available.");
+			} else if(dependencyType.equals(MobilityUtils.RESOURCE_FILE_ID)) {
 				// Current file is a resource file, so it must be requested
-				missingItems.put(dependencyId, dependencyMinVersion);
+				missingItems.add(dependency);
 				System.out.println("------ Dependency " + dependencyId + " is a resource file, so I am requesting it.");
 			} else {
 				
@@ -225,7 +254,7 @@ public class ManageDependencies {
 						if (Float.compare(Float.parseFloat(libVersion), Float.parseFloat(dependencyMinVersion)) < 0) {
 							// An older version of the item is available; request the updated version
 							System.out.println("An older version (" + libVersion + ") of dependency " + dependencyId + " is available; requesting the updated version (" + dependencyMinVersion + ")");
-							missingItems.put(dependencyId, dependencyMinVersion);
+							missingItems.add(dependency);
 						} else {
 							System.out.println(MobilityUtils.CLIENT_DEPENDENCY_AVAILABLE + dependencyId);
 								
@@ -243,9 +272,12 @@ public class ManageDependencies {
 						
 						// If the xml info file does not exist, the dependency is not a FM so just check for its availability
 						
-						File f = MobilityUtils.getRequestedItem(pairs.getKey(), p, getMigrationStore());
+						File f = MobilityUtils.getRequestedItem(dependencyId, p, getMigrationStore());
 						if (f == null || !f.exists()) {
-							missingItems.put(pairs.getKey(), dependencyMinVersion);
+							
+							missingItems.add(dependency);
+							
+							// missingItems.put(pairs.getKey(), dependencyMinVersion);
 							System.out.print("I do not have such a dependency, so I am requesting it.\n");
 						} else {
 							System.out.println("I already have the library, so I will not request it.");
@@ -264,9 +296,7 @@ public class ManageDependencies {
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				} catch (FileNotFoundException e) {
-					// The available library misses XML file; request the dependency
-					// System.out.println("Dependency " + dependencyId + " is missing XML description file; requesting it");
-					// missingItems.put(dependencyId, dependencyMinVersion);
+					System.out.println("An available library misses the info file");
 					e.printStackTrace();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -280,15 +310,16 @@ public class ManageDependencies {
 		
 		// Add to missingItems the xml info files for which the associated FM is going to be requested as well
 		// Xml info files for available FMs will not be requested
-		for(Entry<String, String> entry : missingXmlFiles.entrySet()) {
-		    String key = entry.getKey();
-		    String value = entry.getValue();
-
-		    if (missingItems.containsKey(key.replace(MobilityUtils.INFO_FILE_EXTENSION, ""))) {
-		    	// Adding to the requested info files
-		    	System.out.println("Adding " + key + " to missing files");
-		    	missingItems.put(key, value);
-		    }
+		for (Dependency dependency : missingXmlFiles) {
+			String fileName = dependency.getId().replace(MobilityUtils.INFO_FILE_EXTENSION, "");
+			
+			for (Dependency missingItem : missingItems) {
+				if (missingItem.getId().equals(fileName)) {
+					System.out.println("Adding " + fileName + " to missing files");
+					missingItems.add(dependency);
+					break;
+				}
+			}
 		}
 			
 		return missingItems;

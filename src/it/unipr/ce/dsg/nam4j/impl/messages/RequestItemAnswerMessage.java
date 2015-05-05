@@ -1,6 +1,8 @@
 package it.unipr.ce.dsg.nam4j.impl.messages;
 
-import java.util.HashMap;
+import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.Dependency;
+
+import java.util.ArrayList;
 
 import com.google.gson.Gson;
 
@@ -31,12 +33,12 @@ public class RequestItemAnswerMessage {
 	private String type;
 	
 	// The list of required libraries id and version
-	private HashMap<String, String> items;
+	private ArrayList<Dependency> items;
 	
 	public RequestItemAnswerMessage(String conversationKey) {
 		setType(MSG_KEY);
 		setConversationKey(conversationKey);
-		items = new HashMap<String, String>();
+		items = new ArrayList<Dependency>();
 	}
 	
 	public String getConversationKey() {
@@ -55,8 +57,16 @@ public class RequestItemAnswerMessage {
 		this.type = type;
 	}
 
-	public void addItem(String itemId, String version) {
-		items.put(itemId, version);
+	public void addItem(Dependency dependency) {
+		boolean found = false;
+		for (Dependency dependencyInList : items) {
+			if (dependencyInList.getId().equals(dependency.getId())) {
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+			items.add(dependency);
 	}
 
 	/**

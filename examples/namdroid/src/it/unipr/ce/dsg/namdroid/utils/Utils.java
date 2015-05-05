@@ -9,6 +9,11 @@ import android.view.Window;
 
 public class Utils {
 
+	/** Shared Preferences */
+	public static final String PREFERENCES = "SHARED_PREFERENCES";
+	public static final String PEER_DESCRIPTOR = "PEER_DESCRIPTOR";
+	public static final String PD_NOT_AVAILABLE = "The Peer Descriptor is not available";
+	
 	public enum Orientation {
 		LANDSCAPE, PORTRAIT
 	};

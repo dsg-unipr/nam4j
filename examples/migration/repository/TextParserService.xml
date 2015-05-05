@@ -22,6 +22,7 @@
 	
 	<!-- List of dependencies - add a <dependency> element for each one -->
 	<dependency>
+	    <dependency_type>FM</dependency_type>
 		<dependency_version>1.0</dependency_version>
 		<dependency_id>ChordFunctionalModule</dependency_id>
 	</dependency>

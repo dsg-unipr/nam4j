@@ -3,10 +3,9 @@ package it.unipr.ce.dsg.nam4j.impl.mobility.utils;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
+import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.Dependency;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map.Entry;
+import java.util.ArrayList;
 
 /**
  * <p>
@@ -54,7 +53,7 @@ public class ConversationItem {
 	Platform platform;
 	
 	/** List of missing dependencies */
-	HashMap<String, String> missingDependencies;
+	ArrayList<Dependency> missingDependencies;
 
 	public ConversationItem(String id, String partnerContactAddress, String itemId, Object object, String itemVersion, Action action, MigrationSubject role, Platform platform) {
 		setId(id);
@@ -65,7 +64,7 @@ public class ConversationItem {
 		setAction(action);
 		setRole(role);
 		setPlatform(platform);
-		missingDependencies = new HashMap<String, String>();
+		missingDependencies = new ArrayList<Dependency>();
 	}
 
 	public String getId() {
@@ -132,18 +131,63 @@ public class ConversationItem {
 		this.platform = platform;
 	}
 	
-	public void addMissingDependencies(HashMap<String, String> list) {
-		Iterator<Entry<String, String>> missingIt = list.entrySet().iterator();
-		while(missingIt.hasNext()) {
-			Entry<String, String> pairs = (Entry<String, String>) missingIt.next();
-			this.missingDependencies.put(pairs.getKey(), pairs.getValue());
+	/**
+	 * Method to store the list of missing dependencies.
+	 * 
+	 * @param list
+	 *            The list of missing dependencies
+	 */
+	public void addMissingDependencies(ArrayList<Dependency> list) {
+		for (Dependency dependency : list) {
+			boolean found = false;
+			for (Dependency dependencyInList : this.missingDependencies) {
+				if (dependency.getId().equals(dependencyInList.getId())) {
+					found = true;
+					break;
+				}
+			}
+			if(!found)
+				this.missingDependencies.add(dependency);
 		}
 	}
 	
-	public void removeMissingDependency(String id) {
-		this.missingDependencies.remove(id);
+	/**
+	 * Method to get a {@link Dependency} from the list of missing ones.
+	 * 
+	 * @param id
+	 *            The id of the requested {@link Dependency}
+	 * 
+	 * @return a {@link Dependency} from the list of missing ones
+	 */
+	public Dependency getMissingDependency(String id) {
+		for (Dependency dependencyInList : this.missingDependencies) {
+			if (dependencyInList.getId().equals(id)) {
+				return dependencyInList;
+			}
+		}
+		return null;
 	}
 	
+	/**
+	 * Method to remove a {@link Dependency} from the list of missing ones.
+	 * 
+	 * @param id
+	 *            The id of the {@link Dependency} to be removed
+	 */
+	public void removeMissingDependency(String id) {
+		for (Dependency dependencyInList : this.missingDependencies) {
+			if (dependencyInList.getId().equals(id)) {
+				this.missingDependencies.remove(dependencyInList);
+				break;
+			}
+		}
+	}
+	
+	/**
+	 * Method to get the number of missing dependencies.
+	 * 
+	 * @return the number of missing dependencies
+	 */
 	public int getMissingDependenciesSize() {
 		return this.missingDependencies.size();
 	}

@@ -5,6 +5,9 @@ import it.unipr.ce.dsg.namdroid.fragment.FirstPageFragment;
 import it.unipr.ce.dsg.namdroid.fragment.SecondPageFragment;
 import it.unipr.ce.dsg.namdroid.utils.Utils;
 import it.unipr.ce.dsg.namdroid.utils.Utils.SupportedFonts;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -15,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
 	private FirstPageFragment firstPageFragment = null;
 	private SecondPageFragment secondPageFragment = null;
 	private int currentFragmentIndex = 0;
+	private Context mContext;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         	firstPageFragment  = new FirstPageFragment();
             getSupportFragmentManager().beginTransaction().add(R.id.container, firstPageFragment).commit();
         }
+        mContext = this;
         Toolbar toolbar = (Toolbar)findViewById(R.id.my_awesome_toolbar);
         setSupportActionBar(toolbar);
         mDrawerLayout  = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -98,14 +104,26 @@ public class MainActivity extends AppCompatActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
 		
-		//int id = item.getItemId();
-		// if (id == R.id.action_settings) {
-		//	return true;
-		//}
+		if (id == R.id.action_info) {
+			SharedPreferences sharedPreferences = getSharedPreferences(Utils.PREFERENCES, Context.MODE_PRIVATE);
+			final Dialog dialog = new Dialog(mContext);
+            dialog.setContentView(R.layout.custom_dialog);
+            dialog.setTitle("Contact address");
+            TextView dialogTV = (TextView) dialog.findViewById(R.id.dialogTV);
+            dialogTV.setText(sharedPreferences.getString(Utils.PEER_DESCRIPTOR, Utils.PD_NOT_AVAILABLE));
+            Button dialogButton = (Button) dialog.findViewById(R.id.dialogButton);
+            dialogButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.cancel();
+                }
+            });
+            dialog.show();
+            
+			return true;
+		}
 		
 		return super.onOptionsItemSelected(item);
 	}

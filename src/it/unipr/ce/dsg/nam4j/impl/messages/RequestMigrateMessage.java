@@ -3,10 +3,11 @@ package it.unipr.ce.dsg.nam4j.impl.messages;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
+import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.Dependency;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.MinimumRequirements;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 import com.google.gson.Gson;
 
@@ -47,9 +48,9 @@ public class RequestMigrateMessage {
 	private MigrationSubject role;
 	
 	// The list of dependencies id and version
-	private HashMap<String, String> items;
+	private ArrayList<Dependency> items = new ArrayList<>();
 	
-	public RequestMigrateMessage(String conversationKey, PeerDescriptor peer, Platform platform, String itemId, MigrationSubject role, Action action, HashMap<String, String> items, String version, MinimumRequirements minimumRequirements) {
+	public RequestMigrateMessage(String conversationKey, PeerDescriptor peer, Platform platform, String itemId, MigrationSubject role, Action action, ArrayList<Dependency> items, String version, MinimumRequirements minimumRequirements) {
 		setType(MSG_KEY);
 		setConversationKey(conversationKey);
 		setPeer(peer);
@@ -134,12 +135,22 @@ public class RequestMigrateMessage {
 		this.minimumRequirements = minimumRequirements;
 	}
 
-	public HashMap<String, String> getItems() {
+	public ArrayList<Dependency> getItems() {
 		return items;
 	}
 
-	public void setItems(HashMap<String, String> items) {
-		this.items = items;
+	public void setItems(ArrayList<Dependency> items) {
+		for (Dependency item : items) {
+			boolean found = false;
+			for (Dependency dependency : this.items) {
+				if (dependency.getId().equals(item.getId())) {
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+				this.items.add(item);
+		}
 	}
 
 	/**

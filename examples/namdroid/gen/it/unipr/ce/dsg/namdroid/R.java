@@ -2169,8 +2169,10 @@ containing a value of this type.
         public static final int button_shape=0x7f02003b;
         public static final int dsg_logo=0x7f02003c;
         public static final int gradient_bg=0x7f02003d;
-        public static final int ic_launcher=0x7f02003e;
-        public static final int listview_selector=0x7f02003f;
+        public static final int ic_action_about=0x7f02003e;
+        public static final int ic_action_settings=0x7f02003f;
+        public static final int ic_launcher=0x7f020040;
+        public static final int listview_selector=0x7f020041;
     }
     public static final class id {
         public static final int action_bar=0x7f090040;
@@ -2181,6 +2183,7 @@ containing a value of this type.
         public static final int action_bar_subtitle=0x7f090024;
         public static final int action_bar_title=0x7f090023;
         public static final int action_context_bar=0x7f090041;
+        public static final int action_info=0x7f09005e;
         public static final int action_menu_divider=0x7f090005;
         public static final int action_menu_presenter=0x7f090006;
         public static final int action_mode_bar=0x7f09003d;
@@ -2396,7 +2399,7 @@ containing a value of this type.
          */
         public static final int abc_toolbar_collapse_description=0x7f0a0004;
         public static final int aboutApp=0x7f0a0016;
-        public static final int action_settings=0x7f0a0012;
+        public static final int action_info=0x7f0a0012;
         public static final int app_name=0x7f0a0011;
         /**  FirstPageFragment buttons titles 
          */

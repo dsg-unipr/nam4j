@@ -669,8 +669,10 @@ int drawable abc_textfield_search_material 0x7f02003a
 int drawable button_shape 0x7f02003b
 int drawable dsg_logo 0x7f02003c
 int drawable gradient_bg 0x7f02003d
-int drawable ic_launcher 0x7f02003e
-int drawable listview_selector 0x7f02003f
+int drawable ic_action_about 0x7f02003e
+int drawable ic_action_settings 0x7f02003f
+int drawable ic_launcher 0x7f020040
+int drawable listview_selector 0x7f020041
 int id action_bar 0x7f090040
 int id action_bar_activity_content 0x7f090003
 int id action_bar_container 0x7f09003f
@@ -679,6 +681,7 @@ int id action_bar_spinner 0x7f090002
 int id action_bar_subtitle 0x7f090024
 int id action_bar_title 0x7f090023
 int id action_context_bar 0x7f090041
+int id action_info 0x7f09005e
 int id action_menu_divider 0x7f090005
 int id action_menu_presenter 0x7f090006
 int id action_mode_bar 0x7f09003d
@@ -820,7 +823,7 @@ int string abc_shareactionprovider_share_with 0x7f0a0010
 int string abc_shareactionprovider_share_with_application 0x7f0a000f
 int string abc_toolbar_collapse_description 0x7f0a0004
 int string aboutApp 0x7f0a0016
-int string action_settings 0x7f0a0012
+int string action_info 0x7f0a0012
 int string app_name 0x7f0a0011
 int string button1_title 0x7f0a0019
 int string button2_title 0x7f0a001a

@@ -10,6 +10,7 @@ import it.unipr.ce.dsg.nam4j.impl.mobility.utils.DependencyChunk;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.InfoFileChunk;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.ItemChunk;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
+import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.Dependency;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.SAXHandler;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
 import it.unipr.ce.dsg.s2p.sip.Address;
@@ -20,9 +21,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map.Entry;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -131,21 +129,19 @@ public class CopyActionImplementation extends CopyActionHandler {
 	 * @param senderContactAddress
 	 *            The contact address of the requesting peer
 	 */
-	public void copyDependencyItems(String conversationKey, String itemId, Platform p, HashMap<String, String> dependencies, PeerDescriptor peerDescriptor, String senderContactAddress) {
+	public void copyDependencyItems(String conversationKey, String itemId, Platform p, ArrayList<Dependency> dependencies, PeerDescriptor peerDescriptor, String senderContactAddress) {
 		
 		System.out.println(MobilityUtils.SENDING_DEPENDENCIES + itemId);
 		
-		Iterator<Entry<String, String>> dependenciesIt = dependencies.entrySet().iterator();
-		while(dependenciesIt.hasNext()) {
-			Entry<String, String> pairs = (Entry<String, String>) dependenciesIt.next();
+		for (Dependency dependencyObject : dependencies) {
 			
 			File dependency = null;
 			
-			if (!(pairs.getValue().equals(MobilityUtils.INFO_FILE_ID) || pairs.getValue().equals(MobilityUtils.RESOURCE_FILE_ID))) {
-				dependency = MobilityUtils.getRequestedItem(pairs.getKey(), p, getMigrationStore());
+			if (!(dependencyObject.getType().equals(MobilityUtils.INFO_FILE_ID) || dependencyObject.getType().equals(MobilityUtils.RESOURCE_FILE_ID))) {
+				dependency = MobilityUtils.getRequestedItem(dependencyObject.getId(), p, getMigrationStore());
 			} else {
 				// The file is a xml info file for a dependency or a resource file
-				File f = new File(this.getMigrationStore() + pairs.getKey());
+				File f = new File(this.getMigrationStore() + dependencyObject.getId());
 				if (f.exists()) {
 					dependency = f;
 				} else {
@@ -166,10 +162,10 @@ public class CopyActionImplementation extends CopyActionHandler {
 					e.printStackTrace();
 				}
 
-				ArrayList<DependencyChunk> chunkList = MobilityUtils.generateDependencyChunksFromByteArray(conversationKey, bDependencyFile, pairs.getKey(), dependency.getName());
+				ArrayList<DependencyChunk> chunkList = MobilityUtils.generateDependencyChunksFromByteArray(conversationKey, bDependencyFile, dependencyObject.getId(), dependency.getName());
 				
 				for(DependencyChunk chunk : chunkList) {
-					System.out.println(MobilityUtils.SENDING_DEPENDENCY_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file " + dependency.getName() + " (" + pairs.getKey() + ")");
+					System.out.println(MobilityUtils.SENDING_DEPENDENCY_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file " + dependency.getName() + " (" + dependencyObject.getId() + ")");
 				
 					DependencyChunkTransferMessage dependencyChunkTransferMessage = new DependencyChunkTransferMessage(peerDescriptor, chunk);
 					this.getPeer().sendMessageToPeer(new Address(senderContactAddress), dependencyChunkTransferMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
