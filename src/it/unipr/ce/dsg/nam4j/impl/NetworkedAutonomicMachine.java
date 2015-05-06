@@ -257,6 +257,20 @@ public abstract class NetworkedAutonomicMachine implements
 
 		clientPlatform = new Platform[getPoolSize()];
 	}
+	
+	/**
+	 * Class constructor.
+	 * 
+	 * @param migrationStorePath
+	 *            The path to store files received via migration
+	 * 
+	 * @param platform
+	 *            The {@link Platform} of current node
+	 */
+	public NetworkedAutonomicMachine(String migrationStorePath, Platform platform) {
+		setMigrationStore(migrationStorePath);
+		setPlatform(platform);
+	}
 
 	/**
 	 * Sets the address of the server to which the migration requests should be

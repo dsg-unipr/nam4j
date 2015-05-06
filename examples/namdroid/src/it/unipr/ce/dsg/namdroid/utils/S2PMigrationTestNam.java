@@ -2,10 +2,10 @@ package it.unipr.ce.dsg.namdroid.utils;
 
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 import it.unipr.ce.dsg.nam4j.impl.mobility.peer.MccNamPeer;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.Key;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 import it.unipr.ce.dsg.nam4j.interfaces.IMobilityItemAvailability;
 import it.unipr.ce.dsg.namdroid.interfaces.IMobilityItemIsAvailableObserver;
-import it.unipr.ce.dsg.s2p.centralized.utils.Key;
 
 import java.util.ArrayList;
 import java.util.Random;

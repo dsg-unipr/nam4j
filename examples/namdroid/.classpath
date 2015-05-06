@@ -6,7 +6,6 @@
 	<classpathentry exported="true" kind="lib" path="libs/sip2peer/sip2peer-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/sip2peer/sip.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/sip2peer/server.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/centralizednetwork.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/gson-1.7.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/nam4j-0.3.0.jar"/>
 	<classpathentry kind="src" path="src"/>

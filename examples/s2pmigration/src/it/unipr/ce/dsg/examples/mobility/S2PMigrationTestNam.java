@@ -3,7 +3,7 @@ package it.unipr.ce.dsg.examples.mobility;
 import it.unipr.ce.dsg.examples.mobility.runnable.ManageInputRunnable;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 import it.unipr.ce.dsg.nam4j.impl.mobility.peer.MccNamPeer;
-import it.unipr.ce.dsg.s2p.centralized.utils.Key;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.Key;
 
 import java.util.Random;
 
@@ -11,8 +11,8 @@ public class S2PMigrationTestNam extends NetworkedAutonomicMachine {
 	
 	private MccNamPeer peer;
 
-	public S2PMigrationTestNam(int poolSize, String migrationStorePath, int trialsNumber, String pathConfig) {
-		super(poolSize, migrationStorePath, trialsNumber, Platform.DESKTOP);
+	public S2PMigrationTestNam(String migrationStorePath, String pathConfig) {
+		super(migrationStorePath, Platform.DESKTOP);
 
 		Key key = new Key((new Random().nextInt()) + "");
 
@@ -43,7 +43,7 @@ public class S2PMigrationTestNam extends NetworkedAutonomicMachine {
 		if (args.length != 2) {
 			System.out.println("Please provide 2 parameters:\n1. the path to the config file\n2. where to store received jars");
 		} else {
-			S2PMigrationTestNam s2PMigrationTestNam = new S2PMigrationTestNam(10, args[1], 3, args[0]);
+			S2PMigrationTestNam s2PMigrationTestNam = new S2PMigrationTestNam(args[1], args[0]);
 			ManageInputRunnable manageInputRunnable = new ManageInputRunnable(s2PMigrationTestNam);
 			Thread manageInput = new Thread(manageInputRunnable);
 			manageInput.start();

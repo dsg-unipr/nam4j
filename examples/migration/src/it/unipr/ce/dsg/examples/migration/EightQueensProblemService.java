@@ -32,8 +32,8 @@ public class EightQueensProblemService extends Service implements Serializable {
 
 	public EightQueensProblemService() {
 		super();
-		this.setId("NQueensProblemService");
-		this.setName("NQueensProblemService");
+		this.setId("8QueensProblemService");
+		this.setName("8QueensProblemService");
 		serviceRunnableImplementation = new ServiceRunnableImplementation();
 	}
 	

@@ -1,7 +1,5 @@
 package it.unipr.ce.dsg.nam4j.impl.mobility.utils;
 
-import it.unipr.ce.dsg.s2p.centralized.utils.Key;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;

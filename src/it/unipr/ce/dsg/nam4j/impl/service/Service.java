@@ -43,6 +43,17 @@ public class Service implements IService {
 	public Service() {}
 	
 	/**
+	 * Class constructor.
+	 * 
+	 * @param functionalModule
+	 *            a reference to the {@link FunctionalModule} to which the
+	 *            Service is bound
+	 */
+	public Service(FunctionalModule functionalModule) {
+		this.functionalModule = functionalModule;
+	}
+	
+	/**
 	 * Method to get the {@link FunctionalModule} to which the Service is
 	 * associated.
 	 * 
