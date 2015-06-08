@@ -3,6 +3,7 @@ package it.unipr.ce.dsg.nam4j.impl.mobility;
 import it.unipr.ce.dsg.nam4j.impl.mobility.peer.MccNamPeer;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.StateChunk;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils.EncryptionAlgorithm;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,6 +11,8 @@ import java.io.NotSerializableException;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+
+import javax.crypto.SecretKey;
 
 /**
  * <p>
@@ -69,7 +72,7 @@ public class MigrateActionImplementation extends MigrateActionHandler {
 	 * 
 	 * @return the list of state chunks
 	 */
-	public ArrayList<StateChunk> generateStateChunks(String conversationKey, Object object) {
+	public ArrayList<StateChunk> generateStateChunks(String conversationKey, Object object, SecretKey secretKey, EncryptionAlgorithm encryptionAlgorithm) {
 		byte[] bObject = null;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutput out = null;
@@ -98,7 +101,7 @@ public class MigrateActionImplementation extends MigrateActionHandler {
 		}
 		
 		// The byte array representing the object is divided in chunks
-		ArrayList<StateChunk> chunkList = MobilityUtils.generateStateChunksFromByteArray(conversationKey, bObject);
+		ArrayList<StateChunk> chunkList = MobilityUtils.generateStateChunksFromByteArray(conversationKey, bObject, secretKey, encryptionAlgorithm);
 		
 		return chunkList;
 	}

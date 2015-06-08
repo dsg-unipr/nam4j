@@ -35,11 +35,13 @@ public class RequestDependenciesMessage {
 	private ArrayList<Dependency> dependencies;
 	
 	private String type;
+	private byte[] encodedPublicKey;
 
-	public RequestDependenciesMessage(String conversationKey) {
+	public RequestDependenciesMessage(String conversationKey, byte[] encodedPublicKey) {
 		setType(MSG_KEY);
 		setConversationKey(conversationKey);
 		dependencies = new ArrayList<Dependency>();
+		setEncodedPublicKey(encodedPublicKey);
 	}
 	
 	public String getConversationKey() {
@@ -69,6 +71,14 @@ public class RequestDependenciesMessage {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+	
+	public byte[] getEncodedPublicKey() {
+		return encodedPublicKey;
+	}
+	
+	public void setEncodedPublicKey(byte[] encodedPublicKey) {
+		this.encodedPublicKey = encodedPublicKey;
 	}
 
 	/**

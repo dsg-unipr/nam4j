@@ -4,6 +4,7 @@ import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 import it.unipr.ce.dsg.nam4j.impl.mobility.peer.MccNamPeer;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.Key;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils.EncryptionAlgorithm;
 import it.unipr.ce.dsg.nam4j.interfaces.IMobilityItemAvailability;
 import it.unipr.ce.dsg.namdroid.interfaces.IMobilityItemIsAvailableObserver;
 
@@ -21,7 +22,7 @@ public class S2PMigrationTestNam extends NetworkedAutonomicMachine implements IM
 	private ArrayList<IMobilityItemIsAvailableObserver> listeners;
 	
 	/** Set the variable to the address of the peer to be contacted */
-	String peerToBeContactedAddress = "1101001011011100110010100001101110111101000010100001101100011000010100100001001110010001001111111010101101110011011010111110010010001111100010000101100101000111@160.78.27.183:3121";
+	String peerToBeContactedAddress = "1001010111111010000010001111010111001110001111110101100001111100011100001101000101011010100101001110100111010010100001110000101011011111010110101110001001001110@192.168.1.146:9394";
 
 	private S2PMigrationTestNam(Context mContext, String confFile) {
 		super(10, pathToSaveFile, 3, Platform.ANDROID);
@@ -46,22 +47,22 @@ public class S2PMigrationTestNam extends NetworkedAutonomicMachine implements IM
 	
 	/** Method to request a text parser Service. */
 	public void requestTextParseService() {
-		peer.requestService(peerToBeContactedAddress, "TextParserService", Platform.ANDROID, Action.COPY, "1.0");
+		peer.requestService(peerToBeContactedAddress, "TextParserService", Platform.ANDROID, Action.COPY, "1.0", EncryptionAlgorithm.AES_CTR);
 	}
 	
 	/** Method to request a Sudoku solver Service. */
 	public void requestSudokuService() {
-		peer.requestService(peerToBeContactedAddress, "SudokuService", Platform.ANDROID, Action.COPY, "1.0");
+		peer.requestService(peerToBeContactedAddress, "SudokuService", Platform.ANDROID, Action.COPY, "1.0", EncryptionAlgorithm.AES_CTR);
 	}
 	
-	/** Method to request a Sudoku solver Service. */
+	/** Method to request a N queens problem solver Service. */
 	public void requestNQueensProblemService() {
-		peer.requestService(peerToBeContactedAddress, "EightQueensProblemService", Platform.ANDROID, Action.COPY, "1.0");
+		peer.requestService(peerToBeContactedAddress, "EightQueensProblemService", Platform.ANDROID, Action.COPY, "1.0", EncryptionAlgorithm.AES_CTR);
 	}
 	
 	/** Sample method to test FM requests. */
 	public void performRequestFMTest() {
-		peer.requestFM(peerToBeContactedAddress, "TestFunctionalModule", Platform.ANDROID, Action.COPY, "1.0");
+		peer.requestFM(peerToBeContactedAddress, "TestFunctionalModule", Platform.ANDROID, Action.COPY, "1.0", EncryptionAlgorithm.AES_CTR);
 	}
 	
 	public void addIMobilityItemIsAvailableObserver(IMobilityItemIsAvailableObserver iMobilityItemIsAvailableObserver) {

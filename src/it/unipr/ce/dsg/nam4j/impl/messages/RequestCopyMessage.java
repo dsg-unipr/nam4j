@@ -3,6 +3,7 @@ package it.unipr.ce.dsg.nam4j.impl.messages;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils.EncryptionAlgorithm;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
 
 import com.google.gson.Gson;
@@ -36,11 +37,13 @@ public class RequestCopyMessage {
 	private String type;
 	private PeerDescriptor peer;
 	private String version;
+	private byte[] encodedPublicKey;
+	EncryptionAlgorithm encryptionAlgorithm;
 	
 	// The role of the requested item, either Functional Module or Service
 	private MigrationSubject role;
 	
-	public RequestCopyMessage(String conversationKey, PeerDescriptor peer, Platform platform, String itemId, MigrationSubject role, Action action, String version) {
+	public RequestCopyMessage(String conversationKey, PeerDescriptor peer, Platform platform, String itemId, MigrationSubject role, Action action, String version, byte[] encodedPublicKey, EncryptionAlgorithm encryptionAlgorithm) {
 		setType(MSG_KEY);
 		setConversationKey(conversationKey);
 		setPeer(peer);
@@ -49,6 +52,8 @@ public class RequestCopyMessage {
 		setPlatform(platform);
 		setItemId(itemId);
 		setMigrationSubject(role);
+		setEncodedPublicKey(encodedPublicKey);
+		setEncryptionAlgorithm(encryptionAlgorithm);
 	}
 	
 	public String getConversationKey() {
@@ -113,6 +118,22 @@ public class RequestCopyMessage {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	public byte[] getEncodedPublicKey() {
+		return encodedPublicKey;
+	}
+
+	public void setEncodedPublicKey(byte[] encodedPublicKey) {
+		this.encodedPublicKey = encodedPublicKey;
+	}
+	
+	public EncryptionAlgorithm getEncryptionAlgorithm() {
+		return encryptionAlgorithm;
+	}
+
+	public void setEncryptionAlgorithm(EncryptionAlgorithm encryptionAlgorithm) {
+		this.encryptionAlgorithm = encryptionAlgorithm;
 	}
 
 	/**

@@ -3,6 +3,7 @@ package it.unipr.ce.dsg.nam4j.impl.messages;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils.EncryptionAlgorithm;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.Dependency;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.MinimumRequirements;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
@@ -43,6 +44,8 @@ public class RequestMigrateMessage {
 	private PeerDescriptor peer;
 	private String version;
 	private MinimumRequirements minimumRequirements;
+	private byte[] encodedPublicKey;
+	EncryptionAlgorithm encryptionAlgorithm;
 	
 	// The role of the requested item, either Functional Module or Service
 	private MigrationSubject role;
@@ -50,7 +53,7 @@ public class RequestMigrateMessage {
 	// The list of dependencies id and version
 	private ArrayList<Dependency> items = new ArrayList<>();
 	
-	public RequestMigrateMessage(String conversationKey, PeerDescriptor peer, Platform platform, String itemId, MigrationSubject role, Action action, ArrayList<Dependency> items, String version, MinimumRequirements minimumRequirements) {
+	public RequestMigrateMessage(String conversationKey, PeerDescriptor peer, Platform platform, String itemId, MigrationSubject role, Action action, ArrayList<Dependency> items, String version, MinimumRequirements minimumRequirements, byte[] encodedPublicKey, EncryptionAlgorithm encryptionAlgorithm) {
 		setType(MSG_KEY);
 		setConversationKey(conversationKey);
 		setPeer(peer);
@@ -61,6 +64,8 @@ public class RequestMigrateMessage {
 		setItemId(itemId);
 		setMigrationSubject(role);
 		setItems(items);
+		setEncodedPublicKey(encodedPublicKey);
+		setEncryptionAlgorithm(encryptionAlgorithm);
 	}
 	
 	public String getConversationKey() {
@@ -151,6 +156,22 @@ public class RequestMigrateMessage {
 			if (!found)
 				this.items.add(item);
 		}
+	}
+
+	public byte[] getEncodedPublicKey() {
+		return encodedPublicKey;
+	}
+
+	public void setEncodedPublicKey(byte[] encodedPublicKey) {
+		this.encodedPublicKey = encodedPublicKey;
+	}
+
+	public EncryptionAlgorithm getEncryptionAlgorithm() {
+		return encryptionAlgorithm;
+	}
+
+	public void setEncryptionAlgorithm(EncryptionAlgorithm encryptionAlgorithm) {
+		this.encryptionAlgorithm = encryptionAlgorithm;
 	}
 
 	/**

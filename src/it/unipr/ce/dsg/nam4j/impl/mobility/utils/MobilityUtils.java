@@ -9,6 +9,9 @@ import it.unipr.ce.dsg.nam4j.impl.mobility.peer.MccNamPeer;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.MinimumRequirements;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.SAXHandler;
 import it.unipr.ce.dsg.nam4j.impl.service.Service;
+import it.unipr.ce.dsg.nam4j.security.AES;
+import it.unipr.ce.dsg.nam4j.security.CipherTextIvPair;
+import it.unipr.ce.dsg.nam4j.security.DES;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +25,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 
+import javax.crypto.SecretKey;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -102,6 +106,11 @@ public class MobilityUtils {
 	public static final String CREATING_FILE = "Creating file...";
 	public static final String PATH_SEPARATOR = "/";
 	public static final String REFUSING_MIGRATION_BECAUSE_REQUIREMENTS_ARE_NOT_MET = "Refusing migration because minimum requirements are not met";
+	public static final String DATA_NOT_ENCODED = "Sent data was not encoded";
+	public static final String DECODING_DEPENDENCY_CHUNK = "Decoding dependency chunk...";
+	public static final String DECODING_INFO_FILE_CHUNK = "Decoding info file chunk...";
+	public static final String DECODING_ITEM_CHUNK = "Decoding item chunk...";
+	public static final String DECODING_STATE_CHUNK = "Decoding state file chunk...";
 	
 	/** Error strings */
 	public static final String INFO_FILE_DOES_NOT_INCLUDE_DESCRIPTION = "The info file does not include the item description";
@@ -120,6 +129,59 @@ public class MobilityUtils {
 	public static final String FM_ID = "FM";
 	public static final String SERVICE_ID = "SERVICE";
 	public static final String LIB_ID = "LIB";
+	
+	/**
+	 * The encryption algorithm to be used (DES or AES) and its mode of
+	 * operation (ECB, CBC, PCBC, CFB and OFB, for both DES and AES; CTR only
+	 * for AES).
+	 */
+	public enum EncryptionAlgorithm {
+		DES_ECB, DES_CBC, DES_CFB, DES_OFB, DES_CTR, AES_ECB, AES_CBC, AES_CFB, AES_OFB, AES_CTR, CLEAR;
+
+		public static EncryptionAlgorithm toEncryptionAlgorithm(String s) {
+			if (s.equals("DES_ECB"))
+				return DES_ECB;
+			else if (s.equals("DES_CBC"))
+				return DES_CBC;
+			else if (s.equals("DES_CFB"))
+				return DES_CFB;
+			else if (s.equals("DES_OFB"))
+				return DES_OFB;
+			else if (s.equals("DES_CTR"))
+				return DES_CTR;
+			else if (s.equals("AES_ECB"))
+				return AES_ECB;
+			else if (s.equals("AES_CBC"))
+				return AES_CBC;
+			else if (s.equals("AES_CFB"))
+				return AES_CFB;
+			else if (s.equals("AES_OFB"))
+				return AES_OFB;
+			else if (s.equals("AES_CTR"))
+				return AES_CTR;
+			else if (s.equals("CLEAR"))
+				return CLEAR;
+			else throw new IllegalArgumentException();
+		}
+		
+		@Override
+		public String toString() {
+			switch (this) {
+				case DES_ECB: return "DES_ECB";
+				case DES_CBC: return "DES_CBC";
+				case DES_CFB: return "DES_CFB";
+				case DES_OFB: return "DES_OFB";
+				case DES_CTR: return "DES_CTR";
+				case AES_ECB: return "AES_ECB";
+				case AES_CBC: return "AES_CBC";
+				case AES_CFB: return "AES_CFB";
+				case AES_OFB: return "AES_OFB";
+				case AES_CTR: return "AES_CTR";
+				case CLEAR: return "CLEAR";
+				default: throw new IllegalArgumentException();
+			}
+		}
+	};
 	
 	/**
 	 * Method to check if current node has a given file.
@@ -166,6 +228,81 @@ public class MobilityUtils {
 		}
 		return null;
 	}
+	
+	private static CipherTextIvPair getEncodedArrayAndIV(EncryptionAlgorithm encryptionAlgorithm, byte chunkBuffer[], SecretKey secretKey) {
+		byte[] cipherText = null;
+		byte[] iv = null;
+		
+		if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_ECB)) {
+			System.out.println("Encoding chunk using AES - ECB...");
+
+			cipherText = AES.encryptDataECB(chunkBuffer, secretKey);
+		
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_CBC)) {
+			System.out.println("Encoding chunk using AES - CBC...");
+		
+			CipherTextIvPair pair = AES.encryptDataCBC(chunkBuffer, secretKey);
+			cipherText = pair.getCiphertext();
+			iv = pair.getIv();
+			
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_OFB)) {
+			System.out.println("Encoding chunk using AES - OFB...");
+		
+			CipherTextIvPair pair = AES.encryptDataOFB(chunkBuffer, secretKey);
+			cipherText = pair.getCiphertext();
+			iv = pair.getIv();
+			
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_CFB)) {
+			System.out.println("Encoding chunk using AES - CFB...");
+		
+			CipherTextIvPair pair = AES.encryptDataCFB(chunkBuffer, secretKey);
+			cipherText = pair.getCiphertext();
+			iv = pair.getIv();
+			
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_CTR)) {
+			System.out.println("Encoding chunk using AES - CTR...");
+		
+			CipherTextIvPair pair = AES.encryptDataCTR(chunkBuffer, secretKey);
+			cipherText = pair.getCiphertext();
+			iv = pair.getIv();
+			
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_ECB)) {
+			System.out.println("Encoding chunk using DES - ECB...");
+			
+			cipherText = DES.encryptDataECB(chunkBuffer, secretKey);
+		
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_CBC)) {
+			System.out.println("Encoding chunk using DES - CBC...");
+		
+			CipherTextIvPair pair = DES.encryptDataCBC(chunkBuffer, secretKey);
+			cipherText = pair.getCiphertext();
+			iv = pair.getIv();
+			
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_OFB)) {
+			System.out.println("Encoding chunk using DES - OFB...");
+		
+			CipherTextIvPair pair = DES.encryptDataOFB(chunkBuffer, secretKey);
+			cipherText = pair.getCiphertext();
+			iv = pair.getIv();
+			
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_CFB)) {
+			System.out.println("Encoding chunk using DES - CFB...");
+		
+			CipherTextIvPair pair = DES.encryptDataCFB(chunkBuffer, secretKey);
+			cipherText = pair.getCiphertext();
+			iv = pair.getIv();
+			
+		}  else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_CTR)) {
+			System.out.println("Encoding chunk using DES - CTR...");
+		
+			CipherTextIvPair pair = DES.encryptDataCTR(chunkBuffer, secretKey);
+			cipherText = pair.getCiphertext();
+			iv = pair.getIv();
+			
+		}
+		
+		return new CipherTextIvPair(cipherText, iv);
+	}
 
 	/**
 	 * Method to generate a list of chunks for a byte array representing
@@ -182,7 +319,7 @@ public class MobilityUtils {
 	 * 
 	 * @return the list of chunks for a byte array
 	 */
-	public static ArrayList<StateChunk> generateStateChunksFromByteArray(String conversationId, byte[] bObject) {
+	public static ArrayList<StateChunk> generateStateChunksFromByteArray(String conversationId, byte[] bObject, SecretKey secretKey, EncryptionAlgorithm encryptionAlgorithm) {
 		try {
 			ArrayList<StateChunk> chunkList = new ArrayList<StateChunk>();
 			double chunkNumber = Math.ceil((double) bObject.length / (double) MobilityUtils.CHUNK_SIZE);
@@ -197,7 +334,24 @@ public class MobilityUtils {
 				
 				byte chunkBuffer[] = new byte[length];
 				System.arraycopy(bObject, chunkIndex * MobilityUtils.CHUNK_SIZE, chunkBuffer, 0, length);
-				StateChunk newChunk = new StateChunk(conversationId, (int) chunkNumber, chunkIndex, chunkBuffer);
+				
+				StateChunk newChunk = null;
+				
+				if(!encryptionAlgorithm.equals(EncryptionAlgorithm.CLEAR)) {
+					
+					CipherTextIvPair pair = MobilityUtils.getEncodedArrayAndIV(encryptionAlgorithm, chunkBuffer, secretKey);
+					
+					byte[] cipherText = pair.getCiphertext();
+					byte[] iv = pair.getIv();
+					
+					System.out.println("--- Encrypting execution state chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber);
+					newChunk = new StateChunk(conversationId, (int) chunkNumber, chunkIndex, cipherText, iv);
+					
+				} else {
+					System.out.println("--- Execution state chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber + " is not being encrypted");
+					newChunk = new StateChunk(conversationId, (int) chunkNumber, chunkIndex, chunkBuffer, null);
+				}
+				
 				chunkList.add(newChunk);
 			}
 	
@@ -231,7 +385,7 @@ public class MobilityUtils {
 	 * 
 	 * @return the list of chunks for a byte array
 	 */
-	public static ArrayList<DependencyChunk> generateDependencyChunksFromByteArray(String conversationId, byte[] bObject, String dependencyId, String fileName) {
+	public static ArrayList<DependencyChunk> generateDependencyChunksFromByteArray(String conversationId, byte[] bObject, String dependencyId, String fileName, SecretKey secretKey, EncryptionAlgorithm encryptionAlgorithm) {
 		try {
 	
 			ArrayList<DependencyChunk> chunkList = new ArrayList<DependencyChunk>();
@@ -247,7 +401,25 @@ public class MobilityUtils {
 				
 				byte chunkBuffer[] = new byte[length];
 				System.arraycopy(bObject, chunkIndex * MobilityUtils.CHUNK_SIZE, chunkBuffer, 0, length);
-				DependencyChunk newChunk = new DependencyChunk(conversationId, dependencyId, fileName, (int) chunkNumber, chunkIndex, chunkBuffer);
+				
+				DependencyChunk newChunk = null;
+				
+				if(!encryptionAlgorithm.equals(EncryptionAlgorithm.CLEAR)) {
+					
+					CipherTextIvPair pair = MobilityUtils.getEncodedArrayAndIV(encryptionAlgorithm, chunkBuffer, secretKey);
+					
+					byte[] cipherText = pair.getCiphertext();
+					byte[] iv = pair.getIv();
+						
+					System.out.println("--- Encrypting dependency chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber);
+						
+					newChunk = new DependencyChunk(conversationId, dependencyId, fileName, (int) chunkNumber, chunkIndex, cipherText, iv);
+					
+				} else {
+					System.out.println("--- Dependency chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber + " is not being encrypted");
+					newChunk = new DependencyChunk(conversationId, dependencyId, fileName, (int) chunkNumber, chunkIndex, chunkBuffer, null);
+				}
+				
 				chunkList.add(newChunk);
 			}
 	
@@ -286,7 +458,7 @@ public class MobilityUtils {
 	 * 
 	 * @return the list of chunks for a byte array
 	 */
-	public static ArrayList<ItemChunk> generateItemChunksFromByteArray(String conversationId, byte[] bObject, String mainClass, String functionalModuleIdForService, String fileName) {
+	public static ArrayList<ItemChunk> generateItemChunksFromByteArray(String conversationId, byte[] bObject, String mainClass, String functionalModuleIdForService, String fileName, SecretKey secretKey, EncryptionAlgorithm encryptionAlgorithm) {
 		try {
 			ArrayList<ItemChunk> chunkList = new ArrayList<ItemChunk>();
 			double chunkNumber = Math.ceil((double) bObject.length / (double) MobilityUtils.CHUNK_SIZE);
@@ -301,7 +473,25 @@ public class MobilityUtils {
 				
 				byte chunkBuffer[] = new byte[length];
 				System.arraycopy(bObject, chunkIndex * MobilityUtils.CHUNK_SIZE, chunkBuffer, 0, length);
-				ItemChunk newChunk = new ItemChunk(conversationId, (int) chunkNumber, chunkIndex, chunkBuffer, mainClass, functionalModuleIdForService, fileName);
+				
+				ItemChunk newChunk = null;
+				
+				if(!encryptionAlgorithm.equals(EncryptionAlgorithm.CLEAR)) {
+					
+					CipherTextIvPair pair = MobilityUtils.getEncodedArrayAndIV(encryptionAlgorithm, chunkBuffer, secretKey);
+					
+					byte[] cipherText = pair.getCiphertext();
+					byte[] iv = pair.getIv();
+						
+					System.out.println("--- Encrypting item chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber);
+						
+					newChunk = new ItemChunk(conversationId, (int) chunkNumber, chunkIndex, cipherText, iv, mainClass, functionalModuleIdForService, fileName);
+				
+				} else {
+					System.out.println("--- Item chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber + " is not being encrypted");
+					newChunk = new ItemChunk(conversationId, (int) chunkNumber, chunkIndex, chunkBuffer, null, mainClass, functionalModuleIdForService, fileName);
+				}
+				
 				chunkList.add(newChunk);
 			}
 	
@@ -335,7 +525,7 @@ public class MobilityUtils {
 	 * 
 	 * @return the list of chunks for a byte array
 	 */
-	public static ArrayList<InfoFileChunk> generateInfoFileChunksFromByteArray(String conversationId, byte[] bObject, String infoFileId, String fileName) {
+	public static ArrayList<InfoFileChunk> generateInfoFileChunksFromByteArray(String conversationId, byte[] bObject, String infoFileId, String fileName, SecretKey secretKey, EncryptionAlgorithm encryptionAlgorithm) {
 		try {
 			ArrayList<InfoFileChunk> chunkList = new ArrayList<InfoFileChunk>();
 			double chunkNumber = Math.ceil((double) bObject.length / (double) MobilityUtils.CHUNK_SIZE);
@@ -350,7 +540,25 @@ public class MobilityUtils {
 				
 				byte chunkBuffer[] = new byte[length];
 				System.arraycopy(bObject, chunkIndex * MobilityUtils.CHUNK_SIZE, chunkBuffer, 0, length);
-				InfoFileChunk newChunk = new InfoFileChunk(conversationId, infoFileId, fileName, (int) chunkNumber, chunkIndex, chunkBuffer);
+				
+				InfoFileChunk newChunk = null;
+				
+				if(!encryptionAlgorithm.equals(EncryptionAlgorithm.CLEAR)) {
+					
+					CipherTextIvPair pair = MobilityUtils.getEncodedArrayAndIV(encryptionAlgorithm, chunkBuffer, secretKey);
+					
+					byte[] cipherText = pair.getCiphertext();
+					byte[] iv = pair.getIv();
+						
+					System.out.println("--- Encrypting info file chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber);
+						
+					newChunk = new InfoFileChunk(conversationId, infoFileId, fileName, (int) chunkNumber, chunkIndex, cipherText, iv);
+					
+				} else {
+					System.out.println("--- Info file chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber + " is not being encrypted");
+					newChunk = new InfoFileChunk(conversationId, infoFileId, fileName, (int) chunkNumber, chunkIndex, chunkBuffer, null);
+				}
+				
 				chunkList.add(newChunk);
 			}
 	

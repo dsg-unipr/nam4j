@@ -26,15 +26,21 @@ public class InfoFileChunk {
 	private String fileName = null;
 	private int chunkNumber = -1;
 	private int chunkId = -1;
+	
+	/** The encrypted chunk */
 	private byte buffer[];
 	
-	public InfoFileChunk(String conversationId, String infoFileId, String fileName, int chunkNumber,  int chunkId, byte[] buffer) {
+	/** The initialization vector used by some block cipher operation modes */
+	private byte iv[];
+	
+	public InfoFileChunk(String conversationId, String infoFileId, String fileName, int chunkNumber,  int chunkId, byte[] buffer, byte[] iv) {
 		super();
 		setConversationId(conversationId);
 		setInfoFileId(infoFileId);
 		setFileName(fileName);
 		setChunkId(chunkId);
 		setBuffer(buffer);
+		setIv(iv);
 		setChunkNumber(chunkNumber);
 	}
 	
@@ -76,6 +82,14 @@ public class InfoFileChunk {
 
 	public void setBuffer(byte[] buffer) {
 		this.buffer = buffer;
+	}
+
+	public byte[] getIv() {
+		return iv;
+	}
+
+	public void setIv(byte[] iv) {
+		this.iv = iv;
 	}
 
 	public int getChunkNumber() {

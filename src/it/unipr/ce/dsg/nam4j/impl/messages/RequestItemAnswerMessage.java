@@ -31,14 +31,16 @@ public class RequestItemAnswerMessage {
 	
 	private String conversationKey;
 	private String type;
+	private byte[] encodedPublicKey;
 	
 	// The list of required libraries id and version
 	private ArrayList<Dependency> items;
 	
-	public RequestItemAnswerMessage(String conversationKey) {
+	public RequestItemAnswerMessage(String conversationKey, byte[] encodedPublicKey) {
 		setType(MSG_KEY);
 		setConversationKey(conversationKey);
 		items = new ArrayList<Dependency>();
+		setEncodedPublicKey(encodedPublicKey);
 	}
 	
 	public String getConversationKey() {
@@ -67,6 +69,14 @@ public class RequestItemAnswerMessage {
 		}
 		if (!found)
 			items.add(dependency);
+	}
+
+	public byte[] getEncodedPublicKey() {
+		return encodedPublicKey;
+	}
+
+	public void setEncodedPublicKey(byte[] encodedPublicKey) {
+		this.encodedPublicKey = encodedPublicKey;
 	}
 
 	/**

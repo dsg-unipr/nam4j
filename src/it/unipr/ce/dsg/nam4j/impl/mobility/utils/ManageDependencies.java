@@ -77,11 +77,11 @@ public class ManageDependencies {
 		this.migrationStore = migrationStore;
 	}
 	
-	public String answerToCopyRequest(String conversationKey, String itemId, Platform p, MigrationSubject r, PeerDescriptor peerDescriptor, PeerDescriptor senderPeerDescriptor) {
+	public String answerToCopyRequest(String conversationKey, String itemId, Platform p, MigrationSubject r, PeerDescriptor peerDescriptor, PeerDescriptor senderPeerDescriptor, byte[] encodedPublicKey) {
 		ArrayList<Dependency> items = getDependenciesForItem(r, itemId, p);
 		
 		if (items != null) {
-			RequestItemAnswerMessage requestMigrationAnswerMessage = new RequestItemAnswerMessage(conversationKey);
+			RequestItemAnswerMessage requestMigrationAnswerMessage = new RequestItemAnswerMessage(conversationKey, encodedPublicKey);
 			
 			for (Dependency dependency : items) {
 				requestMigrationAnswerMessage.addItem(dependency);

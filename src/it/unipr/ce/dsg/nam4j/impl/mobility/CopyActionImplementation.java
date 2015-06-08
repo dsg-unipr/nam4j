@@ -10,6 +10,7 @@ import it.unipr.ce.dsg.nam4j.impl.mobility.utils.DependencyChunk;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.InfoFileChunk;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.ItemChunk;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils.EncryptionAlgorithm;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.Dependency;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.SAXHandler;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
+import javax.crypto.SecretKey;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -129,7 +131,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 	 * @param senderContactAddress
 	 *            The contact address of the requesting peer
 	 */
-	public void copyDependencyItems(String conversationKey, String itemId, Platform p, ArrayList<Dependency> dependencies, PeerDescriptor peerDescriptor, String senderContactAddress) {
+	public void copyDependencyItems(String conversationKey, String itemId, Platform p, ArrayList<Dependency> dependencies, PeerDescriptor peerDescriptor, String senderContactAddress, SecretKey secretKey, EncryptionAlgorithm encryptionAlgorithm) {
 		
 		System.out.println(MobilityUtils.SENDING_DEPENDENCIES + itemId);
 		
@@ -162,7 +164,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 					e.printStackTrace();
 				}
 
-				ArrayList<DependencyChunk> chunkList = MobilityUtils.generateDependencyChunksFromByteArray(conversationKey, bDependencyFile, dependencyObject.getId(), dependency.getName());
+				ArrayList<DependencyChunk> chunkList = MobilityUtils.generateDependencyChunksFromByteArray(conversationKey, bDependencyFile, dependencyObject.getId(), dependency.getName(), secretKey, encryptionAlgorithm);
 				
 				for(DependencyChunk chunk : chunkList) {
 					System.out.println(MobilityUtils.SENDING_DEPENDENCY_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file " + dependency.getName() + " (" + dependencyObject.getId() + ")");
@@ -197,7 +199,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 	 * @return the JSON representation of the message containing the item to be
 	 *         sent
 	 */
-	public int copyItem(String conversationKey, String itemId, Platform p, PeerDescriptor peerDescriptor, String senderContactAddress) {
+	public int copyItem(String conversationKey, String itemId, Platform p, PeerDescriptor peerDescriptor, String senderContactAddress, SecretKey secretKey, EncryptionAlgorithm encryptionAlgorithm) {
 		
 		System.out.println(MobilityUtils.SENDING_ITEM + itemId);
 		
@@ -244,7 +246,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 							e.printStackTrace();
 						}
 						
-						ArrayList<ItemChunk> chunkList = MobilityUtils.generateItemChunksFromByteArray(conversationKey, bFile, mainClass, functionalModuleIdForService, file.getName());
+						ArrayList<ItemChunk> chunkList = MobilityUtils.generateItemChunksFromByteArray(conversationKey, bFile, mainClass, functionalModuleIdForService, file.getName(), secretKey, encryptionAlgorithm);
 						
 						for(ItemChunk chunk : chunkList) {
 							System.out.println(MobilityUtils.SENDING_ITEM_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber());
@@ -301,7 +303,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 	 * @param senderContactAddress
 	 *            The contact address of the requesting peer
 	 */
-	public int copyInfoFile(String conversationKey, String itemId, PeerDescriptor peerDescriptor, String senderContactAddress) {
+	public int copyInfoFile(String conversationKey, String itemId, PeerDescriptor peerDescriptor, String senderContactAddress, SecretKey secretKey, EncryptionAlgorithm encryptionAlgorithm) {
 		System.out.println("Sending info file for item " + itemId);
 		
 		try {
@@ -313,7 +315,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 				byte[] bInfoFile = new byte[(int) infoFile.length()];
 				infoFileInputStream.read(bInfoFile);
 				
-				ArrayList<InfoFileChunk> chunkList = MobilityUtils.generateInfoFileChunksFromByteArray(conversationKey, bInfoFile, itemId, infoFile.getName());
+				ArrayList<InfoFileChunk> chunkList = MobilityUtils.generateInfoFileChunksFromByteArray(conversationKey, bInfoFile, itemId, infoFile.getName(), secretKey, encryptionAlgorithm);
 				
 				for(InfoFileChunk chunk : chunkList) {
 					System.out.println(MobilityUtils.SENDING_INFO_FILE_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber());

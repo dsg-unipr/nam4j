@@ -27,10 +27,12 @@ public class ItemIsAvailableMessage {
 	public static final String MSG_KEY = "RECEIVED_ITEM";
 	private String type;
 	private String conversationKey;
+	private byte[] encodedPublicKey;
 	
-	public ItemIsAvailableMessage(String conversationKey) {
+	public ItemIsAvailableMessage(String conversationKey, byte[] encodedPublicKey) {
 		setType(MSG_KEY);
 		setConversationKey(conversationKey);
+		setEncodedPublicKey(encodedPublicKey);
 	}
 	
 	public String getType() {
@@ -47,6 +49,14 @@ public class ItemIsAvailableMessage {
 
 	public void setConversationKey(String conversationKey) {
 		this.conversationKey = conversationKey;
+	}
+	
+	public byte[] getEncodedPublicKey() {
+		return encodedPublicKey;
+	}
+	
+	public void setEncodedPublicKey(byte[] encodedPublicKey) {
+		this.encodedPublicKey = encodedPublicKey;
 	}
 	
 	/**

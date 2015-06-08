@@ -24,16 +24,22 @@ public class ItemChunk {
 	private String conversationId = null;
 	private int chunkNumber = -1;
 	private int chunkId = -1;
-	private byte buffer[];
 	private String mainClassName = null;
 	private String functionalModuleIdForService = null;
 	private String fileName = null;
 	
-	public ItemChunk(String conversationId, int chunkNumber,  int chunkId, byte[] buffer, String mainClassName, String functionalModuleIdForService, String fileName) {
+	/** The encrypted chunk */
+	private byte buffer[];
+	
+	/** The initialization vector used by some block cipher operation modes */
+	private byte iv[];
+	
+	public ItemChunk(String conversationId, int chunkNumber,  int chunkId, byte[] buffer, byte[] iv, String mainClassName, String functionalModuleIdForService, String fileName) {
 		super();
 		setConversationId(conversationId);
 		setChunkId(chunkId);
 		setBuffer(buffer);
+		setIv(iv);
 		setChunkNumber(chunkNumber);
 		setMainClassName(mainClassName);
 		setFunctionalModuleIdForService(functionalModuleIdForService);
@@ -62,6 +68,14 @@ public class ItemChunk {
 
 	public void setBuffer(byte[] buffer) {
 		this.buffer = buffer;
+	}
+
+	public byte[] getIv() {
+		return iv;
+	}
+
+	public void setIv(byte[] iv) {
+		this.iv = iv;
 	}
 
 	public int getChunkNumber() {

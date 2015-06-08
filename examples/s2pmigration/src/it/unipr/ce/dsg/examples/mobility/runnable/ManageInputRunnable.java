@@ -9,6 +9,7 @@ import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
 import it.unipr.ce.dsg.nam4j.impl.mobility.peer.MccNamPeer;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils.EncryptionAlgorithm;
 import it.unipr.ce.dsg.nam4j.impl.service.Service;
 
 import java.io.InputStreamReader;
@@ -83,7 +84,7 @@ public class ManageInputRunnable implements Runnable {
 				String ca = scanner.nextLine().trim();
 				System.out.print("Please provide the FM id: ");
 				String fmId = scanner.nextLine().trim();
-				peer.requestFM(ca, fmId, Platform.DESKTOP, Action.COPY, "1.0");
+				peer.requestFM(ca, fmId, Platform.DESKTOP, Action.COPY, "1.0", EncryptionAlgorithm.AES_CBC);
 			}
 			
 			else if (choice.equals("rs")) {
@@ -91,7 +92,7 @@ public class ManageInputRunnable implements Runnable {
 				String ca = scanner.nextLine().trim();
 				System.out.print("Please provide the service id: ");
 				String sId = scanner.nextLine().trim();
-				peer.requestService(ca, sId, Platform.DESKTOP, Action.COPY, "1.0");
+				peer.requestService(ca, sId, Platform.DESKTOP, Action.COPY, "1.0", EncryptionAlgorithm.AES_CBC);
 			}
 			
 			else if (choice.equals("sfm")) {
@@ -109,7 +110,7 @@ public class ManageInputRunnable implements Runnable {
 				tfm.getFunctionalModuleRunnable().saveState();
 				tfm.getFunctionalModuleRunnable().suspend();
 				
-				peer.migrateFM(ca, fmId, Platform.ANDROID, Action.MIGRATE, tfm, MigrationSubject.FM, "1.0");
+				peer.migrateFM(ca, fmId, Platform.ANDROID, Action.MIGRATE, tfm, MigrationSubject.FM, "1.0", EncryptionAlgorithm.AES_CBC);
 			}
 			
 			else if (choice.equals("ss")) {
@@ -142,7 +143,7 @@ public class ManageInputRunnable implements Runnable {
 					ts.getServiceRunnable().suspend();
 				}
 				
-				peer.migrateService(ca, sId, Platform.ANDROID, Action.MIGRATE, ts, MigrationSubject.SERVICE, "1.0");
+				peer.migrateService(ca, sId, Platform.ANDROID, Action.MIGRATE, ts, MigrationSubject.SERVICE, "1.0", EncryptionAlgorithm.AES_CBC);
 			}
 
 			else if (choice.equals("q")) {

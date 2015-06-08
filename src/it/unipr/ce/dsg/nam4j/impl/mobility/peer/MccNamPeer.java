@@ -30,6 +30,7 @@ import it.unipr.ce.dsg.nam4j.impl.mobility.utils.InfoFileChunk;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.ItemChunk;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.ManageDependencies;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
+import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils.EncryptionAlgorithm;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.StateChunk;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.Dependency;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.MinimumRequirements;
@@ -37,6 +38,9 @@ import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.SAXHandler;
 import it.unipr.ce.dsg.nam4j.impl.peer.NamPeer;
 import it.unipr.ce.dsg.nam4j.impl.service.Service;
 import it.unipr.ce.dsg.nam4j.interfaces.IMobilityItemAvailability;
+import it.unipr.ce.dsg.nam4j.security.AES;
+import it.unipr.ce.dsg.nam4j.security.DES;
+import it.unipr.ce.dsg.nam4j.security.DHKeyExchange;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
 import it.unipr.ce.dsg.s2p.sip.Address;
 import it.unipr.ce.dsg.s2p.util.FileHandler;
@@ -51,11 +55,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
+import javax.crypto.KeyAgreement;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.DHParameterSpec;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -115,6 +123,9 @@ public class MccNamPeer extends NamPeer {
 	
 	/** A list of peers interested in mobility events related to file availability (mainly used to manage the Android platform) */
 	private ArrayList<IMobilityItemAvailability> listeners;
+	
+	/** Parameters used by Diffie-Hellman key exchange */
+	private DHParameterSpec dhParameterSpec = null;
 	
 	/**
 	 * Class constructor.
@@ -181,6 +192,61 @@ public class MccNamPeer extends NamPeer {
 	}
 	
 	/**
+	 * Method to generate the public-private key pair, the agreement and to
+	 * encode the public key when the peer starts a conversation with another
+	 * one using Diffie-Hellman key exchange.
+	 * 
+	 * @param conversationItem
+	 *            the {@link ConversationItem} which has to store the generated
+	 *            tools
+	 * 
+	 * @return the edited {@link ConversationItem} including the tools
+	 */
+	private ConversationItem generateDHKeyExchangeToolsToStartConversation(ConversationItem conversationItem) {
+		
+		// Generating Diffie-Hellman parameters only once
+		if (dhParameterSpec == null)
+			dhParameterSpec = DHKeyExchange.generateDHParameters();
+		
+		KeyPair keyPair = DHKeyExchange.generateDHKeypair(dhParameterSpec);
+		KeyAgreement keyAgreement = DHKeyExchange.initializeKeyAgreement(keyPair);
+		byte[] encodedPublicKey = DHKeyExchange.encodePublicKey(keyPair);
+		
+		conversationItem.setDhParameterSpec(dhParameterSpec);
+		conversationItem.setKeyPair(keyPair);
+		conversationItem.setKeyAgreement(keyAgreement);
+		conversationItem.setEncodedPublicKey(encodedPublicKey);
+		
+		return conversationItem;
+	}
+	
+	/**
+	 * Method to generate the public-private key pair, the agreement and to
+	 * encode the public key when the peer receives a conversation request from
+	 * another one using Diffie-Hellman key exchange.
+	 * 
+	 * @param conversationItem
+	 *            the {@link ConversationItem} which has to store the generated
+	 *            tools
+	 * 
+	 * @param receivedPublicKey
+	 *            the partner's Diffie-Hellman public key
+	 *            
+	 * @return the updated {@link ConversationItem}
+	 */
+	private ConversationItem generateDHKeyExchangeToolsFromReceivedPublicKey(ConversationItem conversationItem, byte[] receivedPublicKey) {
+		KeyPair keyPair = DHKeyExchange.generateDHKeyPairFromReceivedKey(receivedPublicKey);
+		KeyAgreement keyAgreement = DHKeyExchange.initializeKeyAgreement(keyPair);
+		byte[] encodedPublicKey = DHKeyExchange.encodePublicKey(keyPair);
+		
+		conversationItem.setKeyPair(keyPair);
+		conversationItem.setKeyAgreement(keyAgreement);
+		conversationItem.setEncodedPublicKey(encodedPublicKey);
+		
+		return conversationItem;
+	}
+	
+	/**
 	 * Method which requests to a peer if it is available to receive a
 	 * {@link FunctionalModule} and the list of its dependencies to continue the
 	 * execution.
@@ -207,14 +273,20 @@ public class MccNamPeer extends NamPeer {
 	 * @param version
 	 *            the version of the {@link FunctionalModule} to be migrated
 	 */
-	public void migrateFM(String peerToBeContactedAddress, String fmId, Platform platform, Action action, Object object, MigrationSubject r, String version) {
+	public void migrateFM(String peerToBeContactedAddress, String fmId, Platform platform, Action action, Object object, MigrationSubject r, String version, EncryptionAlgorithm encryptionAlgorithm) {
 		if (migrateActionImplementation == null) {
 			migrateActionImplementation = new MigrateActionImplementation(this.nam.getMigrationStore(), this);
 		}
 		
 		// Create a new conversation
 		String conversationKey = Conversations.generateConversationItemKey();
-		ConversationItem conversationItem = new ConversationItem(conversationKey, peerToBeContactedAddress, fmId, object, version, action, MigrationSubject.FM, platform);
+		ConversationItem conversationItem = new ConversationItem(conversationKey, peerToBeContactedAddress, fmId, object, version, action, MigrationSubject.FM, platform, encryptionAlgorithm);
+		
+		if(!encryptionAlgorithm.equals(EncryptionAlgorithm.CLEAR)) {
+			// Generating the Diffie-Hellman tools
+			conversationItem = generateDHKeyExchangeToolsToStartConversation(conversationItem);
+		}
+
 		this.conversations.add(conversationItem);
 		
 		if (manageDependencies == null) {
@@ -228,8 +300,9 @@ public class MccNamPeer extends NamPeer {
 			SAXHandler handler = MobilityUtils.parseXMLFile(fmId, this.nam);
 			MinimumRequirements minimumRequirements = handler.getMinimumRequirements();
 			
-			RequestMigrateMessage peerMsg = new RequestMigrateMessage(conversationKey, peerDescriptor, platform, fmId, MigrationSubject.FM, action, items, version, minimumRequirements);
+			RequestMigrateMessage peerMsg = new RequestMigrateMessage(conversationKey, peerDescriptor, platform, fmId, MigrationSubject.FM, action, items, version, minimumRequirements, conversationItem.getEncodedPublicKey(), encryptionAlgorithm);
 			sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
+		
 		} else {
 			System.err.println(MobilityUtils.ERROR_PARSING_XML_FILE_FOR_DEPENDENCIES);
 		}
@@ -262,19 +335,26 @@ public class MccNamPeer extends NamPeer {
 	 * @param version
 	 *            the version of the {@link Service} to be migrated
 	 */
-	public void migrateService(String peerToBeContactedAddress, String serviceId, Platform platform, Action action, Object object, MigrationSubject r, String version) {
+	public void migrateService(String peerToBeContactedAddress, String serviceId, Platform platform, Action action, Object object, MigrationSubject r, String version, EncryptionAlgorithm encryptionAlgorithm) {
 		if (migrateActionImplementation == null) {
 			migrateActionImplementation = new MigrateActionImplementation(this.nam.getMigrationStore(), this);
 		}
 		
 		// Create a new conversation
 		String conversationKey = Conversations.generateConversationItemKey();
-		ConversationItem conversationItem = new ConversationItem(conversationKey, peerToBeContactedAddress, serviceId, object, version, action, MigrationSubject.SERVICE, platform);
+		ConversationItem conversationItem = new ConversationItem(conversationKey, peerToBeContactedAddress, serviceId, object, version, action, MigrationSubject.SERVICE, platform, encryptionAlgorithm);
+
+		if(!encryptionAlgorithm.equals(EncryptionAlgorithm.CLEAR)) {
+			// Generating the Diffie-Hellman tools
+			conversationItem = generateDHKeyExchangeToolsToStartConversation(conversationItem);
+		}
+		
 		this.conversations.add(conversationItem);
 		
 		if (manageDependencies == null) {
 			manageDependencies = new ManageDependencies(this.nam.getMigrationStore());
 		}
+		
 		ArrayList<Dependency> items = manageDependencies.getDependenciesForItem(r, serviceId, platform);
 		
 		if (items != null) {
@@ -283,8 +363,9 @@ public class MccNamPeer extends NamPeer {
 			SAXHandler handler = MobilityUtils.parseXMLFile(serviceId, this.nam);
 			MinimumRequirements minimumRequirements = handler.getMinimumRequirements();
 			
-			RequestMigrateMessage peerMsg = new RequestMigrateMessage(conversationKey, peerDescriptor, platform, serviceId, MigrationSubject.SERVICE, action, items, version, minimumRequirements);
+			RequestMigrateMessage peerMsg = new RequestMigrateMessage(conversationKey, peerDescriptor, platform, serviceId, MigrationSubject.SERVICE, action, items, version, minimumRequirements, conversationItem.getEncodedPublicKey(), encryptionAlgorithm);
 			sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
+		
 		}  else {
 			System.err.println(MobilityUtils.ERROR_PARSING_XML_FILE_FOR_DEPENDENCIES);
 		}
@@ -308,12 +389,19 @@ public class MccNamPeer extends NamPeer {
 	 * @param version
 	 *            The minimum version of the requested item
 	 */
-	public void requestFM(String peerToBeContactedAddress, String fmId, Platform platform, Action action, String version) {
+	public void requestFM(String peerToBeContactedAddress, String fmId, Platform platform, Action action, String version, EncryptionAlgorithm encryptionAlgorithm) {
 		// Create a new conversation
 		String conversationKey = Conversations.generateConversationItemKey();
-		ConversationItem conversationItem = new ConversationItem(conversationKey, peerToBeContactedAddress, fmId, null, version, action, MigrationSubject.FM, platform);
+		ConversationItem conversationItem = new ConversationItem(conversationKey, peerToBeContactedAddress, fmId, null, version, action, MigrationSubject.FM, platform, encryptionAlgorithm);
+		
+		if(!encryptionAlgorithm.equals(EncryptionAlgorithm.CLEAR)) {
+			// Generating the Diffie-Hellman tools
+			conversationItem = generateDHKeyExchangeToolsToStartConversation(conversationItem);
+		}
+		
 		this.conversations.add(conversationItem);
-		RequestCopyMessage peerMsg = new RequestCopyMessage(conversationKey, peerDescriptor, platform, fmId, MigrationSubject.FM, action, version);
+		
+		RequestCopyMessage peerMsg = new RequestCopyMessage(conversationKey, peerDescriptor, platform, fmId, MigrationSubject.FM, action, version, conversationItem.getEncodedPublicKey(), encryptionAlgorithm);
 		sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 	}
 	
@@ -335,12 +423,19 @@ public class MccNamPeer extends NamPeer {
 	 * @param version
 	 *            The minimum version of the requested {@link Service}
 	 */
-	public void requestService(String peerToBeContactedAddress, String serviceId, Platform platform, Action action, String version) {
+	public void requestService(String peerToBeContactedAddress, String serviceId, Platform platform, Action action, String version, EncryptionAlgorithm encryptionAlgorithm) {
 		// Create a new conversation
 		String conversationKey = Conversations.generateConversationItemKey();
-		ConversationItem conversationItem = new ConversationItem(conversationKey, peerToBeContactedAddress, serviceId, null, version, action, MigrationSubject.SERVICE, platform);
+		ConversationItem conversationItem = new ConversationItem(conversationKey, peerToBeContactedAddress, serviceId, null, version, action, MigrationSubject.SERVICE, platform, encryptionAlgorithm);
+		
+		if(!encryptionAlgorithm.equals(EncryptionAlgorithm.CLEAR)) {
+			// Generating the Diffie-Hellman tools
+			conversationItem = generateDHKeyExchangeToolsToStartConversation(conversationItem);
+		}
+		
 		this.conversations.add(conversationItem);
-		RequestCopyMessage peerMsg = new RequestCopyMessage(conversationKey, peerDescriptor, platform, serviceId, MigrationSubject.SERVICE, action, version);
+		
+		RequestCopyMessage peerMsg = new RequestCopyMessage(conversationKey, peerDescriptor, platform, serviceId, MigrationSubject.SERVICE, action, version, conversationItem.getEncodedPublicKey(), encryptionAlgorithm);
 		sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 	}
 	
@@ -399,6 +494,53 @@ public class MccNamPeer extends NamPeer {
 		this.conversations.remove(conversationId);
 	}
 	
+	private byte[] decodeChunk(EncryptionAlgorithm encryptionAlgorithm, byte[] chunkBuffer, SecretKey secretKey, byte[] receivedIv) {
+		
+		if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_ECB)) {
+			System.out.println("Decoding chunk using AES - ECB...");
+			return AES.decryptDataECB(chunkBuffer, secretKey);
+			
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_CBC)) {
+			System.out.println("Decoding chunk using AES - CBC...");
+			return AES.decryptDataCBC(chunkBuffer, secretKey, receivedIv);
+			
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_OFB)) {
+			System.out.println("Decoding chunk using AES - OFB...");
+			return AES.decryptDataOFB(chunkBuffer, secretKey, receivedIv);
+			
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_CFB)) {
+			System.out.println("Decoding chunk using AES - CFB...");
+			return AES.decryptDataCFB(chunkBuffer, secretKey, receivedIv);
+			
+		}  else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_CTR)) {
+			System.out.println("Decoding chunk using AES - CTR...");
+			return AES.decryptDataCTR(chunkBuffer, secretKey, receivedIv);
+			
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_ECB)) {
+			System.out.println("Decoding chunk using DES - ECB...");
+			return DES.decryptDataECB(chunkBuffer, secretKey);
+			
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_CBC)) {
+			System.out.println("Decoding chunk using DES - CBC...");
+			return DES.decryptDataCBC(chunkBuffer, secretKey, receivedIv);
+			
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_OFB)) {
+			System.out.println("Decoding chunk using DES - OFB...");
+			return DES.decryptDataOFB(chunkBuffer, secretKey, receivedIv);
+			
+		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_CFB)) {
+			System.out.println("Decoding chunk using DES - CFB...");
+			return DES.decryptDataCFB(chunkBuffer, secretKey, receivedIv);
+			
+		}  else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_CTR)) {
+			System.out.println("Decoding chunk using DES - CTR...");
+			return DES.decryptDataCTR(chunkBuffer, secretKey, receivedIv);
+			
+		}
+		
+		return null;
+	}
+	
 	/**
 	 * Method to manage received JSON messages represented as {@link JsonObject}
 	 * objects.
@@ -411,6 +553,7 @@ public class MccNamPeer extends NamPeer {
 	 */
 	@Override
 	protected void onReceivedJSONMsg(JsonObject peerMsg, Address sender) {
+		
 		Gson gson = new Gson();
 		String messageType = peerMsg.get("type").getAsString();
 		
@@ -452,6 +595,7 @@ public class MccNamPeer extends NamPeer {
 			}
 			
 		} else if (messageType.equals(RequestCopyMessage.MSG_KEY)) {
+			
 			PeerDescriptor senderPeerDescriptor = gson.fromJson(peerMsg.get("peer").toString(), PeerDescriptor.class);
 			
 			String conversationItemId = peerMsg.get("conversationKey").getAsString();
@@ -464,12 +608,33 @@ public class MccNamPeer extends NamPeer {
 			String itemId = peerMsg.get("itemId").getAsString();
 			String requiredLibVersion = peerMsg.get("version").getAsString();
 			
+			// Get the encryption algorithm to be used and its operation mode
+			String encryptionAlgorithmString = peerMsg.get("encryptionAlgorithm").getAsString();
+			EncryptionAlgorithm encryptionAlgorithm = EncryptionAlgorithm.toEncryptionAlgorithm(encryptionAlgorithmString);
+			
+			byte[] partnerEncodedPublicKey = null;
+			
+			if(!encryptionAlgorithm.equals(EncryptionAlgorithm.CLEAR)) {
+			
+				// Getting the partner's Diffie-Hellman public key
+				Type type = new TypeToken<byte[]>(){}.getType();
+				partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
+				
+				System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+			}
+			
 			Platform p = Platform.toPlatform(platform);
 			MigrationSubject r = MigrationSubject.toMigrationSubject(role);
 			Action a = Action.toAction(action);
 			
 			// This is the first message of a new conversation, create a new one
-			ConversationItem conversationItem = new ConversationItem(conversationItemId, senderContactAddress, itemId, null, requiredLibVersion, a, r, p);
+			ConversationItem conversationItem = new ConversationItem(conversationItemId, senderContactAddress, itemId, null, requiredLibVersion, a, r, p, encryptionAlgorithm);
+			
+			if(!encryptionAlgorithm.equals(EncryptionAlgorithm.CLEAR)) {
+				// Generating the Diffie-Hellman tools
+				conversationItem = generateDHKeyExchangeToolsFromReceivedPublicKey(conversationItem, partnerEncodedPublicKey);
+			}
+
 			this.conversations.add(conversationItem);
 			
 			System.out.println("--- Received a " + action + " request for item " + itemId + " from a " + platform + " node");
@@ -505,7 +670,45 @@ public class MccNamPeer extends NamPeer {
 					if (manageDependencies == null) {
 						manageDependencies = new ManageDependencies(this.nam.getMigrationStore());
 					}
-					String jsonMessage = manageDependencies.answerToCopyRequest(conversationItemId, itemId, p, r, this.getPeerDescriptor(), senderPeerDescriptor);
+					
+					SecretKey secretKey = null;
+					
+					// Generating secret if CLEAR has not been specified
+					if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_ECB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CBC) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CFB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_OFB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CTR)) {
+						
+						System.out.println("Generating private AES key...");
+						secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
+						
+						conversationItem.setSecret(secretKey);
+						this.conversations.update(conversationItem);
+						
+						System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+						System.out.println("--- Sending DH encoded public key " + DHKeyExchange.toHexString(conversationItem.getEncodedPublicKey()));
+						
+					} else {
+						if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_ECB) ||
+								conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CBC) ||
+								conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CFB) ||
+								conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_OFB) ||
+								conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CTR)) {
+							
+							System.out.println("Generating private DES key...");
+							secretKey = DES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
+							
+							conversationItem.setSecret(secretKey);
+							this.conversations.update(conversationItem);
+							
+							System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+							System.out.println("--- Sending DH encoded public key " + DHKeyExchange.toHexString(conversationItem.getEncodedPublicKey()));
+						}
+					}
+					
+					// Sending DH encoded public key
+					String jsonMessage = manageDependencies.answerToCopyRequest(conversationItemId, itemId, p, r, this.getPeerDescriptor(), senderPeerDescriptor, conversationItem.getEncodedPublicKey());
 					
 					if (jsonMessage != null) {
 						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), jsonMessage, MobilityUtils.JSON_MESSAGE_FORMAT);
@@ -546,6 +749,56 @@ public class MccNamPeer extends NamPeer {
 			String senderContactAddress = conversationItem.getPartnerContactAddress();
 			MigrationSubject r = conversationItem.getRole();
 			
+			EncryptionAlgorithm encryptionAlgorithm = conversationItem.getEncryptionAlgorithm();
+			
+			byte[] partnerEncodedPublicKey = null;
+			
+			if(!encryptionAlgorithm.equals(EncryptionAlgorithm.CLEAR)) {
+			
+				// Getting the partner's Diffie-Hellman public key
+				Type type = new TypeToken<byte[]>(){}.getType();
+				partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
+				
+				System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+				
+				System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+				
+				SecretKey secretKey = null;
+				
+				// Generating secret if CLEAR has not been specified
+				if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_ECB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CBC) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CFB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_OFB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CTR)) {
+					
+					System.out.println("Generating private AES key...");
+					secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
+					
+					conversationItem.setSecret(secretKey);
+					this.conversations.update(conversationItem);
+					
+					System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+					
+				} else {
+					if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_ECB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CBC) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CFB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_OFB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CTR)) {
+						
+						System.out.println("Generating private DES key...");
+						secretKey = DES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
+						
+						conversationItem.setSecret(secretKey);
+						this.conversations.update(conversationItem);
+						
+						System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+						System.out.println("--- Sending DH encoded public key " + DHKeyExchange.toHexString(conversationItem.getEncodedPublicKey()));
+					}
+				}
+			}
+			
 			// Get the list of dependencies from the message
 			Type type = new TypeToken<ArrayList<Dependency>>(){}.getType();
 			ArrayList<Dependency> dependencies = gson.fromJson(peerMsg.get("items").toString(), type);
@@ -560,13 +813,7 @@ public class MccNamPeer extends NamPeer {
 			if (missingItems.size() > 0) {
 				conversationItem.addMissingDependencies(missingItems);
 				
-				RequestDependenciesMessage dependencyMessage = new RequestDependenciesMessage(conversationId);
-				
-//				Iterator<Entry<String, String>> missingIt = missingItems.entrySet().iterator();
-//				while(missingIt.hasNext()) {
-//					Entry<String, String> pairs = (Entry<String, String>) missingIt.next();
-//					dependencyMessage.addItem(pairs.getKey(), pairs.getValue());
-//				}
+				RequestDependenciesMessage dependencyMessage = new RequestDependenciesMessage(conversationId, null);
 				
 				for (Dependency dependency : missingItems) {
 					dependencyMessage.addItem(dependency);
@@ -611,12 +858,12 @@ public class MccNamPeer extends NamPeer {
 						// inform that all dependencies are available but not
 						// the item.
 						if (Float.compare(Float.parseFloat(libVersion), Float.parseFloat(requiredLibVersion)) < 0) {
-							AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId);
+							AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId, null);
 							sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 							System.out.println(MobilityUtils.OLD_ITEM_AVAILABLE);
 						} else {
 							// The item is already available (the same required version or a new one)
-							ItemIsAvailableMessage itemIsAvailable = new ItemIsAvailableMessage(conversationId);
+							ItemIsAvailableMessage itemIsAvailable = new ItemIsAvailableMessage(conversationId, null);
 							sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), itemIsAvailable.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 							
 							if (conversationItem.getAction().equals(Action.COPY)) {
@@ -681,13 +928,13 @@ public class MccNamPeer extends NamPeer {
 						}
 					} else {
 						System.out.println(MobilityUtils.ITEM_NOT_AVAILABLE);
-						InfoFileIsAvailableMessage infoFileIsAvailableMessage = new InfoFileIsAvailableMessage(conversationId);
+						InfoFileIsAvailableMessage infoFileIsAvailableMessage = new InfoFileIsAvailableMessage(conversationId, null);
 						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), infoFileIsAvailableMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 					}
 				} else {
 					// Requesting info file
 					System.out.println(MobilityUtils.INFO_FILE_NOT_AVAILABLE);
-					AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId);
+					AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId, null);
 					sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 				}
 			}
@@ -717,8 +964,70 @@ public class MccNamPeer extends NamPeer {
 			MigrationSubject r = MigrationSubject.toMigrationSubject(role);
 			Action a = Action.toAction(action);
 			
+			// Get the encryption algorithm to be used and its operation mode
+			String encryptionAlgorithmString = peerMsg.get("encryptionAlgorithm").getAsString();
+			EncryptionAlgorithm encryptionAlgorithm = EncryptionAlgorithm.toEncryptionAlgorithm(encryptionAlgorithmString);
+			
+			byte[] partnerEncodedPublicKey = null;
+			
+			if(!encryptionAlgorithm.equals(EncryptionAlgorithm.CLEAR)) {
+			
+				// Getting the partner's Diffie-Hellman public key
+				Type type = new TypeToken<byte[]>(){}.getType();
+				partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
+				
+				System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+			}
+			
 			// This is the first message of a new conversation, create a new one
-			ConversationItem conversationItem = new ConversationItem(conversationId, senderContactAddress, itemId, null, requiredLibVersion, a, r, p);
+			ConversationItem conversationItem = new ConversationItem(conversationId, senderContactAddress, itemId, null, requiredLibVersion, a, r, p, encryptionAlgorithm);
+			
+			// Generating secret if CLEAR has not been specified
+			if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_ECB) ||
+					conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CBC) ||
+					conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CFB) ||
+					conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_OFB) ||
+					conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CTR)) {
+				
+				conversationItem = generateDHKeyExchangeToolsFromReceivedPublicKey(conversationItem, partnerEncodedPublicKey);
+				
+				System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+				
+				System.out.println("Generating private AES key...");
+				SecretKey secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
+				
+				conversationItem.setSecret(secretKey);
+				this.conversations.update(conversationItem);
+				System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+				
+			} else {
+				if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_ECB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CBC) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CFB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_OFB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CTR)) {
+					
+					conversationItem = generateDHKeyExchangeToolsFromReceivedPublicKey(conversationItem, partnerEncodedPublicKey);
+					
+					System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+					
+					System.out.println("Generating private DES key...");
+					SecretKey secretKey = DES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
+					
+					conversationItem.setSecret(secretKey);
+					this.conversations.update(conversationItem);
+					System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+					
+				}
+			}
+			
+			// Getting the partner key from the message and send the DH key in
+			// the first sent message (based on the available items it could be
+			// - a RequestDependenciesMessage, or
+			// - an AllDependenciesAreAvailableMessage, or
+			// - an ItemIsAvailableMessage, or
+			// - an InfoFileIsAvailableMessage)
+			
 			this.conversations.add(conversationItem);
 			
 			// Get the list of dependencies from the message
@@ -730,14 +1039,9 @@ public class MccNamPeer extends NamPeer {
 			for (Dependency dependency : dependencies) {
 				System.out.print(dependency.getId() + "; ");
 			}
-			
-//			for (String key : dependencies.keySet()) {
-//		        System.out.print(key + "; ");
-//		    }
 			System.out.print("\n");
 			
-			// TODO: decide whether to accept or not a MIGRATE request by
-			// implementing MobilityUtils.decideWhetherToAcceptRequest method
+			// TODO: decide whether to accept or not a MIGRATE request by implementing MobilityUtils.decideWhetherToAcceptRequest method
 			if(MobilityUtils.decideWhetherToAcceptMobilityRequest(a, minimumRequirements)) {
 				
 				if (manageDependencies == null) {
@@ -750,14 +1054,8 @@ public class MccNamPeer extends NamPeer {
 				if (missingItems.size() > 0) {
 					conversationItem.addMissingDependencies(missingItems);
 					
-					RequestDependenciesMessage dependencyMessage = new RequestDependenciesMessage(conversationId);
-					
-					// Add dependencies
-//					Iterator<Entry<String, String>> missingIt = missingItems.entrySet().iterator();
-//					while(missingIt.hasNext()) {
-//						Entry<String, String> pairs = (Entry<String, String>) missingIt.next();
-//						dependencyMessage.addItem(pairs.getKey(), pairs.getValue());
-//					}
+					// Adding DH key to RequestDependenciesMessage
+					RequestDependenciesMessage dependencyMessage = new RequestDependenciesMessage(conversationId, conversationItem.getEncodedPublicKey());
 					
 					for (Dependency dependency : missingItems) {
 						dependencyMessage.addItem(dependency);
@@ -802,7 +1100,8 @@ public class MccNamPeer extends NamPeer {
 							// the item.
 							if (Float.compare(Float.parseFloat(libVersion), Float.parseFloat(requiredLibVersion)) < 0) {
 								// Requesting the updated info file
-								AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId);
+								// Adding DH key to AllDependenciesAreAvailableMessage
+								AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId, conversationItem.getEncodedPublicKey());
 								sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 								System.out.println(MobilityUtils.OLD_ITEM_AVAILABLE);
 							} else {
@@ -816,18 +1115,21 @@ public class MccNamPeer extends NamPeer {
 								
 								notifyObservers(itemFile.getAbsolutePath(), mainClassName, r, a, null);
 								
-								ItemIsAvailableMessage itemIsAvailable = new ItemIsAvailableMessage(conversationId);
+								// Adding DH key to ItemIsAvailableMessage
+								ItemIsAvailableMessage itemIsAvailable = new ItemIsAvailableMessage(conversationId, conversationItem.getEncodedPublicKey());
 								sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), itemIsAvailable.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 							}
 						} else {
 							System.out.println(MobilityUtils.ITEM_NOT_AVAILABLE);
-							InfoFileIsAvailableMessage infoFileIsAvailableMessage = new InfoFileIsAvailableMessage(conversationId);
+							// Adding DH key to InfoFileIsAvailableMessage
+							InfoFileIsAvailableMessage infoFileIsAvailableMessage = new InfoFileIsAvailableMessage(conversationId, conversationItem.getEncodedPublicKey());
 							sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), infoFileIsAvailableMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 						}
 					} else {
 						// Requesting info file
 						System.out.println(MobilityUtils.INFO_FILE_NOT_AVAILABLE);
-						AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId);
+						// Adding DH key to AllDependenciesAreAvailableMessage
+						AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId, conversationItem.getEncodedPublicKey());
 						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 					}
 				}
@@ -839,6 +1141,53 @@ public class MccNamPeer extends NamPeer {
 			
 			String conversationId = peerMsg.get("conversationKey").getAsString();
 			ConversationItem conversationItem = this.conversations.getConversationItem(conversationId);
+			
+			if(conversationItem.getAction().equals(Action.MIGRATE) && conversationItem.getSecret() == null && !conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.CLEAR)) {
+				
+				// Generating secret if CLEAR has not been specified
+				if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_ECB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CBC) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CFB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_OFB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CTR)) {
+					
+					// Getting the partner's Diffie-Hellman public key
+					Type type = new TypeToken<byte[]>(){}.getType();
+					byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
+					
+					System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+					
+					System.out.println("Generating private AES key...");
+					SecretKey secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
+					
+					conversationItem.setSecret(secretKey);
+					this.conversations.update(conversationItem);
+					
+					System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+					
+				} else {
+					if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_ECB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CBC) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CFB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_OFB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CTR)) {
+						
+						// Getting the partner's Diffie-Hellman public key
+						Type type = new TypeToken<byte[]>(){}.getType();
+						byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
+						
+						System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+						
+						System.out.println("Generating private DES key...");
+						SecretKey secretKey = DES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
+						
+						conversationItem.setSecret(secretKey);
+						this.conversations.update(conversationItem);
+						
+						System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+					}
+				}
+			}
 			
 			Platform platform = conversationItem.getPlatform();
 			// Action action = conversationItem.getAction();
@@ -853,14 +1202,30 @@ public class MccNamPeer extends NamPeer {
 			if (copyActionImplementation == null) {
 				copyActionImplementation = new CopyActionImplementation(this.nam.getMigrationStore(), this);
 			}
-			copyActionImplementation.copyDependencyItems(conversationId, itemId, platform, dependencies, this.getPeerDescriptor(), senderContactAddress);
+			copyActionImplementation.copyDependencyItems(conversationId, itemId, platform, dependencies, this.getPeerDescriptor(), senderContactAddress, conversationItem.getSecret(), conversationItem.getEncryptionAlgorithm());
 
 		} else if (messageType.equals(DependencyChunkTransferMessage.MSG_KEY)) {
-			
 			JsonObject params = peerMsg.getAsJsonObject("payload").getAsJsonObject("params");
 			DependencyChunk chunk = (DependencyChunk) gson.fromJson(params.get("chunk").toString(), DependencyChunk.class);
-
+			
 			ConversationItem conversationItem = this.conversations.getConversationItem(chunk.getConversationId());
+			
+			byte[] chunkBuffer = chunk.getBuffer();
+			
+			if(!conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.CLEAR)) {
+				
+				System.out.println("--- " + MobilityUtils.DECODING_DEPENDENCY_CHUNK);
+				
+				// Decoding the buffer
+				byte[] receivedIv = chunk.getIv();
+				byte[] decryptedChunkBuffer = decodeChunk(conversationItem.getEncryptionAlgorithm(), chunkBuffer, conversationItem.getSecret(), receivedIv);
+				
+				// Replacing the encrypted buffer with the decrypted one to be stored in received dependency chunk list
+				chunk.setBuffer(decryptedChunkBuffer);
+				
+			} else {
+				System.out.println(MobilityUtils.DATA_NOT_ENCODED);
+			}
 			
 			System.out.println(MobilityUtils.RECEIVED_DEPENDENCY_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file: " + chunk.getFileName() + " (ID: " + chunk.getDependencyId() + ")");
 			
@@ -956,7 +1321,7 @@ public class MccNamPeer extends NamPeer {
 						File itemFile = MobilityUtils.getRequestedItem(conversationItem.getItemId(), conversationItem.getPlatform(), this.nam.getMigrationStore());
 						
 						if (itemFile != null && itemFile.exists()) {
-							ItemIsAvailableMessage receivedItem = new ItemIsAvailableMessage(chunk.getConversationId());
+							ItemIsAvailableMessage receivedItem = new ItemIsAvailableMessage(chunk.getConversationId(), null);
 							sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedItem.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 						
 							if (conversationItem.getAction().equals(Action.COPY)) {
@@ -1038,12 +1403,12 @@ public class MccNamPeer extends NamPeer {
 						
 						} else {
 							System.out.println(MobilityUtils.ITEM_NOT_AVAILABLE);
-							InfoFileIsAvailableMessage infoFileIsAvailableMessage = new InfoFileIsAvailableMessage(chunk.getConversationId());
+							InfoFileIsAvailableMessage infoFileIsAvailableMessage = new InfoFileIsAvailableMessage(chunk.getConversationId(), null);
 							sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), infoFileIsAvailableMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 						}
 					} else {
 						System.out.println("The information file is not available; requesting it...");
-						AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(chunk.getConversationId());
+						AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(chunk.getConversationId(), null);
 						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 					}
 				}
@@ -1055,6 +1420,23 @@ public class MccNamPeer extends NamPeer {
 			InfoFileChunk chunk = (InfoFileChunk) gson.fromJson(params.get("chunk").toString(), InfoFileChunk.class);
 
 			ConversationItem conversationItem = this.conversations.getConversationItem(chunk.getConversationId());
+			
+			byte[] chunkBuffer = chunk.getBuffer();
+			
+			if(!conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.CLEAR)) {
+				
+				System.out.println("--- Decoding " + MobilityUtils.DECODING_INFO_FILE_CHUNK);
+				
+				// Decoding the buffer
+				byte[] receivedIv = chunk.getIv();
+				byte[] decryptedChunkBuffer = decodeChunk(conversationItem.getEncryptionAlgorithm(), chunkBuffer, conversationItem.getSecret(), receivedIv);
+				
+				// Replacing the encrypted buffer with the decrypted one to be stored in received info file chunk list
+				chunk.setBuffer(decryptedChunkBuffer);
+				
+			}  else {
+				System.out.println(MobilityUtils.DATA_NOT_ENCODED);
+			}
 			
 			System.out.println(MobilityUtils.RECEIVED_ITEM_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file: " + chunk.getFileName());
 			
@@ -1110,7 +1492,7 @@ public class MccNamPeer extends NamPeer {
 				String senderContactAddress = conversationItem.getPartnerContactAddress();
 				
 				// Requesting the item even if it is already available since the info file was for an old version and it has already been updated
-				InfoFileIsAvailableMessage infoFileIsAvailableMessage = new InfoFileIsAvailableMessage(chunk.getConversationId());
+				InfoFileIsAvailableMessage infoFileIsAvailableMessage = new InfoFileIsAvailableMessage(chunk.getConversationId(), null);
 				sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), infoFileIsAvailableMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 			}
 			
@@ -1121,6 +1503,53 @@ public class MccNamPeer extends NamPeer {
 			String conversationId = peerMsg.get("conversationKey").getAsString();
 			ConversationItem conversationItem = this.conversations.getConversationItem(conversationId);
 			
+			if(conversationItem.getAction().equals(Action.MIGRATE) && conversationItem.getSecret() == null && !conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.CLEAR)) {
+				
+				// Generating secret if CLEAR has not been specified
+				if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_ECB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CBC) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CFB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_OFB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CTR)) {
+					
+					// Getting the partner's Diffie-Hellman public key
+					Type type = new TypeToken<byte[]>(){}.getType();
+					byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
+					
+					System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+					
+					System.out.println("Generating private AES key...");
+					SecretKey secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
+					
+					conversationItem.setSecret(secretKey);
+					this.conversations.update(conversationItem);
+					
+					System.out.println("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+					
+				} else {
+					if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_ECB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CBC) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CFB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_OFB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CTR)) {
+						
+						// Getting the partner's Diffie-Hellman public key
+						Type type = new TypeToken<byte[]>(){}.getType();
+						byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
+						
+						System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+						
+						System.out.println("Generating private DES key...");
+						SecretKey secretKey = DES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
+						
+						conversationItem.setSecret(secretKey);
+						this.conversations.update(conversationItem);
+						
+						System.out.println("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+					}
+				}
+			}
+			
 			String itemId = conversationItem.getItemId();
 			String senderContactAddress = conversationItem.getPartnerContactAddress();
 			
@@ -1128,7 +1557,7 @@ public class MccNamPeer extends NamPeer {
 			if (copyActionImplementation == null) {
 				copyActionImplementation = new CopyActionImplementation(this.nam.getMigrationStore(), this);
 			}
-			int result = copyActionImplementation.copyInfoFile(conversationId, itemId, this.getPeerDescriptor(), senderContactAddress);
+			int result = copyActionImplementation.copyInfoFile(conversationId, itemId, this.getPeerDescriptor(), senderContactAddress, conversationItem.getSecret(), conversationItem.getEncryptionAlgorithm());
 			
 			if (result == -1) {
 				System.err.println("An error occurred during a " + conversationItem.getAction().toString() + " mobility action with peer " + conversationItem.getPartnerContactAddress());
@@ -1141,6 +1570,53 @@ public class MccNamPeer extends NamPeer {
 			String conversationId = peerMsg.get("conversationKey").getAsString();
 			ConversationItem conversationItem = this.conversations.getConversationItem(conversationId);
 			
+			if(conversationItem.getAction().equals(Action.MIGRATE) && conversationItem.getSecret() == null && !conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.CLEAR)) {
+				
+				// Generating secret if CLEAR has not been specified
+				if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_ECB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CBC) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CFB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_OFB) ||
+						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CTR)) {
+					
+					// Getting the partner's Diffie-Hellman public key
+					Type type = new TypeToken<byte[]>(){}.getType();
+					byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
+					
+					System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+					
+					System.out.println("Generating private AES key...");
+					SecretKey secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
+					
+					conversationItem.setSecret(secretKey);
+					this.conversations.update(conversationItem);
+					
+					System.out.println("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+					
+				} else {
+					if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_ECB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CBC) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CFB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_OFB) ||
+							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CTR)) {
+						
+						// Getting the partner's Diffie-Hellman public key
+						Type type = new TypeToken<byte[]>(){}.getType();
+						byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
+						
+						System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+						
+						System.out.println("Generating private DES key...");
+						SecretKey secretKey = DES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
+						
+						conversationItem.setSecret(secretKey);
+						this.conversations.update(conversationItem);
+						
+						System.out.println("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+					}
+				}
+			}
+			
 			Platform p = conversationItem.getPlatform();
 			String itemId = conversationItem.getItemId();
 			String senderContactAddress = conversationItem.getPartnerContactAddress();
@@ -1149,7 +1625,7 @@ public class MccNamPeer extends NamPeer {
 			if (copyActionImplementation == null) {
 				copyActionImplementation = new CopyActionImplementation(this.nam.getMigrationStore(), this);
 			}
-			int result = copyActionImplementation.copyItem(conversationId, itemId, p, this.getPeerDescriptor(), senderContactAddress);
+			int result = copyActionImplementation.copyItem(conversationId, itemId, p, this.getPeerDescriptor(), senderContactAddress, conversationItem.getSecret(), conversationItem.getEncryptionAlgorithm());
 			
 			if (result == -1) {
 				System.err.println("An error occurred during a " + conversationItem.getAction().toString() + " mobility action with peer " + conversationItem.getPartnerContactAddress());
@@ -1159,8 +1635,25 @@ public class MccNamPeer extends NamPeer {
 			
 			JsonObject params = peerMsg.getAsJsonObject("payload").getAsJsonObject("params");
 			ItemChunk chunk = (ItemChunk) gson.fromJson(params.get("chunk").toString(), ItemChunk.class);
-
+			
 			ConversationItem conversationItem = this.conversations.getConversationItem(chunk.getConversationId());
+			
+			byte[] chunkBuffer = chunk.getBuffer();
+			
+			if(!conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.CLEAR)) {
+				
+				System.out.println("--- Decoding " + MobilityUtils.DECODING_ITEM_CHUNK);
+				
+				// Decoding the buffer
+				byte[] receivedIv = chunk.getIv();
+				byte[] decryptedChunkBuffer = decodeChunk(conversationItem.getEncryptionAlgorithm(), chunkBuffer, conversationItem.getSecret(), receivedIv);
+				
+				// Replacing the encrypted buffer with the decrypted one to be stored in received item chunk list
+				chunk.setBuffer(decryptedChunkBuffer);
+				
+			} else {
+				System.out.println(MobilityUtils.DATA_NOT_ENCODED);
+			}
 			
 			System.out.println(MobilityUtils.RECEIVED_ITEM_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file: " + chunk.getFileName() + " (ID: " + chunk.getMainClassName() + ")");
 			
@@ -1271,7 +1764,7 @@ public class MccNamPeer extends NamPeer {
 					
 					System.out.println("COPY " + MobilityUtils.ACTION_SUCCESSFUL);
 					
-					ItemIsAvailableMessage receivedItem = new ItemIsAvailableMessage(chunk.getConversationId());
+					ItemIsAvailableMessage receivedItem = new ItemIsAvailableMessage(chunk.getConversationId(), null);
 					sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedItem.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 					
 					// Remove conversation item from conversations list
@@ -1291,7 +1784,7 @@ public class MccNamPeer extends NamPeer {
 						notifyObservers(this.nam.getMigrationStore() + fileName, null, role, action, null);
 					}
 
-					ItemIsAvailableMessage receivedItem = new ItemIsAvailableMessage(chunk.getConversationId());
+					ItemIsAvailableMessage receivedItem = new ItemIsAvailableMessage(chunk.getConversationId(), null);
 					sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedItem.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 				}
 				
@@ -1299,13 +1792,30 @@ public class MccNamPeer extends NamPeer {
 			}
 			
 		} else if (messageType.equals(StateChunkTransferMessage.MSG_KEY)) {
-
+			
 			JsonObject params = peerMsg.getAsJsonObject("payload").getAsJsonObject("params");
 			StateChunk chunk = (StateChunk) gson.fromJson(params.get("chunk").toString(), StateChunk.class);
 
 			ConversationItem conversationItem = this.conversations.getConversationItem(chunk.getConversationId());
 			
 			String senderContactAddress = conversationItem.getPartnerContactAddress();
+			
+			byte[] chunkBuffer = chunk.getBuffer();
+			
+			if(!conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.CLEAR)) {
+				
+				System.out.println("--- Decoding " + MobilityUtils.DECODING_STATE_CHUNK);
+				
+				// Decoding the buffer
+				byte[] receivedIv = chunk.getIv();
+				byte[] decryptedChunkBuffer = decodeChunk(conversationItem.getEncryptionAlgorithm(), chunkBuffer, conversationItem.getSecret(), receivedIv);
+				
+				// Replacing the encrypted buffer with the decrypted one to be stored in received info file chunk list
+				chunk.setBuffer(decryptedChunkBuffer);
+				
+			} else {
+				System.out.println(MobilityUtils.DATA_NOT_ENCODED);
+			}
 			
 			System.out.println(MobilityUtils.RECEIVED_STATE_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for conversation: " + chunk.getConversationId());
 			
@@ -1450,6 +1960,21 @@ public class MccNamPeer extends NamPeer {
 			String conversationId = peerMsg.get("conversationKey").getAsString();
 			ConversationItem conversationItem = this.conversations.getConversationItem(conversationId);
 			
+			if(conversationItem.getAction().equals(Action.MIGRATE) && conversationItem.getSecret() == null && !conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.CLEAR)) {
+				
+				// Getting the partner's Diffie-Hellman public key
+				Type type = new TypeToken<byte[]>(){}.getType();
+				byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
+				
+				System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+				
+				SecretKey secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
+				conversationItem.setSecret(secretKey);
+				this.conversations.update(conversationItem);
+				
+				System.out.println("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+			}
+			
 			Action action = conversationItem.getAction();
 			
 			if (action.equals(Action.COPY)) {
@@ -1468,7 +1993,7 @@ public class MccNamPeer extends NamPeer {
 				if (migrateActionImplementation == null) {
 					migrateActionImplementation = new MigrateActionImplementation(this.nam.getMigrationStore(), this);
 				}
-				ArrayList<StateChunk> chunkList = migrateActionImplementation.generateStateChunks(conversationId, object);
+				ArrayList<StateChunk> chunkList = migrateActionImplementation.generateStateChunks(conversationId, object, conversationItem.getSecret(), conversationItem.getEncryptionAlgorithm());
 				
 				if (chunkList == null) {
 					System.err.println(MobilityUtils.ERROR_GENERATING_STATE_CHUNKS);
@@ -1505,7 +2030,6 @@ public class MccNamPeer extends NamPeer {
 			System.err.println("--- Item id: " + itemId + " (" + role + ")");
 			System.err.println("--- Error message: " + errorDescription);
 		}
-		
 	}
 	
 	/**

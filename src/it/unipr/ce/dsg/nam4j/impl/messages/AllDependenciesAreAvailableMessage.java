@@ -26,10 +26,12 @@ public class AllDependenciesAreAvailableMessage {
 	public static final String MSG_KEY = "RECEIVED_ALL_DEPENDENCIES";
 	private String type;
 	private String conversationKey;
+	private byte[] encodedPublicKey;
 	
-	public AllDependenciesAreAvailableMessage(String conversationKey) {
+	public AllDependenciesAreAvailableMessage(String conversationKey, byte[] encodedPublicKey) {
 		setType(MSG_KEY);
 		setConversationKey(conversationKey);
+		setEncodedPublicKey(encodedPublicKey);
 	}
 	
 	public String getType() {
@@ -46,6 +48,14 @@ public class AllDependenciesAreAvailableMessage {
 
 	public void setConversationKey(String conversationKey) {
 		this.conversationKey = conversationKey;
+	}
+	
+	public byte[] getEncodedPublicKey() {
+		return encodedPublicKey;
+	}
+	
+	public void setEncodedPublicKey(byte[] encodedPublicKey) {
+		this.encodedPublicKey = encodedPublicKey;
 	}
 	
 	/**
