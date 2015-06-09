@@ -5,6 +5,7 @@ import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 import it.unipr.ce.dsg.nam4j.impl.messages.AllDependenciesAreAvailableMessage;
 import it.unipr.ce.dsg.nam4j.impl.messages.DependencyChunkTransferMessage;
 import it.unipr.ce.dsg.nam4j.impl.messages.InfoFileChunkTransferMessage;
@@ -43,7 +44,6 @@ import it.unipr.ce.dsg.nam4j.security.DES;
 import it.unipr.ce.dsg.nam4j.security.DHKeyExchange;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
 import it.unipr.ce.dsg.s2p.sip.Address;
-import it.unipr.ce.dsg.s2p.util.FileHandler;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -69,7 +69,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.SAXException;
-import org.zoolu.tools.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -95,9 +94,10 @@ import com.google.gson.reflect.TypeToken;
 
 public class MccNamPeer extends NamPeer {
 	
-	private FileHandler fileHandler;
-	private Log log;
 	private NetworkedAutonomicMachine nam;
+	
+	/** The logger object */
+	private NamLogger messageLogger;
 	
 	/** The list of ongoing conversations. */
 	private Conversations conversations;
@@ -154,22 +154,13 @@ public class MccNamPeer extends NamPeer {
 	
 	/** Method to perform the initial setup of the peer. */
 	private void init() {
-		
-		fileHandler = new FileHandler();
 		this.conversations = new Conversations();
 		this.receivedStateChunkList = new HashMap<String, ArrayList<StateChunk>>();
 		this.receivedDependencyChunkList = new HashMap<String, ArrayList<DependencyChunk>>();
 		this.receivedInfoFileChunkList = new HashMap<String, ArrayList<InfoFileChunk>>();
 		this.receivedItemChunkList = new HashMap<String, ArrayList<ItemChunk>>();
-		
 		this.listeners = new ArrayList<IMobilityItemAvailability>();
-		
-		if (nodeConfig.log_path != null){
-			if (!fileHandler.isDirectoryExists(nodeConfig.log_path))
-				fileHandler.createDirectory(nodeConfig.log_path);
-
-			log = new Log(nodeConfig.log_path + "info_" + peerDescriptor.getAddress() + ".log", Log.LEVEL_MEDIUM);
-		}
+		messageLogger = new NamLogger("MccNamPeer");
 	}
 	
 	/**
@@ -304,7 +295,7 @@ public class MccNamPeer extends NamPeer {
 			sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 		
 		} else {
-			System.err.println(MobilityUtils.ERROR_PARSING_XML_FILE_FOR_DEPENDENCIES);
+			messageLogger.error(MobilityUtils.ERROR_PARSING_XML_FILE_FOR_DEPENDENCIES);
 		}
 	}
 	
@@ -367,7 +358,7 @@ public class MccNamPeer extends NamPeer {
 			sendMessage(new Address(peerToBeContactedAddress), new Address(peerToBeContactedAddress), this.getAddress(), peerMsg.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 		
 		}  else {
-			System.err.println(MobilityUtils.ERROR_PARSING_XML_FILE_FOR_DEPENDENCIES);
+			messageLogger.error(MobilityUtils.ERROR_PARSING_XML_FILE_FOR_DEPENDENCIES);
 		}
 	}
 	
@@ -497,45 +488,44 @@ public class MccNamPeer extends NamPeer {
 	private byte[] decodeChunk(EncryptionAlgorithm encryptionAlgorithm, byte[] chunkBuffer, SecretKey secretKey, byte[] receivedIv) {
 		
 		if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_ECB)) {
-			System.out.println("Decoding chunk using AES - ECB...");
+			messageLogger.debug("Decoding chunk using AES - ECB...");
 			return AES.decryptDataECB(chunkBuffer, secretKey);
 			
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_CBC)) {
-			System.out.println("Decoding chunk using AES - CBC...");
+			messageLogger.debug("Decoding chunk using AES - CBC...");
 			return AES.decryptDataCBC(chunkBuffer, secretKey, receivedIv);
 			
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_OFB)) {
-			System.out.println("Decoding chunk using AES - OFB...");
+			messageLogger.debug("Decoding chunk using AES - OFB...");
 			return AES.decryptDataOFB(chunkBuffer, secretKey, receivedIv);
 			
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_CFB)) {
-			System.out.println("Decoding chunk using AES - CFB...");
+			messageLogger.debug("Decoding chunk using AES - CFB...");
 			return AES.decryptDataCFB(chunkBuffer, secretKey, receivedIv);
 			
 		}  else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_CTR)) {
-			System.out.println("Decoding chunk using AES - CTR...");
+			messageLogger.debug("Decoding chunk using AES - CTR...");
 			return AES.decryptDataCTR(chunkBuffer, secretKey, receivedIv);
 			
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_ECB)) {
-			System.out.println("Decoding chunk using DES - ECB...");
+			messageLogger.debug("Decoding chunk using DES - ECB...");
 			return DES.decryptDataECB(chunkBuffer, secretKey);
 			
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_CBC)) {
-			System.out.println("Decoding chunk using DES - CBC...");
+			messageLogger.debug("Decoding chunk using DES - CBC...");
 			return DES.decryptDataCBC(chunkBuffer, secretKey, receivedIv);
 			
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_OFB)) {
-			System.out.println("Decoding chunk using DES - OFB...");
+			messageLogger.debug("Decoding chunk using DES - OFB...");
 			return DES.decryptDataOFB(chunkBuffer, secretKey, receivedIv);
 			
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_CFB)) {
-			System.out.println("Decoding chunk using DES - CFB...");
+			messageLogger.debug("Decoding chunk using DES - CFB...");
 			return DES.decryptDataCFB(chunkBuffer, secretKey, receivedIv);
 			
 		}  else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_CTR)) {
-			System.out.println("Decoding chunk using DES - CTR...");
+			messageLogger.debug("Decoding chunk using DES - CTR...");
 			return DES.decryptDataCTR(chunkBuffer, secretKey, receivedIv);
-			
 		}
 		
 		return null;
@@ -557,20 +547,6 @@ public class MccNamPeer extends NamPeer {
 		Gson gson = new Gson();
 		String messageType = peerMsg.get("type").getAsString();
 		
-		// Logging
-		if (nodeConfig.log_path != null) {
-			int msgLength = messageType.length();
-
-			JsonObject info = new JsonObject();
-			info.addProperty("timestamp", System.currentTimeMillis());
-			info.addProperty("type", "recv");
-			info.addProperty("typeMessage", messageType);
-			info.addProperty("byte", msgLength);
-			info.addProperty("sender", sender.getURL());
-
-			printJSONLog(info, log, false);
-		}
-		
 		if (messageType.equals(PingMessage.MSG_KEY) || messageType.equals(PongMessage.MSG_KEY)) {
 			
 			// If a PING or a PONG message is received, the node adds the sender
@@ -579,19 +555,19 @@ public class MccNamPeer extends NamPeer {
 			PeerDescriptor senderPeerDescriptor = gson.fromJson(peerMsg.get("peer").toString(), PeerDescriptor.class);
 			
 			if ((!(this.getPeerList().contains(senderPeerDescriptor))) && (!senderPeerDescriptor.getName().equals("bootstrap"))) {
-				System.out.println("--- Adding a new peer to the peers list: " + senderPeerDescriptor.getContactAddress());
+				messageLogger.debug("--- Adding a new peer to the peers list: " + senderPeerDescriptor.getContactAddress());
 
 				this.getPeerList().add(senderPeerDescriptor);
 				this.getPeerList().printPeerList();
 			}
 			
 			if (messageType.equals(PingMessage.MSG_KEY)) {
-				System.out.println("Received PING message from " + senderPeerDescriptor.getContactAddress() + "\nSending pong message to " + senderPeerDescriptor.getContactAddress());
+				messageLogger.debug("Received PING message from " + senderPeerDescriptor.getContactAddress() + "\nSending pong message to " + senderPeerDescriptor.getContactAddress());
 				
 				// If the message was a ping, the node answers with a pong
 				pong(senderPeerDescriptor.getContactAddress());
 			} else {
-				System.out.println("Received PONG message from " + senderPeerDescriptor.getContactAddress());
+				messageLogger.debug("Received PONG message from " + senderPeerDescriptor.getContactAddress());
 			}
 			
 		} else if (messageType.equals(RequestCopyMessage.MSG_KEY)) {
@@ -620,7 +596,7 @@ public class MccNamPeer extends NamPeer {
 				Type type = new TypeToken<byte[]>(){}.getType();
 				partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
 				
-				System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+				messageLogger.debug("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
 			}
 			
 			Platform p = Platform.toPlatform(platform);
@@ -637,7 +613,7 @@ public class MccNamPeer extends NamPeer {
 
 			this.conversations.add(conversationItem);
 			
-			System.out.println("--- Received a " + action + " request for item " + itemId + " from a " + platform + " node");
+			messageLogger.debug("--- Received a " + action + " request for item " + itemId + " from a " + platform + " node");
 			
 			// Before checking for the dependencies, check if the item is
 			// available and if its version is >= than the required one
@@ -656,7 +632,7 @@ public class MccNamPeer extends NamPeer {
 				// lower, than an ItemNotAvailableMessage is sent, otherwise the
 				// list of dependencies is.
 				if (Float.compare(Float.parseFloat(libVersion), Float.parseFloat(requiredLibVersion)) < 0) {
-					System.err.println(MobilityUtils.SERVER_OLD_ITEM_AVAILABLE);
+					messageLogger.error(MobilityUtils.SERVER_OLD_ITEM_AVAILABLE);
 					
 					ItemNotAvailableMessage itemNotAvailable = new ItemNotAvailableMessage(conversationItemId);
 					sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), itemNotAvailable.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
@@ -665,7 +641,7 @@ public class MccNamPeer extends NamPeer {
 					this.conversations.remove(conversationItemId);
 					
 				} else {
-					System.out.println(MobilityUtils.REQUESTED_ITEM_IS_AVAILABLE_SENDING_DEPENDENCIES);
+					messageLogger.debug(MobilityUtils.REQUESTED_ITEM_IS_AVAILABLE_SENDING_DEPENDENCIES);
 
 					if (manageDependencies == null) {
 						manageDependencies = new ManageDependencies(this.nam.getMigrationStore());
@@ -680,14 +656,14 @@ public class MccNamPeer extends NamPeer {
 							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_OFB) ||
 							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CTR)) {
 						
-						System.out.println("Generating private AES key...");
+						messageLogger.debug("Generating private AES key...");
 						secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
 						
 						conversationItem.setSecret(secretKey);
 						this.conversations.update(conversationItem);
 						
-						System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
-						System.out.println("--- Sending DH encoded public key " + DHKeyExchange.toHexString(conversationItem.getEncodedPublicKey()));
+						messageLogger.debug("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+						messageLogger.debug("--- Sending DH encoded public key " + DHKeyExchange.toHexString(conversationItem.getEncodedPublicKey()));
 						
 					} else {
 						if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_ECB) ||
@@ -696,14 +672,14 @@ public class MccNamPeer extends NamPeer {
 								conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_OFB) ||
 								conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CTR)) {
 							
-							System.out.println("Generating private DES key...");
+							messageLogger.debug("Generating private DES key...");
 							secretKey = DES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
 							
 							conversationItem.setSecret(secretKey);
 							this.conversations.update(conversationItem);
 							
-							System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
-							System.out.println("--- Sending DH encoded public key " + DHKeyExchange.toHexString(conversationItem.getEncodedPublicKey()));
+							messageLogger.debug("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+							messageLogger.debug("--- Sending DH encoded public key " + DHKeyExchange.toHexString(conversationItem.getEncodedPublicKey()));
 						}
 					}
 					
@@ -713,7 +689,7 @@ public class MccNamPeer extends NamPeer {
 					if (jsonMessage != null) {
 						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), jsonMessage, MobilityUtils.JSON_MESSAGE_FORMAT);
 					} else {
-						System.out.println(MobilityUtils.ERROR_REQUEST_COPY_MESSAGE);
+						messageLogger.error(MobilityUtils.ERROR_REQUEST_COPY_MESSAGE);
 						
 						ItemNotAvailableMessage itemNotAvailable = new ItemNotAvailableMessage(conversationItemId);
 						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), itemNotAvailable.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
@@ -721,7 +697,7 @@ public class MccNamPeer extends NamPeer {
 				}
 				
 			} else {
-				System.err.println(MobilityUtils.SERVER_ITEM_NOT_AVAILABLE);
+				messageLogger.error(MobilityUtils.SERVER_ITEM_NOT_AVAILABLE);
 				
 				ItemNotAvailableMessage itemNotAvailable = new ItemNotAvailableMessage(conversationItemId);
 				sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), itemNotAvailable.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
@@ -735,7 +711,7 @@ public class MccNamPeer extends NamPeer {
 			String conversationId = peerMsg.get("conversationKey").getAsString();
 			ConversationItem conversationItem = this.conversations.getConversationItem(conversationId);
 			
-			System.err.println(MobilityUtils.CONTACTED_NODE_DOES_NOT_HAVE_ITEM + " whose id is " + conversationItem.getItemId());
+			messageLogger.error(MobilityUtils.CONTACTED_NODE_DOES_NOT_HAVE_ITEM + " whose id is " + conversationItem.getItemId());
 			
 			// Removing conversation
 			this.conversations.remove(conversationId);
@@ -759,9 +735,9 @@ public class MccNamPeer extends NamPeer {
 				Type type = new TypeToken<byte[]>(){}.getType();
 				partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
 				
-				System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+				messageLogger.debug("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
 				
-				System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+				messageLogger.debug("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
 				
 				SecretKey secretKey = null;
 				
@@ -772,13 +748,13 @@ public class MccNamPeer extends NamPeer {
 						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_OFB) ||
 						conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.AES_CTR)) {
 					
-					System.out.println("Generating private AES key...");
+					messageLogger.debug("Generating private AES key...");
 					secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
 					
 					conversationItem.setSecret(secretKey);
 					this.conversations.update(conversationItem);
 					
-					System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+					messageLogger.debug("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
 					
 				} else {
 					if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_ECB) ||
@@ -787,14 +763,14 @@ public class MccNamPeer extends NamPeer {
 							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_OFB) ||
 							conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_CTR)) {
 						
-						System.out.println("Generating private DES key...");
+						messageLogger.debug("Generating private DES key...");
 						secretKey = DES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
 						
 						conversationItem.setSecret(secretKey);
 						this.conversations.update(conversationItem);
 						
-						System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
-						System.out.println("--- Sending DH encoded public key " + DHKeyExchange.toHexString(conversationItem.getEncodedPublicKey()));
+						messageLogger.debug("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+						messageLogger.debug("--- Sending DH encoded public key " + DHKeyExchange.toHexString(conversationItem.getEncodedPublicKey()));
 					}
 				}
 			}
@@ -824,7 +800,7 @@ public class MccNamPeer extends NamPeer {
 				if (jsonMessage != null) {
 					sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), jsonMessage, MobilityUtils.JSON_MESSAGE_FORMAT);
 				} else {
-					System.err.println(MobilityUtils.ERROR_REQUEST_ITEM_ANSWER_MESSAGE);
+					messageLogger.error(MobilityUtils.ERROR_REQUEST_ITEM_ANSWER_MESSAGE);
 					
 					// Notify sender that the mobility action failed
 					MigrationFailedMessage migrationFailedMessage = new MigrationFailedMessage(conversationId, MobilityUtils.ERROR_REQUEST_ITEM_ANSWER_MESSAGE);
@@ -833,12 +809,12 @@ public class MccNamPeer extends NamPeer {
 					manageError(conversationId);
 				}
 			} else {
-				System.out.println(MobilityUtils.CLIENT_ALL_DEPENDENCIES_AVAILABLE);
+				messageLogger.debug(MobilityUtils.CLIENT_ALL_DEPENDENCIES_AVAILABLE);
 				
 				boolean infoFileIsAvailable = (new File(this.nam.getMigrationStore() + conversationItem.getItemId() + MobilityUtils.INFO_FILE_EXTENSION)).exists();
 				if (infoFileIsAvailable) {
 					// The info file is available
-					System.out.println(MobilityUtils.INFO_FILE_AVAILABLE);
+					messageLogger.debug(MobilityUtils.INFO_FILE_AVAILABLE);
 				
 					File itemFile = MobilityUtils.getRequestedItem(conversationItem.getItemId(), p, this.nam.getMigrationStore());
 					
@@ -860,7 +836,7 @@ public class MccNamPeer extends NamPeer {
 						if (Float.compare(Float.parseFloat(libVersion), Float.parseFloat(requiredLibVersion)) < 0) {
 							AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId, null);
 							sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
-							System.out.println(MobilityUtils.OLD_ITEM_AVAILABLE);
+							messageLogger.debug(MobilityUtils.OLD_ITEM_AVAILABLE);
 						} else {
 							// The item is already available (the same required version or a new one)
 							ItemIsAvailableMessage itemIsAvailable = new ItemIsAvailableMessage(conversationId, null);
@@ -871,7 +847,7 @@ public class MccNamPeer extends NamPeer {
 								MigrationSubject role = conversationItem.getRole();
 								
 								if (nam.getPlatform() == Platform.DESKTOP) {
-									System.out.println(MobilityUtils.STARTING_EXECUTION);
+									messageLogger.debug(MobilityUtils.STARTING_EXECUTION);
 									
 									Object obj = MobilityUtils.addToClassPath(this.nam, this.nam.getMigrationStore() + itemFile.getName(), mainClassName, role);
 									
@@ -884,7 +860,7 @@ public class MccNamPeer extends NamPeer {
 										// String functionalModuleId = handler.getLibraryInformation().getFunctionalModule();
 										String functionalModuleId = handler.getFunctionalModuleForService().getId();
 										
-										System.out.println("------ The id of the FM associated to the received Service is " + functionalModuleId);
+										messageLogger.debug("------ The id of the FM associated to the received Service is " + functionalModuleId);
 										
 										// Adding the service to the associated functional module
 										Service s = (Service) obj;
@@ -901,11 +877,11 @@ public class MccNamPeer extends NamPeer {
 											s.getServiceRunnable().start();
 											
 										} else {
-											System.err.println("The info file for the FM to which the Service is associated is not available");
+											messageLogger.error("The info file for the FM to which the Service is associated is not available");
 										}
 									}
 									
-									System.out.println("COPY " + MobilityUtils.ACTION_SUCCESSFUL);
+									messageLogger.debug("COPY " + MobilityUtils.ACTION_SUCCESSFUL);
 									
 								} else if (nam.getPlatform() == Platform.ANDROID) {
 									
@@ -914,7 +890,7 @@ public class MccNamPeer extends NamPeer {
 								}
 								
 							} else if (conversationItem.getAction().equals(Action.MIGRATE)) {
-								System.out.println(MobilityUtils.ITEM_AVAILABLE_WAITING_FOR_STATE);
+								messageLogger.debug(MobilityUtils.ITEM_AVAILABLE_WAITING_FOR_STATE);
 								
 								// The class is added to the class path, but not instantiated (the second argument is null)
 								if (nam.getPlatform() == Platform.DESKTOP) {
@@ -927,13 +903,13 @@ public class MccNamPeer extends NamPeer {
 							}
 						}
 					} else {
-						System.out.println(MobilityUtils.ITEM_NOT_AVAILABLE);
+						messageLogger.debug(MobilityUtils.ITEM_NOT_AVAILABLE);
 						InfoFileIsAvailableMessage infoFileIsAvailableMessage = new InfoFileIsAvailableMessage(conversationId, null);
 						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), infoFileIsAvailableMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 					}
 				} else {
 					// Requesting info file
-					System.out.println(MobilityUtils.INFO_FILE_NOT_AVAILABLE);
+					messageLogger.debug(MobilityUtils.INFO_FILE_NOT_AVAILABLE);
 					AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId, null);
 					sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 				}
@@ -976,7 +952,7 @@ public class MccNamPeer extends NamPeer {
 				Type type = new TypeToken<byte[]>(){}.getType();
 				partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
 				
-				System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+				messageLogger.debug("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
 			}
 			
 			// This is the first message of a new conversation, create a new one
@@ -991,14 +967,14 @@ public class MccNamPeer extends NamPeer {
 				
 				conversationItem = generateDHKeyExchangeToolsFromReceivedPublicKey(conversationItem, partnerEncodedPublicKey);
 				
-				System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+				messageLogger.debug("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
 				
-				System.out.println("Generating private AES key...");
+				messageLogger.debug("Generating private AES key...");
 				SecretKey secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
 				
 				conversationItem.setSecret(secretKey);
 				this.conversations.update(conversationItem);
-				System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+				messageLogger.debug("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
 				
 			} else {
 				if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_ECB) ||
@@ -1009,14 +985,14 @@ public class MccNamPeer extends NamPeer {
 					
 					conversationItem = generateDHKeyExchangeToolsFromReceivedPublicKey(conversationItem, partnerEncodedPublicKey);
 					
-					System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+					messageLogger.debug("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
 					
-					System.out.println("Generating private DES key...");
+					messageLogger.debug("Generating private DES key...");
 					SecretKey secretKey = DES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
 					
 					conversationItem.setSecret(secretKey);
 					this.conversations.update(conversationItem);
-					System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+					messageLogger.debug("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
 					
 				}
 			}
@@ -1034,12 +1010,14 @@ public class MccNamPeer extends NamPeer {
 			Type type = new TypeToken<ArrayList<Dependency>>(){}.getType();
 			ArrayList<Dependency> dependencies = gson.fromJson(peerMsg.get("items").toString(), type);
 	
-			System.out.println("--- Received a " + action + " request for item " + itemId + " from a " + platform + " node whose dependencies are: ");
+			messageLogger.debug("--- Received a " + action + " request for item " + itemId + " from a " + platform + " node whose dependencies are: ");
+			
+			String dependenciesListString = "";
 			
 			for (Dependency dependency : dependencies) {
-				System.out.print(dependency.getId() + "; ");
+				dependenciesListString += dependency.getId() + "; ";
 			}
-			System.out.print("\n");
+			messageLogger.debug(dependenciesListString);
 			
 			// TODO: decide whether to accept or not a MIGRATE request by implementing MobilityUtils.decideWhetherToAcceptRequest method
 			if(MobilityUtils.decideWhetherToAcceptMobilityRequest(a, minimumRequirements)) {
@@ -1066,7 +1044,7 @@ public class MccNamPeer extends NamPeer {
 					if (jsonMessage != null) {
 						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), jsonMessage, MobilityUtils.JSON_MESSAGE_FORMAT);
 					} else {
-						System.err.println(MobilityUtils.ERROR_REQUEST_MIGRATE_MESSAGE);
+						messageLogger.error(MobilityUtils.ERROR_REQUEST_MIGRATE_MESSAGE);
 						
 						// Notify sender that the mobility operation failed
 						MigrationFailedMessage migrationFailedMessage = new MigrationFailedMessage(conversationId, MobilityUtils.ERROR_REQUEST_MIGRATE_MESSAGE);
@@ -1075,11 +1053,11 @@ public class MccNamPeer extends NamPeer {
 						manageError(conversationId);
 					}
 				} else {
-					System.out.println(MobilityUtils.CLIENT_ALL_DEPENDENCIES_AVAILABLE);
+					messageLogger.debug(MobilityUtils.CLIENT_ALL_DEPENDENCIES_AVAILABLE);
 					
 					boolean infoFileIsAvailable = (new File(this.nam.getMigrationStore() + conversationItem.getItemId() + MobilityUtils.INFO_FILE_EXTENSION)).exists();
 					if (infoFileIsAvailable) {
-						System.out.println(MobilityUtils.INFO_FILE_AVAILABLE);
+						messageLogger.debug(MobilityUtils.INFO_FILE_AVAILABLE);
 					
 						File itemFile = MobilityUtils.getRequestedItem(itemId, p, this.nam.getMigrationStore());
 						
@@ -1103,13 +1081,13 @@ public class MccNamPeer extends NamPeer {
 								// Adding DH key to AllDependenciesAreAvailableMessage
 								AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId, conversationItem.getEncodedPublicKey());
 								sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
-								System.out.println(MobilityUtils.OLD_ITEM_AVAILABLE);
+								messageLogger.debug(MobilityUtils.OLD_ITEM_AVAILABLE);
 							} else {
-								System.out.println(MobilityUtils.ITEM_AVAILABLE_WAITING_FOR_STATE);
+								messageLogger.debug(MobilityUtils.ITEM_AVAILABLE_WAITING_FOR_STATE);
 								
 								// Adding the item to the class path before receiving the state
 								if (p == Platform.DESKTOP) {
-									System.out.println(MobilityUtils.ADDING_ITEM_TO_CP_BEFORE_RECEIVING_STATE);
+									messageLogger.debug(MobilityUtils.ADDING_ITEM_TO_CP_BEFORE_RECEIVING_STATE);
 									MobilityUtils.addToClassPath(this.nam, itemFile.getAbsolutePath(), null, null);
 								}
 								
@@ -1120,14 +1098,14 @@ public class MccNamPeer extends NamPeer {
 								sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), itemIsAvailable.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 							}
 						} else {
-							System.out.println(MobilityUtils.ITEM_NOT_AVAILABLE);
+							messageLogger.debug(MobilityUtils.ITEM_NOT_AVAILABLE);
 							// Adding DH key to InfoFileIsAvailableMessage
 							InfoFileIsAvailableMessage infoFileIsAvailableMessage = new InfoFileIsAvailableMessage(conversationId, conversationItem.getEncodedPublicKey());
 							sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), infoFileIsAvailableMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 						}
 					} else {
 						// Requesting info file
-						System.out.println(MobilityUtils.INFO_FILE_NOT_AVAILABLE);
+						messageLogger.debug(MobilityUtils.INFO_FILE_NOT_AVAILABLE);
 						// Adding DH key to AllDependenciesAreAvailableMessage
 						AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(conversationId, conversationItem.getEncodedPublicKey());
 						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
@@ -1135,7 +1113,7 @@ public class MccNamPeer extends NamPeer {
 				}
 				
 			} else
-				System.out.println(MobilityUtils.REFUSING_MIGRATION_BECAUSE_REQUIREMENTS_ARE_NOT_MET);
+				messageLogger.debug(MobilityUtils.REFUSING_MIGRATION_BECAUSE_REQUIREMENTS_ARE_NOT_MET);
 			
 		} else if (messageType.equals(RequestDependenciesMessage.MSG_KEY)) {
 			
@@ -1155,15 +1133,15 @@ public class MccNamPeer extends NamPeer {
 					Type type = new TypeToken<byte[]>(){}.getType();
 					byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
 					
-					System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+					messageLogger.debug("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
 					
-					System.out.println("Generating private AES key...");
+					messageLogger.debug("Generating private AES key...");
 					SecretKey secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
 					
 					conversationItem.setSecret(secretKey);
 					this.conversations.update(conversationItem);
 					
-					System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+					messageLogger.debug("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
 					
 				} else {
 					if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_ECB) ||
@@ -1176,15 +1154,15 @@ public class MccNamPeer extends NamPeer {
 						Type type = new TypeToken<byte[]>(){}.getType();
 						byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
 						
-						System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+						messageLogger.debug("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
 						
-						System.out.println("Generating private DES key...");
+						messageLogger.debug("Generating private DES key...");
 						SecretKey secretKey = DES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
 						
 						conversationItem.setSecret(secretKey);
 						this.conversations.update(conversationItem);
 						
-						System.out.println("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+						messageLogger.debug("--- secretKey = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
 					}
 				}
 			}
@@ -1214,7 +1192,7 @@ public class MccNamPeer extends NamPeer {
 			
 			if(!conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.CLEAR)) {
 				
-				System.out.println("--- " + MobilityUtils.DECODING_DEPENDENCY_CHUNK);
+				messageLogger.debug("--- " + MobilityUtils.DECODING_DEPENDENCY_CHUNK);
 				
 				// Decoding the buffer
 				byte[] receivedIv = chunk.getIv();
@@ -1224,10 +1202,10 @@ public class MccNamPeer extends NamPeer {
 				chunk.setBuffer(decryptedChunkBuffer);
 				
 			} else {
-				System.out.println(MobilityUtils.DATA_NOT_ENCODED);
+				messageLogger.debug(MobilityUtils.DATA_NOT_ENCODED);
 			}
 			
-			System.out.println(MobilityUtils.RECEIVED_DEPENDENCY_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file: " + chunk.getFileName() + " (ID: " + chunk.getDependencyId() + ")");
+			messageLogger.debug(MobilityUtils.RECEIVED_DEPENDENCY_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file: " + chunk.getFileName() + " (ID: " + chunk.getDependencyId() + ")");
 			
 			if (!this.receivedDependencyChunkList.containsKey(chunk.getDependencyId()))
 				this.receivedDependencyChunkList.put(chunk.getDependencyId(), new ArrayList<DependencyChunk>());
@@ -1236,8 +1214,8 @@ public class MccNamPeer extends NamPeer {
 				this.receivedDependencyChunkList.get(chunk.getDependencyId()).add(chunk);
 
 			if (this.receivedDependencyChunkList.get(chunk.getDependencyId()).size() == chunk.getChunkNumber()) {
-				System.out.println("Received all chunks for dependency file " + chunk.getFileName() + " (ID: " + chunk.getDependencyId() + ")");
-				System.out.println(MobilityUtils.CREATING_FILE);
+				messageLogger.debug("Received all chunks for dependency file " + chunk.getFileName() + " (ID: " + chunk.getDependencyId() + ")");
+				messageLogger.debug(MobilityUtils.CREATING_FILE);
 
 				ArrayList<DependencyChunk> fileChunks = this.receivedDependencyChunkList.get(chunk.getDependencyId());
 
@@ -1283,15 +1261,15 @@ public class MccNamPeer extends NamPeer {
 				Dependency dependency = conversationItem.getMissingDependency(chunk.getDependencyId());
 				String type = dependency.getType();
 				if(type.equals(MobilityUtils.INFO_FILE_ID)) {
-					System.out.println(MobilityUtils.RECEIVED_INFO_FILE);
+					messageLogger.debug(MobilityUtils.RECEIVED_INFO_FILE);
 				} else if(type.equals(MobilityUtils.RESOURCE_FILE_ID)) {
-					System.out.println(MobilityUtils.RECEIVED_RESOURCE_FILE);
+					messageLogger.debug(MobilityUtils.RECEIVED_RESOURCE_FILE);
 				} else if(type.equals(MobilityUtils.LIB_ID) || type.equals(MobilityUtils.FM_ID)) {
 					
 					// Add dependency to class path only if it is not an info file nor a resource file
 					
 					String message = type.equals(MobilityUtils.LIB_ID) ? MobilityUtils.RECEIVED_LIB_FILE : MobilityUtils.RECEIVED_FM_FILE;
-					System.out.println(message);
+					messageLogger.debug(message);
 					
 					// Adding the library to the class path 
 					if (nam.getPlatform() == Platform.DESKTOP) {
@@ -1308,7 +1286,7 @@ public class MccNamPeer extends NamPeer {
 				
 				// If no more dependencies are missing, ask for the item
 				if (conversationItem.getMissingDependenciesSize() == 0) {
-					System.out.println(MobilityUtils.CLIENT_ALL_DEPENDENCIES_AVAILABLE);
+					messageLogger.debug(MobilityUtils.CLIENT_ALL_DEPENDENCIES_AVAILABLE);
 					
 					String senderContactAddress = conversationItem.getPartnerContactAddress();
 					
@@ -1316,7 +1294,7 @@ public class MccNamPeer extends NamPeer {
 					
 					boolean infoFileIsAvailable = infoFile.exists();
 					if (infoFileIsAvailable) {
-						System.out.println("The information file is available");
+						messageLogger.debug("The information file is available");
 					
 						File itemFile = MobilityUtils.getRequestedItem(conversationItem.getItemId(), conversationItem.getPlatform(), this.nam.getMigrationStore());
 						
@@ -1346,7 +1324,7 @@ public class MccNamPeer extends NamPeer {
 								MigrationSubject role = conversationItem.getRole();
 								
 								if (nam.getPlatform() == Platform.DESKTOP) {
-									System.out.println("The item is available; starting execution...");
+									messageLogger.debug("The item is available; starting execution...");
 									
 									Object obj = MobilityUtils.addToClassPath(this.nam, this.nam.getMigrationStore() + itemFile.getName(), mainClassName, role);
 									
@@ -1359,7 +1337,7 @@ public class MccNamPeer extends NamPeer {
 										// String functionalModuleId = handler.getLibraryInformation().getFunctionalModule();
 										String functionalModuleId = handler.getFunctionalModuleForService().getId();
 										
-										System.out.println("------ The id of the FM associated to the received Service is " + functionalModuleId);
+										messageLogger.debug("------ The id of the FM associated to the received Service is " + functionalModuleId);
 										
 										// Adding the service to the associated functional module
 										Service s = (Service) obj;
@@ -1376,11 +1354,11 @@ public class MccNamPeer extends NamPeer {
 											s.getServiceRunnable().start();
 											
 										} else {
-											System.err.println("The info file for the FM to which the Service is associated is not available");
+											messageLogger.error("The info file for the FM to which the Service is associated is not available");
 										}
 									}
 									
-									System.out.println("COPY " + MobilityUtils.ACTION_SUCCESSFUL);
+									messageLogger.debug("COPY " + MobilityUtils.ACTION_SUCCESSFUL);
 									
 								} else if (nam.getPlatform() == Platform.ANDROID) {
 									
@@ -1389,7 +1367,7 @@ public class MccNamPeer extends NamPeer {
 								}
 								
 							} else if (conversationItem.getAction().equals(Action.MIGRATE)) {
-								System.out.println(MobilityUtils.ITEM_AVAILABLE_WAITING_FOR_STATE);
+								messageLogger.debug(MobilityUtils.ITEM_AVAILABLE_WAITING_FOR_STATE);
 								
 								// The class is added to the class path, but not instantiated (the second argument is null)
 								if (nam.getPlatform() == Platform.DESKTOP) {
@@ -1402,12 +1380,12 @@ public class MccNamPeer extends NamPeer {
 							}
 						
 						} else {
-							System.out.println(MobilityUtils.ITEM_NOT_AVAILABLE);
+							messageLogger.debug(MobilityUtils.ITEM_NOT_AVAILABLE);
 							InfoFileIsAvailableMessage infoFileIsAvailableMessage = new InfoFileIsAvailableMessage(chunk.getConversationId(), null);
 							sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), infoFileIsAvailableMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 						}
 					} else {
-						System.out.println("The information file is not available; requesting it...");
+						messageLogger.debug("The information file is not available; requesting it...");
 						AllDependenciesAreAvailableMessage receivedAllDependencies = new AllDependenciesAreAvailableMessage(chunk.getConversationId(), null);
 						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedAllDependencies.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
 					}
@@ -1425,7 +1403,7 @@ public class MccNamPeer extends NamPeer {
 			
 			if(!conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.CLEAR)) {
 				
-				System.out.println("--- Decoding " + MobilityUtils.DECODING_INFO_FILE_CHUNK);
+				messageLogger.debug("--- Decoding " + MobilityUtils.DECODING_INFO_FILE_CHUNK);
 				
 				// Decoding the buffer
 				byte[] receivedIv = chunk.getIv();
@@ -1435,10 +1413,10 @@ public class MccNamPeer extends NamPeer {
 				chunk.setBuffer(decryptedChunkBuffer);
 				
 			}  else {
-				System.out.println(MobilityUtils.DATA_NOT_ENCODED);
+				messageLogger.debug(MobilityUtils.DATA_NOT_ENCODED);
 			}
 			
-			System.out.println(MobilityUtils.RECEIVED_ITEM_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file: " + chunk.getFileName());
+			messageLogger.debug(MobilityUtils.RECEIVED_ITEM_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file: " + chunk.getFileName());
 			
 			if (!this.receivedInfoFileChunkList.containsKey(chunk.getInfoFileId()))
 				this.receivedInfoFileChunkList.put(chunk.getInfoFileId(), new ArrayList<InfoFileChunk>());
@@ -1447,8 +1425,8 @@ public class MccNamPeer extends NamPeer {
 				this.receivedInfoFileChunkList.get(chunk.getInfoFileId()).add(chunk);
 
 			if (this.receivedInfoFileChunkList.get(chunk.getInfoFileId()).size() == chunk.getChunkNumber()) {
-				System.out.println("Received all chunks for item " + chunk.getFileName());
-				System.out.println(MobilityUtils.CREATING_FILE);
+				messageLogger.debug("Received all chunks for item " + chunk.getFileName());
+				messageLogger.debug(MobilityUtils.CREATING_FILE);
 
 				ArrayList<InfoFileChunk> fileChunks = this.receivedInfoFileChunkList.get(chunk.getInfoFileId());
 
@@ -1498,7 +1476,7 @@ public class MccNamPeer extends NamPeer {
 			
 		} else if (messageType.equals(AllDependenciesAreAvailableMessage.MSG_KEY)) {
 			
-			System.out.println(MobilityUtils.SENDING_INFO_FILE);
+			messageLogger.debug(MobilityUtils.SENDING_INFO_FILE);
 			
 			String conversationId = peerMsg.get("conversationKey").getAsString();
 			ConversationItem conversationItem = this.conversations.getConversationItem(conversationId);
@@ -1516,15 +1494,15 @@ public class MccNamPeer extends NamPeer {
 					Type type = new TypeToken<byte[]>(){}.getType();
 					byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
 					
-					System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+					messageLogger.debug("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
 					
-					System.out.println("Generating private AES key...");
+					messageLogger.debug("Generating private AES key...");
 					SecretKey secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
 					
 					conversationItem.setSecret(secretKey);
 					this.conversations.update(conversationItem);
 					
-					System.out.println("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+					messageLogger.debug("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
 					
 				} else {
 					if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_ECB) ||
@@ -1537,15 +1515,15 @@ public class MccNamPeer extends NamPeer {
 						Type type = new TypeToken<byte[]>(){}.getType();
 						byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
 						
-						System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+						messageLogger.debug("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
 						
-						System.out.println("Generating private DES key...");
+						messageLogger.debug("Generating private DES key...");
 						SecretKey secretKey = DES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
 						
 						conversationItem.setSecret(secretKey);
 						this.conversations.update(conversationItem);
 						
-						System.out.println("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+						messageLogger.debug("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
 					}
 				}
 			}
@@ -1560,12 +1538,12 @@ public class MccNamPeer extends NamPeer {
 			int result = copyActionImplementation.copyInfoFile(conversationId, itemId, this.getPeerDescriptor(), senderContactAddress, conversationItem.getSecret(), conversationItem.getEncryptionAlgorithm());
 			
 			if (result == -1) {
-				System.err.println("An error occurred during a " + conversationItem.getAction().toString() + " mobility action with peer " + conversationItem.getPartnerContactAddress());
+				messageLogger.error("An error occurred during a " + conversationItem.getAction().toString() + " mobility action with peer " + conversationItem.getPartnerContactAddress());
 			}
 			
 		} else if (messageType.equals(InfoFileIsAvailableMessage.MSG_KEY)) {
 			
-			System.out.println(MobilityUtils.INFO_FILE_AVAILABLE_ON_CLIENT);
+			messageLogger.debug(MobilityUtils.INFO_FILE_AVAILABLE_ON_CLIENT);
 			
 			String conversationId = peerMsg.get("conversationKey").getAsString();
 			ConversationItem conversationItem = this.conversations.getConversationItem(conversationId);
@@ -1583,15 +1561,15 @@ public class MccNamPeer extends NamPeer {
 					Type type = new TypeToken<byte[]>(){}.getType();
 					byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
 					
-					System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+					messageLogger.debug("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
 					
-					System.out.println("Generating private AES key...");
+					messageLogger.debug("Generating private AES key...");
 					SecretKey secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
 					
 					conversationItem.setSecret(secretKey);
 					this.conversations.update(conversationItem);
 					
-					System.out.println("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+					messageLogger.debug("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
 					
 				} else {
 					if(conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.DES_ECB) ||
@@ -1604,15 +1582,15 @@ public class MccNamPeer extends NamPeer {
 						Type type = new TypeToken<byte[]>(){}.getType();
 						byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
 						
-						System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+						messageLogger.debug("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
 						
-						System.out.println("Generating private DES key...");
+						messageLogger.debug("Generating private DES key...");
 						SecretKey secretKey = DES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
 						
 						conversationItem.setSecret(secretKey);
 						this.conversations.update(conversationItem);
 						
-						System.out.println("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+						messageLogger.debug("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
 					}
 				}
 			}
@@ -1628,7 +1606,7 @@ public class MccNamPeer extends NamPeer {
 			int result = copyActionImplementation.copyItem(conversationId, itemId, p, this.getPeerDescriptor(), senderContactAddress, conversationItem.getSecret(), conversationItem.getEncryptionAlgorithm());
 			
 			if (result == -1) {
-				System.err.println("An error occurred during a " + conversationItem.getAction().toString() + " mobility action with peer " + conversationItem.getPartnerContactAddress());
+				messageLogger.error("An error occurred during a " + conversationItem.getAction().toString() + " mobility action with peer " + conversationItem.getPartnerContactAddress());
 			}
 
 		} else if (messageType.equals(ItemChunkTransferMessage.MSG_KEY)) {
@@ -1642,7 +1620,7 @@ public class MccNamPeer extends NamPeer {
 			
 			if(!conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.CLEAR)) {
 				
-				System.out.println("--- Decoding " + MobilityUtils.DECODING_ITEM_CHUNK);
+				messageLogger.debug("--- Decoding " + MobilityUtils.DECODING_ITEM_CHUNK);
 				
 				// Decoding the buffer
 				byte[] receivedIv = chunk.getIv();
@@ -1652,10 +1630,10 @@ public class MccNamPeer extends NamPeer {
 				chunk.setBuffer(decryptedChunkBuffer);
 				
 			} else {
-				System.out.println(MobilityUtils.DATA_NOT_ENCODED);
+				messageLogger.debug(MobilityUtils.DATA_NOT_ENCODED);
 			}
 			
-			System.out.println(MobilityUtils.RECEIVED_ITEM_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file: " + chunk.getFileName() + " (ID: " + chunk.getMainClassName() + ")");
+			messageLogger.debug(MobilityUtils.RECEIVED_ITEM_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for file: " + chunk.getFileName() + " (ID: " + chunk.getMainClassName() + ")");
 			
 			if (!this.receivedItemChunkList.containsKey(chunk.getMainClassName()))
 				this.receivedItemChunkList.put(chunk.getMainClassName(), new ArrayList<ItemChunk>());
@@ -1664,8 +1642,8 @@ public class MccNamPeer extends NamPeer {
 				this.receivedItemChunkList.get(chunk.getMainClassName()).add(chunk);
 
 			if (this.receivedItemChunkList.get(chunk.getMainClassName()).size() == chunk.getChunkNumber()) {
-				System.out.println("Received all chunks for item " + chunk.getFileName() + " (ID: " + chunk.getMainClassName() + ")");
-				System.out.println(MobilityUtils.CREATING_FILE);
+				messageLogger.debug("Received all chunks for item " + chunk.getFileName() + " (ID: " + chunk.getMainClassName() + ")");
+				messageLogger.debug(MobilityUtils.CREATING_FILE);
 
 				ArrayList<ItemChunk> fileChunks = this.receivedItemChunkList.get(chunk.getMainClassName());
 
@@ -1716,9 +1694,9 @@ public class MccNamPeer extends NamPeer {
 				
 				if (action.equals(Action.COPY)) {
 				
-					System.out.println("Received " + file.getName() + " (size is " + file.length() + " bytes) " + file.getAbsolutePath());
+					messageLogger.debug("Received " + file.getName() + " (size is " + file.length() + " bytes) " + file.getAbsolutePath());
 			
-					System.out.println("The file is a " + role + " and its main class is " + mainClassName);
+					messageLogger.debug("The file is a " + role + " and its main class is " + mainClassName);
 					
 					if (nam.getPlatform() == Platform.DESKTOP) {
 						Object obj = MobilityUtils.addToClassPath(this.nam, this.nam.getMigrationStore() + fileName, mainClassName, role);
@@ -1733,7 +1711,7 @@ public class MccNamPeer extends NamPeer {
 						else if (role.equals(MigrationSubject.SERVICE)) {
 							String functionalModuleId = chunk.getFunctionalModuleIdForService();
 							
-							System.out.println("------ Functional module id (retrieved from the last chunk) = " + functionalModuleId);
+							messageLogger.debug("------ Functional module id (retrieved from the last chunk) = " + functionalModuleId);
 							
 							// Adding the service to the associated functional module
 							Service s = (Service) obj;
@@ -1750,7 +1728,7 @@ public class MccNamPeer extends NamPeer {
 								s.getServiceRunnable().start();
 								
 							} else {
-								System.err.println("The info file for the FM to which the Service is associated is not available");
+								messageLogger.error("The info file for the FM to which the Service is associated is not available");
 							}
 							
 							// Store the address of the peer that sent the Service
@@ -1762,7 +1740,7 @@ public class MccNamPeer extends NamPeer {
 						notifyObservers(this.nam.getMigrationStore() + fileName, mainClassName, role, action, null);
 					}
 					
-					System.out.println("COPY " + MobilityUtils.ACTION_SUCCESSFUL);
+					messageLogger.debug("COPY " + MobilityUtils.ACTION_SUCCESSFUL);
 					
 					ItemIsAvailableMessage receivedItem = new ItemIsAvailableMessage(chunk.getConversationId(), null);
 					sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), receivedItem.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
@@ -1771,9 +1749,9 @@ public class MccNamPeer extends NamPeer {
 					this.conversations.remove(chunk.getConversationId());
 				
 				} else if (action.equals(Action.MIGRATE)) {
-					System.out.println(MobilityUtils.ITEM_RECEIVED_WAITING_FOR_STATE);
-					System.out.println("--- Received " + file.getName() + " (size is " + file.length() + " bytes) " + file.getAbsolutePath());
-					System.out.println("--- The file is a " + role + " and its main class is " + mainClassName);
+					messageLogger.debug(MobilityUtils.ITEM_RECEIVED_WAITING_FOR_STATE);
+					messageLogger.debug("--- Received " + file.getName() + " (size is " + file.length() + " bytes) " + file.getAbsolutePath());
+					messageLogger.debug("--- The file is a " + role + " and its main class is " + mainClassName);
 					
 					// The class is added to the class path, but not instantiated (the second argument is null)
 					if (nam.getPlatform() == Platform.DESKTOP) {
@@ -1804,7 +1782,7 @@ public class MccNamPeer extends NamPeer {
 			
 			if(!conversationItem.getEncryptionAlgorithm().equals(EncryptionAlgorithm.CLEAR)) {
 				
-				System.out.println("--- Decoding " + MobilityUtils.DECODING_STATE_CHUNK);
+				messageLogger.debug("--- Decoding " + MobilityUtils.DECODING_STATE_CHUNK);
 				
 				// Decoding the buffer
 				byte[] receivedIv = chunk.getIv();
@@ -1814,10 +1792,10 @@ public class MccNamPeer extends NamPeer {
 				chunk.setBuffer(decryptedChunkBuffer);
 				
 			} else {
-				System.out.println(MobilityUtils.DATA_NOT_ENCODED);
+				messageLogger.debug(MobilityUtils.DATA_NOT_ENCODED);
 			}
 			
-			System.out.println(MobilityUtils.RECEIVED_STATE_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for conversation: " + chunk.getConversationId());
+			messageLogger.debug(MobilityUtils.RECEIVED_STATE_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber() + " for conversation: " + chunk.getConversationId());
 			
 			if (!this.receivedStateChunkList.containsKey(chunk.getConversationId()))
 				this.receivedStateChunkList.put(chunk.getConversationId(), new ArrayList<StateChunk>());
@@ -1826,9 +1804,9 @@ public class MccNamPeer extends NamPeer {
 				this.receivedStateChunkList.get(chunk.getConversationId()).add(chunk);
 
 			if (this.receivedStateChunkList.get(chunk.getConversationId()).size() == chunk.getChunkNumber()) {
-				System.out.println("Received all state chunks for conversation " + chunk.getConversationId());
+				messageLogger.debug("Received all state chunks for conversation " + chunk.getConversationId());
 				
-				System.out.println("Creating object...");
+				messageLogger.debug("Creating object...");
 
 				ArrayList<StateChunk> fileChunks = this.receivedStateChunkList.get(chunk.getConversationId());
 
@@ -1874,7 +1852,7 @@ public class MccNamPeer extends NamPeer {
 				this.receivedStateChunkList.remove(chunk.getConversationId());
 				
 				if (state == null) {
-					System.err.println(MobilityUtils.ERROR_NULL_STATE);
+					messageLogger.error(MobilityUtils.ERROR_NULL_STATE);
 					
 					// Notify sender that the mobility action failed
 					MigrationFailedMessage migrationFailedMessage = new MigrationFailedMessage(chunk.getConversationId(), MobilityUtils.ERROR_NULL_STATE);
@@ -1883,7 +1861,7 @@ public class MccNamPeer extends NamPeer {
 					manageError(chunk.getConversationId());
 				}
 				else {
-					System.out.println("MIGRATE " + MobilityUtils.ACTION_SUCCESSFUL);
+					messageLogger.debug("MIGRATE " + MobilityUtils.ACTION_SUCCESSFUL);
 					
 					conversationItem.setObject(state);
 				
@@ -1901,7 +1879,7 @@ public class MccNamPeer extends NamPeer {
 							SAXHandler handler = MobilityUtils.parseXMLFile(conversationItem.getItemId(), this.nam);
 							String functionalModuleId = handler.getFunctionalModuleForService().getId();
 							
-							System.out.println("------ The id of the FM associated to the received Service is " + functionalModuleId);
+							messageLogger.debug("------ The id of the FM associated to the received Service is " + functionalModuleId);
 							
 							// Adding the service to the associated functional module
 							Service s = (Service) state;
@@ -1919,7 +1897,7 @@ public class MccNamPeer extends NamPeer {
 								s.getServiceRunnable().resume();
 								
 							} else {
-								System.err.println("The info file for the FM to which the Service is associated is not available");
+								messageLogger.error("The info file for the FM to which the Service is associated is not available");
 							}
 							
 							// Store the address of the peer that sent the Service
@@ -1946,7 +1924,7 @@ public class MccNamPeer extends NamPeer {
 			}
 			
 		} else if (messageType.equals(ReceivedStateMessage.MSG_KEY)) {
-			System.out.println("MIGRATE " + MobilityUtils.ACTION_SUCCESSFUL);
+			messageLogger.debug("MIGRATE " + MobilityUtils.ACTION_SUCCESSFUL);
 			
 			String conversationId = peerMsg.get("conversationKey").getAsString();
 			
@@ -1955,7 +1933,7 @@ public class MccNamPeer extends NamPeer {
 			
 		} else if (messageType.equals(ItemIsAvailableMessage.MSG_KEY)) {
 			
-			System.out.println(MobilityUtils.ITEM_RECEIVED);
+			messageLogger.debug(MobilityUtils.ITEM_RECEIVED);
 			
 			String conversationId = peerMsg.get("conversationKey").getAsString();
 			ConversationItem conversationItem = this.conversations.getConversationItem(conversationId);
@@ -1966,26 +1944,26 @@ public class MccNamPeer extends NamPeer {
 				Type type = new TypeToken<byte[]>(){}.getType();
 				byte[] partnerEncodedPublicKey = gson.fromJson(peerMsg.get("encodedPublicKey").toString(), type);
 				
-				System.out.println("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
+				messageLogger.debug("--- Received key " + DHKeyExchange.toHexString(partnerEncodedPublicKey));
 				
 				SecretKey secretKey = AES.generateSharedSecret(conversationItem.getKeyAgreement(), DHKeyExchange.decodeReceivedPublicKey(partnerEncodedPublicKey));
 				conversationItem.setSecret(secretKey);
 				this.conversations.update(conversationItem);
 				
-				System.out.println("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
+				messageLogger.debug("--- Secret Key = " + DHKeyExchange.toHexString(secretKey.getEncoded()));
 			}
 			
 			Action action = conversationItem.getAction();
 			
 			if (action.equals(Action.COPY)) {
-				System.out.println("COPY " + MobilityUtils.ACTION_SUCCESSFUL);
+				messageLogger.debug("COPY " + MobilityUtils.ACTION_SUCCESSFUL);
 				
 				// Remove conversation item from conversations list
 				this.conversations.remove(conversationId);
 				
 			} else if (action.equals(Action.MIGRATE)) {
 				
-				System.out.println(MobilityUtils.SENDING_STATE);
+				messageLogger.debug(MobilityUtils.SENDING_STATE);
 				
 				String senderContactAddress = conversationItem.getPartnerContactAddress();
 				Object object = conversationItem.getObject();
@@ -1996,7 +1974,7 @@ public class MccNamPeer extends NamPeer {
 				ArrayList<StateChunk> chunkList = migrateActionImplementation.generateStateChunks(conversationId, object, conversationItem.getSecret(), conversationItem.getEncryptionAlgorithm());
 				
 				if (chunkList == null) {
-					System.err.println(MobilityUtils.ERROR_GENERATING_STATE_CHUNKS);
+					messageLogger.error(MobilityUtils.ERROR_GENERATING_STATE_CHUNKS);
 					
 					// Notify sender that the mobility action failed
 					MigrationFailedMessage migrationFailedMessage = new MigrationFailedMessage(conversationId, MobilityUtils.ERROR_GENERATING_STATE_CHUNKS);
@@ -2007,7 +1985,7 @@ public class MccNamPeer extends NamPeer {
 				} else {
 					// Send state chunks
 					for(StateChunk chunk : chunkList) {
-						System.out.println(MobilityUtils.SENDING_STATE_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber());
+						messageLogger.debug(MobilityUtils.SENDING_STATE_CHUNK + (chunk.getChunkId() + 1) + MobilityUtils.PATH_SEPARATOR + chunk.getChunkNumber());
 					
 						StateChunkTransferMessage stateChunkTransferMessage = new StateChunkTransferMessage(this.getPeerDescriptor(), chunk);
 						sendMessage(new Address(senderContactAddress), new Address(senderContactAddress), this.getAddress(), stateChunkTransferMessage.getJSONString(), MobilityUtils.JSON_MESSAGE_FORMAT);
@@ -2025,10 +2003,10 @@ public class MccNamPeer extends NamPeer {
 			Action action = conversationItem.getAction();
 			String itemId = conversationItem.getItemId();
 			
-			System.err.println("An error occurred during a " + action + " mobility action");
-			System.err.println("--- Client contact address: " + partner);
-			System.err.println("--- Item id: " + itemId + " (" + role + ")");
-			System.err.println("--- Error message: " + errorDescription);
+			messageLogger.error("An error occurred during a " + action + " mobility action");
+			messageLogger.error("--- Client contact address: " + partner);
+			messageLogger.error("--- Item id: " + itemId + " (" + role + ")");
+			messageLogger.error("--- Error message: " + errorDescription);
 		}
 	}
 	
@@ -2046,12 +2024,12 @@ public class MccNamPeer extends NamPeer {
 	 *            The format of the message (i.e. "application/json")
 	 */
 	protected void onDeliveryMsgFailure(String sentMessage, Address receiver, String contentType) {
-		System.out.println("Could not deliver message to " + receiver);
+		messageLogger.debug("Could not deliver message to " + receiver);
 		
 		for(PeerDescriptor pd : this.getPeerList()) {
 			if (pd.getContactAddress().equalsIgnoreCase(receiver.getURL())) {
 				
-				System.out.println("Removing the peer from the peer list.");
+				messageLogger.debug("Removing the peer from the peer list.");
 				
 				this.getPeerList().remove(pd);
 				this.getPeerList().printPeerList();

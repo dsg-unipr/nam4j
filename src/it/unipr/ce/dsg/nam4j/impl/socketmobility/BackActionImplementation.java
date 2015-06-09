@@ -1,6 +1,7 @@
 package it.unipr.ce.dsg.nam4j.impl.socketmobility;
 
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 
 import java.io.BufferedReader;
 import java.io.OutputStream;
@@ -36,8 +37,11 @@ public class BackActionImplementation extends BackActionHandler {
 	OutputStream os;
 	String receiver;
 	
-	// The descriptor of the object to be migrated.
+	/** The descriptor of the object to be migrated */
 	BundleDescriptor bundleDescriptor;
+	
+	/** The logger object */
+	private NamLogger messageLogger;
 	
 	public BackActionImplementation(NetworkedAutonomicMachine nam, BufferedReader is, OutputStream os, String receiver) {
 		this.nam = nam;
@@ -45,7 +49,9 @@ public class BackActionImplementation extends BackActionHandler {
 		this.os = os;
 		this.receiver = receiver;
 		
-		System.out.println("SERVER: starting BACK action...");
+		messageLogger = new NamLogger("BackActionImplementation");
+		
+		messageLogger.debug("SERVER: starting BACK action...");
 	}
 	
 	// TODO: when a FM or Service is sent back to the offloader, remove from

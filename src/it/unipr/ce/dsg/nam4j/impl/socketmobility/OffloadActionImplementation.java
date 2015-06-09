@@ -1,6 +1,7 @@
 package it.unipr.ce.dsg.nam4j.impl.socketmobility;
 
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 
 import java.io.BufferedReader;
 import java.io.OutputStream;
@@ -36,8 +37,11 @@ public class OffloadActionImplementation extends OffloadActionHandler {
 	OutputStream os;
 	String receiver;
 	
-	// The descriptor of the object to be migrated.
+	/** The descriptor of the object to be migrated */
 	BundleDescriptor bundleDescriptor;
+	
+	/** The logger object */
+	private NamLogger messageLogger;
 	
 	public OffloadActionImplementation(NetworkedAutonomicMachine nam, BufferedReader is, OutputStream os, String receiver) {
 		this.nam = nam;
@@ -45,7 +49,9 @@ public class OffloadActionImplementation extends OffloadActionHandler {
 		this.os = os;
 		this.receiver = receiver;
 		
-		System.out.println("SERVER: starting MIGRATE action...");
+		messageLogger = new NamLogger("OffloadActionImplementation");
+		
+		messageLogger.debug("SERVER: starting MIGRATE action...");
 	}
 	
 	private void fmMobility(String line, Socket cs) {

@@ -2,6 +2,7 @@ package it.unipr.ce.dsg.nam4j.impl.socketmobility;
 
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 
 import java.io.BufferedInputStream;
@@ -54,8 +55,11 @@ public class CopyActionImplementation extends CopyActionHandler {
 
 	ObjectOutputStream oos;
 
-	// The descriptor of the object to be migrated.
+	/** The descriptor of the object to be migrated */
 	BundleDescriptor bundleDescriptor;
+	
+	/** The logger object */
+	private NamLogger messageLogger;
 
 	public CopyActionImplementation(NetworkedAutonomicMachine nam,
 			BufferedReader is, OutputStream os, String receiver) {
@@ -63,8 +67,10 @@ public class CopyActionImplementation extends CopyActionHandler {
 		this.is = is;
 		this.os = os;
 		this.receiver = receiver;
+		
+		messageLogger = new NamLogger("CopyActionImplementation");
 
-		System.out.println("SERVER: starting COPY action...");
+		messageLogger.debug("SERVER: starting COPY action...");
 	}
 
 	/**
@@ -84,7 +90,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 			// Set to true when the file to be migrated is found
 			boolean found = false;
 
-			System.out.println("SERVER: thread "
+			messageLogger.debug("SERVER: thread "
 					+ Thread.currentThread().getId()
 					+ " received a FM request for class \""
 					+ requestedClassname + "\"");
@@ -101,7 +107,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 						&& listOfFiles[i].getName().endsWith(".jar")) {
 					filename = listOfFiles[i].getAbsolutePath();
 
-					System.out.println("SERVER: thread "
+					messageLogger.debug("SERVER: thread "
 							+ Thread.currentThread().getId()
 							+ " is checking inside file " + filename);
 
@@ -166,7 +172,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 
 								if (f.exists()) {
 
-									System.out.println("SERVER: thread "
+									messageLogger.debug("SERVER: thread "
 											+ Thread.currentThread().getId()
 											+ " has found requested file: \""
 											+ filename + "\"");
@@ -209,13 +215,13 @@ public class CopyActionImplementation extends CopyActionHandler {
 				else
 					file = new File(fileToBeMigrated.replace(".jar", ".dex"));
 
-				System.out.println("SERVER: thread "
+				messageLogger.debug("SERVER: thread "
 						+ Thread.currentThread().getId()
 						+ " is sending file name = " + file.getName());
-				System.out.println("SERVER: thread "
+				messageLogger.debug("SERVER: thread "
 						+ Thread.currentThread().getId()
 						+ " is sending FM main class name = " + className);
-				System.out.println("SERVER: thread "
+				messageLogger.debug("SERVER: thread "
 						+ Thread.currentThread().getId()
 						+ " is sending FM main class complete name = "
 						+ completeName);
@@ -224,7 +230,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 						className, completeName);
 				oos.writeObject(bundleDescriptor);
 
-				System.out.println("SERVER: thread "
+				messageLogger.debug("SERVER: thread "
 						+ Thread.currentThread().getId()
 						+ " is sending file...");
 
@@ -237,7 +243,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 
 				nam.addFmReceiver(receiver, fileToBeMigrated);
 				
-				System.out.println("SERVER: thread "
+				messageLogger.debug("SERVER: thread "
 						+ Thread.currentThread().getId()
 						+ " has finished sending");
 
@@ -254,7 +260,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 				oos.writeObject(bundleDescriptor);
 			}
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
+			messageLogger.error(e.getMessage());
 		}
 	}
 
@@ -275,11 +281,11 @@ public class CopyActionImplementation extends CopyActionHandler {
 			// The boolean is set to true if found the file to be migrated
 			boolean found = false;
 
-			System.out.println("SERVER: thread "
+			messageLogger.debug("SERVER: thread "
 					+ Thread.currentThread().getId()
 					+ " received a service request from a client");
 
-			System.out.println("SERVER: thread "
+			messageLogger.debug("SERVER: thread "
 					+ Thread.currentThread().getId()
 					+ " received a request for \"" + line + "\"");
 
@@ -295,7 +301,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 						&& listOfFiles[i].getName().endsWith(".java")) {
 					filename = listOfFiles[i].getAbsolutePath();
 
-					System.out.println("SERVER: thread "
+					messageLogger.debug("SERVER: thread "
 							+ Thread.currentThread().getId()
 							+ " is checking file " + filename);
 
@@ -349,13 +355,13 @@ public class CopyActionImplementation extends CopyActionHandler {
 				else
 					file = new File(fileToBeMigrated.replace(".java", ".dex"));
 
-				System.out.println("SERVER: thread "
+				messageLogger.debug("SERVER: thread "
 						+ Thread.currentThread().getId()
 						+ " is sending file name = " + file.getName());
-				System.out.println("SERVER: thread "
+				messageLogger.debug("SERVER: thread "
 						+ Thread.currentThread().getId()
 						+ " is sending service class name = " + className);
-				System.out.println("SERVER: thread "
+				messageLogger.debug("SERVER: thread "
 						+ Thread.currentThread().getId()
 						+ " is sending service class complete name = "
 						+ completeName);
@@ -364,7 +370,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 						className, completeName);
 				oos.writeObject(bundleDescriptor);
 
-				System.out.println("SERVER: thread "
+				messageLogger.debug("SERVER: thread "
 						+ Thread.currentThread().getId()
 						+ " is sending file...");
 
@@ -377,7 +383,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 				
 				nam.addServiceReceiver(receiver, fileToBeMigrated);
 				
-				System.out.println("SERVER: thread "
+				messageLogger.debug("SERVER: thread "
 						+ Thread.currentThread().getId()
 						+ " has finished sending");
 
@@ -395,13 +401,13 @@ public class CopyActionImplementation extends CopyActionHandler {
 
 			}
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
+			messageLogger.error(e.getMessage());
 		}
 	}
 
 	public void run() {
 
-		System.out.println("SERVER: thread " + Thread.currentThread().getId()
+		messageLogger.debug("SERVER: thread " + Thread.currentThread().getId()
 				+ " accepted connection from " + os);
 
 		try {
@@ -420,17 +426,17 @@ public class CopyActionImplementation extends CopyActionHandler {
 			nam.setClientPlatform(Platform.valueOf(line), 0);
 
 			if (nam.getClientPlatform(0) == Platform.DESKTOP)
-				System.out.println("SERVER: thread "
+				messageLogger.debug("SERVER: thread "
 						+ Thread.currentThread().getId()
 						+ " connected to a desktop node");
 			else
-				System.out.println("SERVER: thread "
+				messageLogger.debug("SERVER: thread "
 						+ Thread.currentThread().getId()
 						+ " connected to an Android node");
 
 			line = new String(is.readLine());
 
-			System.out.println("SERVER: thread "
+			messageLogger.debug("SERVER: thread "
 					+ Thread.currentThread().getId()
 					+ " received a message from client = \"" + line + "\"");
 
@@ -449,7 +455,7 @@ public class CopyActionImplementation extends CopyActionHandler {
 			os.close();
 
 		} catch (Exception e) {
-			System.out.println("SERVER: error: " + e + " for thread "
+			messageLogger.error("SERVER: error: " + e + " for thread "
 					+ Thread.currentThread().getId());
 		}
 	}

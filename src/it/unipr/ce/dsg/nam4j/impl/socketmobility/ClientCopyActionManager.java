@@ -5,6 +5,7 @@ import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 import it.unipr.ce.dsg.nam4j.impl.service.Service;
 import it.unipr.ce.dsg.nam4j.interfaces.IMigrationListener;
@@ -53,6 +54,9 @@ public class ClientCopyActionManager implements Runnable {
 	String[] requiredServiceId;
 	Action action;
 	Platform clientType;
+	
+	/** The logger object */
+	private NamLogger messageLogger;
 
 	/**
 	 * The descriptor of the object to be migrated.
@@ -78,6 +82,8 @@ public class ClientCopyActionManager implements Runnable {
 		this.action = action;
 		this.clientType = platform;
 		this.listeners = new ArrayList<IMigrationListener>();
+		
+		messageLogger = new NamLogger("ClientCopyActionManager");
 	}
 	
 	/**
@@ -198,7 +204,7 @@ public class ClientCopyActionManager implements Runnable {
 		if (nam.getClientPlatform(0) == Platform.DESKTOP) {
 			obj = getItemFromFile(completeClassName, fType);
 		} else
-			System.out.println("CLIENT: Android platform");
+			messageLogger.debug("CLIENT: Android platform");
 
 		return obj;
 
@@ -259,13 +265,13 @@ public class ClientCopyActionManager implements Runnable {
 					System.out
 							.println("CLIENT: connection failed. Trying again...");
 				else
-					System.out.println("CLIENT: connection failed");
+					messageLogger.debug("CLIENT: connection failed");
 			}
 		}
 
 		if (connected) {
 
-			System.out.println("CLIENT: created socket " + s);
+			messageLogger.debug("CLIENT: created socket " + s);
 
 			// Sending the mobility action
 			os.println(a);
@@ -282,7 +288,7 @@ public class ClientCopyActionManager implements Runnable {
 			os.println(fName);
 			os.flush();
 
-			System.out.println("CLIENT: waiting for " + fType
+			messageLogger.debug("CLIENT: waiting for " + fType
 					+ " descriptor...");
 
 			String fileNameAndExt = "";
@@ -303,17 +309,10 @@ public class ClientCopyActionManager implements Runnable {
 
 				if (!fileNameAndExt.equalsIgnoreCase("notAvailable")) {
 
-					System.out
-							.println("CLIENT: file name received from server = "
-									+ fileNameAndExt);
-					System.out
-							.println("CLIENT: main class name received from server = "
-									+ className);
-					System.out
-							.println("CLIENT: complete class name received from server = "
-									+ completeClassName);
-					System.out.println("CLIENT: waiting for " + fType
-							+ " file " + fileNameAndExt);
+					messageLogger.debug("CLIENT: file name received from server = "	+ fileNameAndExt);
+					messageLogger.debug("CLIENT: main class name received from server = " + className);
+					messageLogger.debug("CLIENT: complete class name received from server = " + completeClassName);
+					messageLogger.debug("CLIENT: waiting for " + fType + " file " + fileNameAndExt);
 
 					// Writing for the received file
 
@@ -344,8 +343,7 @@ public class ClientCopyActionManager implements Runnable {
 
 					File f = new File(receivedFilename);
 					if (f.exists()) {
-						System.out.println("CLIENT: " + f.toURI().toURL()
-								+ " received");
+						messageLogger.debug("CLIENT: " + f.toURI().toURL() + " received");
 
 						obj = addToClassPath(receivedFilename,
 								completeClassName, fType);
@@ -369,18 +367,18 @@ public class ClientCopyActionManager implements Runnable {
 						}
 
 					} else {
-						System.out.println("CLIENT: file not received");
+						messageLogger.debug("CLIENT: file not received");
 					}
 
 				}
 			} catch (IOException e) {
-				System.out.println(e.getMessage());
+				messageLogger.debug(e.getMessage());
 			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				messageLogger.debug(e.getMessage());
 			}
 
 		} else {
-			System.out.println("CLIENT: could not connect to server");
+			messageLogger.debug("CLIENT: could not connect to server");
 		}
 
 		return obj;
@@ -389,7 +387,7 @@ public class ClientCopyActionManager implements Runnable {
 	@Override
 	public void run() {
 
-		System.out.println("CLIENT: requesting FM including class "
+		messageLogger.debug("CLIENT: requesting FM including class "
 				+ requiredFmClass);
 
 		FunctionalModule fm = (FunctionalModule) findRemoteItem(
@@ -410,9 +408,7 @@ public class ClientCopyActionManager implements Runnable {
 
 				if (currentServiceClassName != null && currentServiceId != null) {
 
-					System.out
-							.println("CLIENT: requesting Service including class "
-									+ requiredServiceClass);
+					messageLogger.debug("CLIENT: requesting Service including class " + requiredServiceClass);
 
 					// Obtaining the Service
 					Service serv = (Service) findRemoteItem(
@@ -424,8 +420,7 @@ public class ClientCopyActionManager implements Runnable {
 						if (fm != null)
 							fm.addProvidedService(currentServiceId, serv);
 					else
-						System.out
-								.println("CLIENT: Error in service migration");
+						messageLogger.error("CLIENT: Error in service migration");
 				}
 			}
 

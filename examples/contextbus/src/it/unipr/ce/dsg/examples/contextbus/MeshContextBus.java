@@ -3,7 +3,6 @@ package it.unipr.ce.dsg.examples.contextbus;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 import it.unipr.ce.dsg.nam4j.impl.context.ContextBus;
 import it.unipr.ce.dsg.nam4j.impl.context.ContextEvent;
-import it.unipr.ce.dsg.nam4j.impl.logger.Logger;
 import it.unipr.ce.dsg.nam4j.impl.messages.ContextEventActionRequestMessage;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 import it.unipr.ce.dsg.nam4j.impl.peer.PeerList;
@@ -42,17 +41,11 @@ import com.google.gson.JsonObject;
 
 public class MeshContextBus extends ContextBus {
 
-	private Logger logger = null;
 	private ArrayList<String> eventModuleList = null;
 	
 	public MeshContextBus(NetworkedAutonomicMachine nam, String id) {
 		super(nam);
-		this.logger = new Logger("log/", "ContextBusLogs" + id + ".txt");
 		this.eventModuleList = new ArrayList<String>();
-	}
-	
-	public Logger getLogger() {
-		return logger;
 	}
 	
 	/**
@@ -89,7 +82,7 @@ public class MeshContextBus extends ContextBus {
 			String eventModule = contextEventName + ":" + functionalModuleId + MobilityUtils.PATH_SEPARATOR + peer.getPeerDescriptor().getContactAddress();
 
 			eventModuleList.add(eventModule);
-			logger.log("Added " + eventModule + " to eventModuleList");
+			System.out.println("Added " + eventModule + " to eventModuleList");
 			
 			for(PeerDescriptor pd : list) {
 				if (!pd.getContactAddress().equals(peer.getPeerDescriptor().getContactAddress())){
@@ -115,7 +108,7 @@ public class MeshContextBus extends ContextBus {
 						
 						if (!eventModuleList.contains(eventModule + MobilityUtils.PATH_SEPARATOR + peer.getPeerDescriptor().getContactAddress())) {
 							eventModuleList.add(eventModule + MobilityUtils.PATH_SEPARATOR + peer.getPeerDescriptor().getContactAddress());
-							logger.log("added " + eventModule + " from " + peer.getPeerDescriptor().getContactAddress() + " to eventModuleList");
+							System.out.println("Added " + eventModule + " from " + peer.getPeerDescriptor().getContactAddress() + " to eventModuleList");
 						}	
 						
 						contextMsg = new ContextEventActionRequestMessage(null, eventModule, Utils.SUBSCRIBE_REQUEST, hops, peer.getPeerDescriptor().getContactAddress().toString());
@@ -164,7 +157,7 @@ public class MeshContextBus extends ContextBus {
 			String eventModule = contextEventName + ":" + functionalModuleId + MobilityUtils.PATH_SEPARATOR + peer.getPeerDescriptor().getContactAddress();
 			
 			eventModuleList.remove(eventModule);
-			logger.log("removed " + eventModule + " from eventModuleList");
+			System.out.println("Removed " + eventModule + " from eventModuleList");
 			
 			for(PeerDescriptor pd : list) {
 				
@@ -191,7 +184,7 @@ public class MeshContextBus extends ContextBus {
 						
 						if (eventModuleList.contains(eventModule + MobilityUtils.PATH_SEPARATOR + peer.getPeerDescriptor().getContactAddress())) {
 							eventModuleList.remove(eventModule + MobilityUtils.PATH_SEPARATOR + peer.getPeerDescriptor().getContactAddress());
-							logger.log("Removed " + eventModule + " from " + peer.getPeerDescriptor().getContactAddress() + " to eventModuleList");			
+							System.out.println("Removed " + eventModule + " from " + peer.getPeerDescriptor().getContactAddress() + " to eventModuleList");			
 						}
 	
 						contextMsg = new ContextEventActionRequestMessage(null, eventModule, Utils.UNSUBSCRIBE_REQUEST, hops, peer.getPeerDescriptor().getContactAddress().toString());
@@ -270,7 +263,7 @@ public class MeshContextBus extends ContextBus {
 				if (!eventModuleList.contains(name)){
 					
 					eventModuleList.add(name);
-					logger.log("Added " + name + " to eventModuleList");
+					System.out.println("Added " + name + " to eventModuleList");
 				}					
 			}
 			else if (type.equals(Utils.UNSUBSCRIBE_REQUEST)) {
@@ -278,7 +271,7 @@ public class MeshContextBus extends ContextBus {
 				if (eventModuleList.contains(name)) {
 					
 					eventModuleList.remove(name);
-					logger.log("Removed " + name + " from eventModuleList");
+					System.out.println("Removed " + name + " from eventModuleList");
 				}		
 			}
 					
@@ -300,7 +293,7 @@ public class MeshContextBus extends ContextBus {
 					
 					System.out.println("--- Added subscription request for event " + name + ", from peer " + sender);
 					
-					logger.log("added " + name + " from " + sender + " to eventModuleList");			
+					System.out.println("Added " + name + " from " + sender + " to eventModuleList");			
 				} else {
 					System.out.println("--- The subscription has already been recorded");
 				}
@@ -327,7 +320,7 @@ public class MeshContextBus extends ContextBus {
 					
 					System.out.println("--- Removed subscription request for event " + name + ", from peer " + sender);
 
-					logger.log("remove " + name + " from " + sender + " to eventModuleList");			
+					System.out.println("Remove " + name + " from " + sender + " to eventModuleList");			
 				} else {
 					System.out.println("--- The specified subscription is not recorded");
 				}

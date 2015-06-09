@@ -1,5 +1,6 @@
 package it.unipr.ce.dsg.nam4j.impl;
 
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 import it.unipr.ce.dsg.nam4j.impl.resource.ResourceDescriptor;
 import it.unipr.ce.dsg.nam4j.impl.socketmobility.ClientCopyActionManager;
 import it.unipr.ce.dsg.nam4j.impl.socketmobility.ServerMobilityActionManager;
@@ -59,6 +60,9 @@ public abstract class NetworkedAutonomicMachine implements
 	 * A String representing the name of the NAM.
 	 */
 	String name = "Networked Autonomic Machine";
+	
+	/** The logger object */
+	private NamLogger messageLogger;
 
 	/**
 	 * The client platform.
@@ -256,6 +260,7 @@ public abstract class NetworkedAutonomicMachine implements
 		createPoolForClientMobilityAction();
 
 		clientPlatform = new Platform[getPoolSize()];
+		messageLogger = new NamLogger("NetworkedAutonomicMachine");
 	}
 	
 	/**
@@ -270,6 +275,7 @@ public abstract class NetworkedAutonomicMachine implements
 	public NetworkedAutonomicMachine(String migrationStorePath, Platform platform) {
 		setMigrationStore(migrationStorePath);
 		setPlatform(platform);
+		messageLogger = new NamLogger("NetworkedAutonomicMachine");
 	}
 
 	/**
@@ -677,11 +683,11 @@ public abstract class NetworkedAutonomicMachine implements
 
 			ss = new ServerSocket(serverPort);
 
-			System.out.println("SERVER: thread "
+			messageLogger.debug("SERVER: thread "
 					+ Thread.currentThread().getId()
 					+ " has created server socket " + ss);
 
-			System.out.println("SERVER: thread "
+			messageLogger.debug("SERVER: thread "
 					+ Thread.currentThread().getId()
 					+ " is waiting for connections.");
 
@@ -702,7 +708,7 @@ public abstract class NetworkedAutonomicMachine implements
 			ss.close();
 			
 		} catch (IOException e1) {
-			System.err.println("SERVER: connection failed for thread "
+			messageLogger.error("SERVER: connection failed for thread "
 					+ Thread.currentThread().getId());
 		}
 	}

@@ -5,6 +5,7 @@ import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 import it.unipr.ce.dsg.nam4j.impl.mobility.peer.MccNamPeer;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.MinimumRequirements;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.SAXHandler;
@@ -183,6 +184,9 @@ public class MobilityUtils {
 		}
 	};
 	
+	/** The logger object */
+	private static NamLogger messageLogger = new NamLogger("MobilityUtils");
+	
 	/**
 	 * Method to check if current node has a given file.
 	 * 
@@ -234,66 +238,66 @@ public class MobilityUtils {
 		byte[] iv = null;
 		
 		if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_ECB)) {
-			System.out.println("Encoding chunk using AES - ECB...");
+			messageLogger.debug("Encoding chunk using AES - ECB...");
 
 			cipherText = AES.encryptDataECB(chunkBuffer, secretKey);
 		
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_CBC)) {
-			System.out.println("Encoding chunk using AES - CBC...");
+			messageLogger.debug("Encoding chunk using AES - CBC...");
 		
 			CipherTextIvPair pair = AES.encryptDataCBC(chunkBuffer, secretKey);
 			cipherText = pair.getCiphertext();
 			iv = pair.getIv();
 			
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_OFB)) {
-			System.out.println("Encoding chunk using AES - OFB...");
+			messageLogger.debug("Encoding chunk using AES - OFB...");
 		
 			CipherTextIvPair pair = AES.encryptDataOFB(chunkBuffer, secretKey);
 			cipherText = pair.getCiphertext();
 			iv = pair.getIv();
 			
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_CFB)) {
-			System.out.println("Encoding chunk using AES - CFB...");
+			messageLogger.debug("Encoding chunk using AES - CFB...");
 		
 			CipherTextIvPair pair = AES.encryptDataCFB(chunkBuffer, secretKey);
 			cipherText = pair.getCiphertext();
 			iv = pair.getIv();
 			
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.AES_CTR)) {
-			System.out.println("Encoding chunk using AES - CTR...");
+			messageLogger.debug("Encoding chunk using AES - CTR...");
 		
 			CipherTextIvPair pair = AES.encryptDataCTR(chunkBuffer, secretKey);
 			cipherText = pair.getCiphertext();
 			iv = pair.getIv();
 			
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_ECB)) {
-			System.out.println("Encoding chunk using DES - ECB...");
+			messageLogger.debug("Encoding chunk using DES - ECB...");
 			
 			cipherText = DES.encryptDataECB(chunkBuffer, secretKey);
 		
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_CBC)) {
-			System.out.println("Encoding chunk using DES - CBC...");
+			messageLogger.debug("Encoding chunk using DES - CBC...");
 		
 			CipherTextIvPair pair = DES.encryptDataCBC(chunkBuffer, secretKey);
 			cipherText = pair.getCiphertext();
 			iv = pair.getIv();
 			
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_OFB)) {
-			System.out.println("Encoding chunk using DES - OFB...");
+			messageLogger.debug("Encoding chunk using DES - OFB...");
 		
 			CipherTextIvPair pair = DES.encryptDataOFB(chunkBuffer, secretKey);
 			cipherText = pair.getCiphertext();
 			iv = pair.getIv();
 			
 		} else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_CFB)) {
-			System.out.println("Encoding chunk using DES - CFB...");
+			messageLogger.debug("Encoding chunk using DES - CFB...");
 		
 			CipherTextIvPair pair = DES.encryptDataCFB(chunkBuffer, secretKey);
 			cipherText = pair.getCiphertext();
 			iv = pair.getIv();
 			
 		}  else if(encryptionAlgorithm.equals(EncryptionAlgorithm.DES_CTR)) {
-			System.out.println("Encoding chunk using DES - CTR...");
+			messageLogger.debug("Encoding chunk using DES - CTR...");
 		
 			CipherTextIvPair pair = DES.encryptDataCTR(chunkBuffer, secretKey);
 			cipherText = pair.getCiphertext();
@@ -344,11 +348,11 @@ public class MobilityUtils {
 					byte[] cipherText = pair.getCiphertext();
 					byte[] iv = pair.getIv();
 					
-					System.out.println("--- Encrypting execution state chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber);
+					messageLogger.debug("--- Encrypting execution state chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber);
 					newChunk = new StateChunk(conversationId, (int) chunkNumber, chunkIndex, cipherText, iv);
 					
 				} else {
-					System.out.println("--- Execution state chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber + " is not being encrypted");
+					messageLogger.debug("--- Execution state chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber + " is not being encrypted");
 					newChunk = new StateChunk(conversationId, (int) chunkNumber, chunkIndex, chunkBuffer, null);
 				}
 				
@@ -411,12 +415,12 @@ public class MobilityUtils {
 					byte[] cipherText = pair.getCiphertext();
 					byte[] iv = pair.getIv();
 						
-					System.out.println("--- Encrypting dependency chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber);
+					messageLogger.debug("--- Encrypting dependency chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber);
 						
 					newChunk = new DependencyChunk(conversationId, dependencyId, fileName, (int) chunkNumber, chunkIndex, cipherText, iv);
 					
 				} else {
-					System.out.println("--- Dependency chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber + " is not being encrypted");
+					messageLogger.debug("--- Dependency chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber + " is not being encrypted");
 					newChunk = new DependencyChunk(conversationId, dependencyId, fileName, (int) chunkNumber, chunkIndex, chunkBuffer, null);
 				}
 				
@@ -483,12 +487,12 @@ public class MobilityUtils {
 					byte[] cipherText = pair.getCiphertext();
 					byte[] iv = pair.getIv();
 						
-					System.out.println("--- Encrypting item chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber);
+					messageLogger.debug("--- Encrypting item chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber);
 						
 					newChunk = new ItemChunk(conversationId, (int) chunkNumber, chunkIndex, cipherText, iv, mainClass, functionalModuleIdForService, fileName);
 				
 				} else {
-					System.out.println("--- Item chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber + " is not being encrypted");
+					messageLogger.debug("--- Item chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber + " is not being encrypted");
 					newChunk = new ItemChunk(conversationId, (int) chunkNumber, chunkIndex, chunkBuffer, null, mainClass, functionalModuleIdForService, fileName);
 				}
 				
@@ -550,12 +554,12 @@ public class MobilityUtils {
 					byte[] cipherText = pair.getCiphertext();
 					byte[] iv = pair.getIv();
 						
-					System.out.println("--- Encrypting info file chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber);
+					messageLogger.debug("--- Encrypting info file chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber);
 						
 					newChunk = new InfoFileChunk(conversationId, infoFileId, fileName, (int) chunkNumber, chunkIndex, cipherText, iv);
 					
 				} else {
-					System.out.println("--- Info file chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber + " is not being encrypted");
+					messageLogger.debug("--- Info file chunk " + (chunkIndex + 1) + PATH_SEPARATOR + (int) chunkNumber + " is not being encrypted");
 					newChunk = new InfoFileChunk(conversationId, infoFileId, fileName, (int) chunkNumber, chunkIndex, chunkBuffer, null);
 				}
 				
@@ -596,7 +600,7 @@ public class MobilityUtils {
 	 * @throws IOException
 	 */
 	public static Object addToClassPath(NetworkedAutonomicMachine nam, String fileToAddToClassPath, String completeClassName, MigrationSubject fType) {
-		System.out.println("Adding file " + fileToAddToClassPath + " to class path");
+		messageLogger.debug("Adding file " + fileToAddToClassPath + " to class path");
 		
 		Object obj = null;
 	
@@ -646,7 +650,7 @@ public class MobilityUtils {
 				} catch (NoSuchMethodException e) {
 					e.printStackTrace();
 				} catch (ClassNotFoundException e) {
-					System.err.println("Main class (" + e.getMessage() + ") not found in file");
+					messageLogger.error("Main class (" + e.getMessage() + ") not found in file");
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
 				} catch (InstantiationException e) {
@@ -658,7 +662,7 @@ public class MobilityUtils {
 				}
 				
 			} else
-				System.out.println("CLIENT: Android platform");		
+				messageLogger.debug("CLIENT: Android platform");		
 		}
 	
 		return obj;
@@ -685,7 +689,7 @@ public class MobilityUtils {
 		} catch (MalformedURLException e1) {
 			e1.printStackTrace();
 		} catch (FileNotFoundException e) {
-			System.err.println(MISSING_XML_FILE);
+			messageLogger.error(MISSING_XML_FILE);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ParserConfigurationException e) {
@@ -719,7 +723,7 @@ public class MobilityUtils {
 	 */
 	public static FunctionalModule addServiceToFm(Service s, String fmId, NetworkedAutonomicMachine nam, String fmCompleteMainClassName) {
 		
-		System.out.println("--------- The main class name for the FM to which the Service is associated is " + fmCompleteMainClassName + " - instantiating it and adding the Service to such a Functional Module...");
+		messageLogger.debug("--------- The main class name for the FM to which the Service is associated is " + fmCompleteMainClassName + " - instantiating it and adding the Service to such a Functional Module...");
 		
 		try {
 			Constructor<?> cs = ClassLoader.getSystemClassLoader().loadClass(fmCompleteMainClassName).getConstructor(NetworkedAutonomicMachine.class);
@@ -780,35 +784,35 @@ public class MobilityUtils {
 		// Total memory currently available to the JVM (it may change over time depending on the environment)
 		long totalJvmMemory = Runtime.getRuntime().totalMemory();
 		
-		System.out.println("Available processors (cores): " + availableProcessors);
-		System.out.println("Free memory (bytes): " + freeJvmMemory);
-		System.out.println("Maximum memory (bytes): " + (maxJvmMemory == Long.MAX_VALUE ? "no limit" : maxJvmMemory));
-		System.out.println("Total memory available to JVM (bytes): " + totalJvmMemory);
+		messageLogger.info("Available processors (cores): " + availableProcessors);
+		messageLogger.info("Free memory (bytes): " + freeJvmMemory);
+		messageLogger.info("Maximum memory (bytes): " + (maxJvmMemory == Long.MAX_VALUE ? "no limit" : maxJvmMemory));
+		messageLogger.info("Total memory available to JVM (bytes): " + totalJvmMemory);
 
 		// Get a list of all file system roots and print info
 		File[] roots = File.listRoots();
 		for (File root : roots) {
-			System.out.println("File system root: " + root.getAbsolutePath());
-			System.out.println("Total space (bytes): " + root.getTotalSpace());
-			System.out.println("Free space (bytes): " + root.getFreeSpace());
-			System.out.println("Usable space (bytes): " + root.getUsableSpace());
+			messageLogger.info("File system root: " + root.getAbsolutePath());
+			messageLogger.info("Total space (bytes): " + root.getTotalSpace());
+			messageLogger.info("Free space (bytes): " + root.getFreeSpace());
+			messageLogger.info("Usable space (bytes): " + root.getUsableSpace());
 		}
 		
 		if (minimumRequirements != null) {
-			System.out.println("Minimum requirements are specified");
+			messageLogger.debug("Minimum requirements are specified");
 			
-			System.out.println("--- Cores: " + minimumRequirements.getNumProcessors());
-			System.out.println("--- Ram (MB): " + minimumRequirements.getRam());
-			System.out.println("--- Clock (Hz): " + minimumRequirements.getClockFrequency());
-			System.out.println("--- Disk space (Hz): " + minimumRequirements.getStorage());
-			System.out.println("--- Network connection is requested: " + minimumRequirements.isNetworkRequested());
-			System.out.println("--- Location sensor is requested: " + minimumRequirements.isLocationSensorRequested());
-			System.out.println("--- Camera is requested: " + minimumRequirements.isCameraRequested());
+			messageLogger.info("--- Cores: " + minimumRequirements.getNumProcessors());
+			messageLogger.info("--- Ram (MB): " + minimumRequirements.getRam());
+			messageLogger.info("--- Clock (Hz): " + minimumRequirements.getClockFrequency());
+			messageLogger.info("--- Disk space (Hz): " + minimumRequirements.getStorage());
+			messageLogger.info("--- Network connection is requested: " + minimumRequirements.isNetworkRequested());
+			messageLogger.info("--- Location sensor is requested: " + minimumRequirements.isLocationSensorRequested());
+			messageLogger.info("--- Camera is requested: " + minimumRequirements.isCameraRequested());
 			
 			return true;
 			
 		} else {
-			System.out.println("--- Minimum requirements are not specified");
+			messageLogger.info("--- Minimum requirements are not specified");
 			return true;
 		}
 	}

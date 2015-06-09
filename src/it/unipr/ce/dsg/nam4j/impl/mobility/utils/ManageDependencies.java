@@ -3,6 +3,7 @@ package it.unipr.ce.dsg.nam4j.impl.mobility.utils;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.MigrationSubject;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Platform;
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 import it.unipr.ce.dsg.nam4j.impl.messages.RequestItemAnswerMessage;
 import it.unipr.ce.dsg.nam4j.impl.mobility.peer.MccNamPeer;
 import it.unipr.ce.dsg.nam4j.impl.mobility.xmlparser.Dependency;
@@ -48,6 +49,9 @@ public class ManageDependencies {
 	/** The path where dependencies are stored */
 	private String migrationStore;
 	
+	/** The logger object */
+	private NamLogger messageLogger;
+	
 	/**
 	 * Constructor.
 	 * 
@@ -56,6 +60,7 @@ public class ManageDependencies {
 	 */
 	public ManageDependencies(String migrationStore) {
 		setMigrationStore(migrationStore);
+		messageLogger = new NamLogger("ManageDependencies");
 	}
 	
 	/**
@@ -111,7 +116,7 @@ public class ManageDependencies {
 	public ArrayList<Dependency> getDependenciesForItem(MigrationSubject r, String itemId, Platform p) {
 		ArrayList<Dependency> items = new ArrayList<Dependency>();
 		
-		System.out.println("--- Getting the list of dependencies");
+		messageLogger.debug("--- Getting the list of dependencies");
 		
 		try {
 			// The list of dependencies is stored in an xml file having the same name of the item id
@@ -130,17 +135,17 @@ public class ManageDependencies {
 			// requested by the client - e.g. the client requested a FM, but
 			// the owned item is a Service
 			if (migrationSubject != null && !migrationSubject.equals(r)) {
-				System.err.println(MobilityUtils.ERROR_IN_RESOURCE_TYPE + " (client requested a " + r + ", but I have a " + migrationSubject + ")");
+				messageLogger.error(MobilityUtils.ERROR_IN_RESOURCE_TYPE + " (client requested a " + r + ", but I have a " + migrationSubject + ")");
 				return null;
 			}
 			
 			for (Dependency dependency : handler.getDependencyList()) {
-				System.out.println("\tDependency " + dependency.getId() + " ; v. " + dependency.getVersion() + " ; " + dependency.getType());
+				messageLogger.debug("\tDependency " + dependency.getId() + " ; v. " + dependency.getVersion() + " ; " + dependency.getType());
 				
 				boolean found = false;
 				
 				if(dependency.getType() == null) {
-					System.err.println("Dependency " + dependency.getId() + " type is not set in info file");
+					messageLogger.error("Dependency " + dependency.getId() + " type is not set in info file");
 				} else if(dependency.getType().equals(MobilityUtils.FM_ID)) {
 					// The dependency is a Functional Module, so its associated info file is also a dependency
 					Dependency infoFileDependency = new Dependency();
@@ -172,12 +177,12 @@ public class ManageDependencies {
 					items.add(dependency);
 			}
 			
-			System.out.println("General info: " + handler.getLibraryInformation().getId() + " ; " + handler.getLibraryInformation().getMainClass() + " (v. " + handler.getLibraryInformation().getVersion() + ")");
+			messageLogger.debug("General info: " + handler.getLibraryInformation().getId() + " ; " + handler.getLibraryInformation().getMainClass() + " (v. " + handler.getLibraryInformation().getVersion() + ")");
 			
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {
-			System.err.println(MobilityUtils.MISSING_XML_FILE);
+			messageLogger.error(MobilityUtils.MISSING_XML_FILE);
 			return null;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -207,7 +212,7 @@ public class ManageDependencies {
 	 */
 	public ArrayList<Dependency> getMissingDependenciesList(Platform p, ArrayList<Dependency> dependencies, MigrationSubject r, MccNamPeer mccNamPeer) {
 		
-		System.out.println("Received the list of dependencies for the requested item (size = " + dependencies.size() + ")");
+		messageLogger.debug("Received the list of dependencies for the requested item (size = " + dependencies.size() + ")");
 		
 		ArrayList<Dependency> missingItems = new ArrayList<Dependency>();
 		ArrayList<Dependency> missingXmlFiles = new ArrayList<Dependency>();
@@ -221,14 +226,14 @@ public class ManageDependencies {
 			if (dependencyType.equals(MobilityUtils.INFO_FILE_ID)) {
 				// Current file is the xml info file for a dependency, so it must be requested
 				missingXmlFiles.add(dependency);
-				System.out.println("------ Dependency " + dependencyId + " is an info file, waiting to check if the associated FM is available.");
+				messageLogger.debug("------ Dependency " + dependencyId + " is an info file, waiting to check if the associated FM is available.");
 			} else if(dependencyType.equals(MobilityUtils.RESOURCE_FILE_ID)) {
 				// Current file is a resource file, so it must be requested
 				missingItems.add(dependency);
-				System.out.println("------ Dependency " + dependencyId + " is a resource file, so I am requesting it.");
+				messageLogger.debug("------ Dependency " + dependencyId + " is a resource file, so I am requesting it.");
 			} else {
 				
-				System.out.println("------ Analyzing dependency " + dependencyId);
+				messageLogger.debug("------ Analyzing dependency " + dependencyId);
 				
 				// Check in the XML file of the owned dependency if the version
 				// is >= than the requested minimum one. If not, or if no XML
@@ -239,7 +244,7 @@ public class ManageDependencies {
 				try {
 					File infoFile = new File(this.getMigrationStore() + dependencyId + MobilityUtils.INFO_FILE_EXTENSION);
 					if (infoFile.exists()) {
-						System.out.println((this.getMigrationStore() + dependencyId + MobilityUtils.INFO_FILE_EXTENSION) + " exists");
+						messageLogger.debug((this.getMigrationStore() + dependencyId + MobilityUtils.INFO_FILE_EXTENSION) + " exists");
 						
 						// If the xml info file exists, then check for its version
 						FileInputStream infoFis = new FileInputStream(infoFile);
@@ -253,10 +258,10 @@ public class ManageDependencies {
 						
 						if (Float.compare(Float.parseFloat(libVersion), Float.parseFloat(dependencyMinVersion)) < 0) {
 							// An older version of the item is available; request the updated version
-							System.out.println("An older version (" + libVersion + ") of dependency " + dependencyId + " is available; requesting the updated version (" + dependencyMinVersion + ")");
+							messageLogger.debug("An older version (" + libVersion + ") of dependency " + dependencyId + " is available; requesting the updated version (" + dependencyMinVersion + ")");
 							missingItems.add(dependency);
 						} else {
-							System.out.println(MobilityUtils.CLIENT_DEPENDENCY_AVAILABLE + dependencyId);
+							messageLogger.debug(MobilityUtils.CLIENT_DEPENDENCY_AVAILABLE + dependencyId);
 								
 							// Add dependency to class path
 							if (mccNamPeer.getNam().getPlatform() == Platform.DESKTOP) {
@@ -268,7 +273,7 @@ public class ManageDependencies {
 							}
 						}
 					} else {
-						System.out.print((this.getMigrationStore() + dependencyId + MobilityUtils.INFO_FILE_EXTENSION) + " is not available.");
+						messageLogger.debug((this.getMigrationStore() + dependencyId + MobilityUtils.INFO_FILE_EXTENSION) + " is not available.");
 						
 						// If the xml info file does not exist, the dependency is not a FM so just check for its availability
 						
@@ -278,9 +283,9 @@ public class ManageDependencies {
 							missingItems.add(dependency);
 							
 							// missingItems.put(pairs.getKey(), dependencyMinVersion);
-							System.out.print("I do not have such a dependency, so I am requesting it.\n");
+							messageLogger.debug("I do not have such a dependency, so I am requesting it.\n");
 						} else {
-							System.out.println("I already have the library, so I will not request it.");
+							messageLogger.debug("I already have the library, so I will not request it.");
 							
 							// Add dependency to class path
 							if (mccNamPeer.getNam().getPlatform() == Platform.DESKTOP) {
@@ -296,7 +301,7 @@ public class ManageDependencies {
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				} catch (FileNotFoundException e) {
-					System.out.println("An available library misses the info file");
+					messageLogger.debug("An available library misses the info file");
 					e.printStackTrace();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -315,7 +320,7 @@ public class ManageDependencies {
 			
 			for (Dependency missingItem : missingItems) {
 				if (missingItem.getId().equals(fileName)) {
-					System.out.println("Adding " + fileName + " to missing files");
+					messageLogger.debug("Adding " + fileName + " to missing files");
 					missingItems.add(dependency);
 					break;
 				}

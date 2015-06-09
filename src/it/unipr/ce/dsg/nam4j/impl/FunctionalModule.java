@@ -1,6 +1,7 @@
 package it.unipr.ce.dsg.nam4j.impl;
 
 import it.unipr.ce.dsg.nam4j.impl.context.ContextEvent;
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 import it.unipr.ce.dsg.nam4j.impl.service.Service;
 import it.unipr.ce.dsg.nam4j.interfaces.IFunctionalModule;
 import it.unipr.ce.dsg.nam4j.interfaces.IService;
@@ -38,6 +39,9 @@ public abstract class FunctionalModule implements IFunctionalModule {
 	HashMap<String,ContextEvent> providedContextEvents = new HashMap<String,ContextEvent>();
 	HashMap<String,IService> consumableServices = new HashMap<String,IService>();
 	HashMap<String,IService> providedServices = new HashMap<String,IService>();
+	
+	/** The logger object */
+	private NamLogger messageLogger = new NamLogger("FunctionalModule");
 	
 	/**
 	 * Default constructor.
@@ -332,7 +336,7 @@ public abstract class FunctionalModule implements IFunctionalModule {
 		/** Start the execution of the {@link FunctionalModule} main thread */
 		public void start() {
 			if (thread == null) {
-				System.out.println("Starting execution...");
+				messageLogger.debug("Starting execution...");
 				thread = new Thread(this);
 				thread.start();
 			}
@@ -340,13 +344,13 @@ public abstract class FunctionalModule implements IFunctionalModule {
 		
 		/** Suspend the execution of the {@link FunctionalModule} main thread */
 		public void suspend() {
-			System.out.println("Suspending execution...");
+			messageLogger.debug("Suspending execution...");
 			this.suspended = true;
 		}
 		
 		/** Resume the execution of the {@link FunctionalModule} main thread after suspension */
 		public synchronized void resume() {
-			System.out.println("Resuming execution...");
+			messageLogger.debug("Resuming execution...");
 			
 			suspended = false;
 			
@@ -365,7 +369,7 @@ public abstract class FunctionalModule implements IFunctionalModule {
 		@SuppressWarnings("deprecation")
 		public void stop() {
 			if (thread != null) {
-				System.out.println("Execution stopped");
+				messageLogger.debug("Execution stopped");
 				thread.stop();
 			}
 		}

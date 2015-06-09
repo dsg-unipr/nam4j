@@ -2,6 +2,7 @@ package it.unipr.ce.dsg.nam4j.impl.socketmobility;
 
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine.Action;
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -20,13 +21,17 @@ public class ServerMobilityActionManager implements Runnable {
 	private GoActionImplementation goActionImplementation;
 	private MigrateActionImplementation migrateActionImplementation;
 	private OffloadActionImplementation offloadActionImplementation;
+	
+	/** The logger object */
+	private NamLogger messageLogger;
 
 	public ServerMobilityActionManager(Socket connection,
 			NetworkedAutonomicMachine nam) {
 
 		this.cs = connection;
 		this.nam = nam;
-
+		
+		messageLogger = new NamLogger("ServerMobilityActionManager");
 	}
 
 	public void run() {
@@ -34,7 +39,7 @@ public class ServerMobilityActionManager implements Runnable {
 		BufferedReader is = null;
 		OutputStream os = null;
 
-		System.out.println("SERVER: thread " + Thread.currentThread().getId()
+		messageLogger.debug("SERVER: thread " + Thread.currentThread().getId()
 				+ " accepted connection from " + cs);
 
 		try {
@@ -111,7 +116,7 @@ public class ServerMobilityActionManager implements Runnable {
 			}
 
 		} catch (Exception e) {
-			System.out.println("SERVER: error: " + e + " for thread "
+			messageLogger.error("SERVER: error: " + e + " for thread "
 					+ Thread.currentThread().getId());
 		}
 	}

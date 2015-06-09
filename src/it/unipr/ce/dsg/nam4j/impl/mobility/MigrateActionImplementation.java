@@ -1,5 +1,6 @@
 package it.unipr.ce.dsg.nam4j.impl.mobility;
 
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 import it.unipr.ce.dsg.nam4j.impl.mobility.peer.MccNamPeer;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.MobilityUtils;
 import it.unipr.ce.dsg.nam4j.impl.mobility.utils.StateChunk;
@@ -40,9 +41,13 @@ public class MigrateActionImplementation extends MigrateActionHandler {
 	
 	private MccNamPeer peer;
 	
+	/** The logger object */
+	private NamLogger messageLogger;
+	
 	public MigrateActionImplementation(String migrationStore, MccNamPeer peer) {
 		setMigrationStore(migrationStore);
 		setPeer(peer);
+		messageLogger = new NamLogger("MigrateActionImplementation");
 	}
 
 	public String getMigrationStore() {
@@ -81,7 +86,7 @@ public class MigrateActionImplementation extends MigrateActionHandler {
 			out.writeObject(object);
 			bObject = bos.toByteArray();
 		} catch(NotSerializableException e) {
-			System.err.println("The Runnable object representing the state cannot be serialized (" + e.getMessage() + " is not serializable - define it as transient and edit storeState() and retrieveState() methods to manage it)");
+			messageLogger.error("The Runnable object representing the state cannot be serialized (" + e.getMessage() + " is not serializable - define it as transient and edit storeState() and retrieveState() methods to manage it)");
 			return null;
 		} catch (IOException e) {
 			e.printStackTrace();

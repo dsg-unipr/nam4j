@@ -17,10 +17,11 @@
 	<classpathentry kind="lib" path="lib/sip2peer/sip.jar"/>
 	<classpathentry kind="lib" path="lib/sip2peer/server.jar"/>
 	<classpathentry kind="lib" path="lib/gson-1.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/log4j.jar"/>
 	<classpathentry kind="lib" path="lib/sip2peer/sip2peer-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/s2pKademlia.jar"/>
 	<classpathentry kind="lib" path="lib/s2pMesh.jar"/>
 	<classpathentry kind="lib" path="lib/s2pChord.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-api-2.3.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-core-2.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

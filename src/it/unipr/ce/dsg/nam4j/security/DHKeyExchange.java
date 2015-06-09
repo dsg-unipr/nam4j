@@ -1,5 +1,7 @@
 package it.unipr.ce.dsg.nam4j.security;
 
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
+
 import java.security.AlgorithmParameterGenerator;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -38,6 +40,9 @@ import javax.crypto.spec.DHParameterSpec;
 
 public class DHKeyExchange {
 	
+	/** The logger object */
+	private static NamLogger messageLogger = new NamLogger("DHKeyExchange");
+	
 	public DHKeyExchange() {
 		generateDHParameters();
 		
@@ -68,7 +73,7 @@ public class DHKeyExchange {
 	
 	/** Method to generate Diffie-Hellman parameters. */
 	public static DHParameterSpec generateDHParameters() {
-		System.out.println("Creating Diffie-Hellman parameters");
+		messageLogger.debug("Creating Diffie-Hellman parameters");
 		
 		DHParameterSpec dhSkipParamSpec = null;
 		try {
@@ -90,7 +95,7 @@ public class DHKeyExchange {
 	 * @return a Diffie-Hellman key pair
 	 */
 	public static KeyPair generateDHKeypair(DHParameterSpec dhSkipParamSpec) {
-		System.out.println("Generating Diffie-Hellman key pair...");
+		messageLogger.debug("Generating Diffie-Hellman key pair...");
 		
 		KeyPair aliceKpair = null;
 		try {
@@ -114,7 +119,7 @@ public class DHKeyExchange {
 	 * @return a key agreement
 	 */
 	public static KeyAgreement initializeKeyAgreement(KeyPair keyPair) {
-		System.out.println("Initializing key agreement for key pair...");
+		messageLogger.debug("Initializing key agreement for key pair...");
 		
 		KeyAgreement keyAgree = null;
 		try {
@@ -164,7 +169,7 @@ public class DHKeyExchange {
 	        DHParameterSpec dhParamSpec = ((DHPublicKey)pubKey).getParams();
 	
 	        // The peer creates its own DH key pair
-	        System.out.println("Generating Diffie-Hellman keypair from received key...");
+	        messageLogger.debug("Generating Diffie-Hellman keypair from received key...");
 	        KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("DH");
 	        keyPairGen.initialize(dhParamSpec);
 	        keypair = keyPairGen.generateKeyPair();
@@ -179,7 +184,7 @@ public class DHKeyExchange {
 	public static KeyAgreement initializeKeyAgreementFromReceivedKey(KeyPair keyPair) {
 		KeyAgreement keyAgree = null;
 		try {
-	        System.out.println("Creating and initializing a Diffie-Hellman agreement object from received key...");
+	        messageLogger.debug("Creating and initializing a Diffie-Hellman agreement object from received key...");
 	        keyAgree = KeyAgreement.getInstance("DH");
 	        keyAgree.init(keyPair.getPrivate());
 		} catch (NoSuchAlgorithmException e) {

@@ -1,5 +1,7 @@
 package it.unipr.ce.dsg.nam4j.security;
 
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
+
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -15,6 +17,9 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class AES {
+	
+	/** The logger object */
+	private static NamLogger messageLogger = new NamLogger("AES");
 	
 	/**
 	 * Method to execute the Diffie-Hellman phase and generate a shared 128-bit
@@ -61,7 +66,7 @@ public class AES {
 			
 			truncatedAesKey = new SecretKeySpec(truncatedKeyBytes, 0, truncatedKeyBytes.length, "AES");
 			
-			System.out.println("AES key length: " + aesKey.getEncoded().length + " ; truncated AES key length: " + truncatedAesKey.getEncoded().length);
+			messageLogger.debug("AES key length: " + aesKey.getEncoded().length + " ; truncated AES key length: " + truncatedAesKey.getEncoded().length);
 			
 		} catch (InvalidKeyException e) {
 			e.printStackTrace();

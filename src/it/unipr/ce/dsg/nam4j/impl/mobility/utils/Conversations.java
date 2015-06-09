@@ -1,5 +1,7 @@
 package it.unipr.ce.dsg.nam4j.impl.mobility.utils;
 
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -31,8 +33,12 @@ public class Conversations implements Iterable<ConversationItem> {
 	/** The list of conversations a peer is carrying on */
 	private Set<ConversationItem> conversations;
 	
+	/** The logger object */
+	private NamLogger messageLogger;
+	
 	public Conversations() {
 		conversations = Collections.newSetFromMap(new ConcurrentHashMap<ConversationItem, Boolean>());
+		messageLogger = new NamLogger("Conversations");
 	}
 	
 	public boolean add(ConversationItem conversationItem) {
@@ -132,18 +138,19 @@ public class Conversations implements Iterable<ConversationItem> {
 	
 	public void printConversations() {
 		if (!conversations.isEmpty()) {
-			System.out.println("\n********** Ongoing conversations **********");
+			messageLogger.debug("\n********** Ongoing conversations **********");
 
 			int i = 1;
+			String conversationListString = "";
 
 			for(ConversationItem ci : conversations) {
-				System.out.println(i++ + ". " + ci.getAction() + " ; " + ci.getItemId() + " ; " + ci.getPlatform() + " ; " + ci.getPartnerContactAddress());
+				conversationListString += i++ + ". " + ci.getAction() + " ; " + ci.getItemId() + " ; " + ci.getPlatform() + " ; " + ci.getPartnerContactAddress();
 			}
 
-			System.out.println("*******************************************\n");
+			messageLogger.debug(conversationListString + "\n*******************************************\n");
 
 		} else {
-			System.out.println("No conversation is in progress");
+			messageLogger.debug("No conversation is in progress");
 		}
 	}
 

@@ -1,5 +1,6 @@
 package it.unipr.ce.dsg.nam4j.impl.peer;
 
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 import it.unipr.ce.dsg.nam4j.interfaces.IPeerList;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
 
@@ -32,10 +33,14 @@ public class PeerList implements Iterable<PeerDescriptor>, IPeerList {
 
 	/** The peer list container. */
 	private Set<PeerDescriptor> peerDescriptors;
+	
+	/** The logger object */
+	private NamLogger messageLogger;
 
 	/** Constructs a new, empty {@link PeerList}. */
 	public PeerList() {
 		peerDescriptors = Collections.newSetFromMap(new ConcurrentHashMap<PeerDescriptor, Boolean>());
+		messageLogger = new NamLogger("PeerList");
 	}
 
 	/**
@@ -198,18 +203,19 @@ public class PeerList implements Iterable<PeerDescriptor>, IPeerList {
 		
 		if (!peerDescriptors.isEmpty()) {
 
-			System.out.println("\n********** Known peers **********");
+			messageLogger.debug("\n********** Known peers **********");
 
 			int i = 1;
+			String contactAddressList = "";
 
 			for(PeerDescriptor pd : peerDescriptors) {
-				System.out.println(i++ + ". " +  pd.getContactAddress());
+				contactAddressList += i++ + ". " +  pd.getContactAddress();
 			}
 
-			System.out.println("*********************************\n");
+			messageLogger.debug(contactAddressList + "\n*********************************\n");
 
 		} else {
-			System.out.println("No known peer");
+			messageLogger.debug("No known peer");
 		}
 	}
 	

@@ -1,6 +1,7 @@
 package it.unipr.ce.dsg.nam4j.impl.socketmobility;
 
 import it.unipr.ce.dsg.nam4j.impl.NetworkedAutonomicMachine;
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 
 import java.io.BufferedReader;
 import java.io.OutputStream;
@@ -36,8 +37,11 @@ public class GoActionImplementation extends GoActionHandler {
 	OutputStream os;
 	String receiver;
 	
-	// The descriptor of the object to be migrated.
+	/* The descriptor of the object to be migrated */
 	BundleDescriptor bundleDescriptor;
+	
+	/** The logger object */
+	private NamLogger messageLogger;
 	
 	public GoActionImplementation(NetworkedAutonomicMachine nam, BufferedReader is, OutputStream os, String receiver) {
 		this.nam = nam;
@@ -45,7 +49,9 @@ public class GoActionImplementation extends GoActionHandler {
 		this.os = os;
 		this.receiver = receiver;
 		
-		System.out.println("SERVER: starting GO action...");
+		messageLogger = new NamLogger("GoActionImplementation");
+		
+		messageLogger.debug("SERVER: starting GO action...");
 	}
 	
 	// TODO: when a FM or Service is sent, remove from fmSender and

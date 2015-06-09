@@ -25,12 +25,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 
 public class FirstPageFragment extends Fragment implements IMobilityItemIsAvailableObserver {
 
 	private S2PMigrationTestNam nam;
-	TextView numberTextView;
 	Button requestTextParserService;
 	Button requestSudokuService;
 	Button requestEightQueensProblemService;
@@ -40,8 +38,6 @@ public class FirstPageFragment extends Fragment implements IMobilityItemIsAvaila
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.first_page_fragment, container, false);
-        numberTextView = (TextView) rootView.findViewById(R.id.infoTextView);
-        numberTextView.setTypeface(Utils.getCustomFont(getActivity(), SupportedFonts.HELVETICA_THIN));
         requestTextParserService = (Button) rootView.findViewById(R.id.requestTextParserServiceButton);
         requestTextParserService.setTypeface(Utils.getCustomFont(getActivity(), SupportedFonts.HELVETICA_THIN));
         requestSudokuService = (Button) rootView.findViewById(R.id.requestSudokuServiceButton);

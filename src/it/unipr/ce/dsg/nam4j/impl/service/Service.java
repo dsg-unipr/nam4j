@@ -1,6 +1,7 @@
 package it.unipr.ce.dsg.nam4j.impl.service;
 
 import it.unipr.ce.dsg.nam4j.impl.FunctionalModule;
+import it.unipr.ce.dsg.nam4j.impl.logger.NamLogger;
 import it.unipr.ce.dsg.nam4j.interfaces.IService;
 
 import java.io.Serializable;
@@ -36,6 +37,9 @@ public class Service implements IService {
 	HashMap<String,Parameter> outputs = new HashMap<String,Parameter>();
 	HashMap<String,Effect> effects = new HashMap<String,Effect>();
 	HashMap<String,Precondition> preconditions = new HashMap<String,Precondition>();
+	
+	/** The logger object */
+	private NamLogger messageLogger = new NamLogger("Service");
 	
 	/**
      * Default constructor.
@@ -305,7 +309,7 @@ public class Service implements IService {
 		/** Start the execution of the Service main thread */
 		public void start() {
 			if (thread == null) {
-				System.out.println("Starting execution...");
+				messageLogger.debug("Starting execution...");
 				thread = new Thread(this);
 				thread.start();
 			}
@@ -313,13 +317,13 @@ public class Service implements IService {
 		
 		/** Suspend the execution of the Service main thread */
 		public void suspend() {
-			System.out.println("Suspending execution...");
+			messageLogger.debug("Suspending execution...");
 			this.suspended = true;
 		}
 
 		/** Resume the execution of the Service main thread after suspension */
 		public synchronized void resume() {
-			System.out.println("Resuming execution...");
+			messageLogger.debug("Resuming execution...");
 			
 			suspended = false;
 			
@@ -338,7 +342,7 @@ public class Service implements IService {
 		@SuppressWarnings("deprecation")
 		public void stop() {
 			if (thread != null) {
-				System.out.println("Execution stopped");
+				messageLogger.debug("Execution stopped");
 				thread.stop();
 			}
 		}

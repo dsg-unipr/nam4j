@@ -8,6 +8,8 @@
 	<classpathentry exported="true" kind="lib" path="libs/sip2peer/server.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/gson-1.7.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/nam4j-0.3.0.jar"/>
+	<classpathentry kind="lib" path="libs/log4j-api-2.3.jar"/>
+	<classpathentry kind="lib" path="libs/log4j-core-2.3.jar"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="output" path="bin/classes"/>

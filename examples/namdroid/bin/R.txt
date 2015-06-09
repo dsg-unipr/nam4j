@@ -681,7 +681,7 @@ int id action_bar_spinner 0x7f090002
 int id action_bar_subtitle 0x7f090024
 int id action_bar_title 0x7f090023
 int id action_context_bar 0x7f090041
-int id action_info 0x7f09005e
+int id action_info 0x7f09005d
 int id action_menu_divider 0x7f090005
 int id action_menu_presenter 0x7f090006
 int id action_mode_bar 0x7f09003d
@@ -708,7 +708,7 @@ int id dialogTV 0x7f090055
 int id disableHome 0x7f09000d
 int id drawer_layout 0x7f090050
 int id dropdown 0x7f09001f
-int id dsg_contacts 0x7f09005d
+int id dsg_contacts 0x7f09005c
 int id edit_query 0x7f090042
 int id end 0x7f090021
 int id expand_activities_button 0x7f090027
@@ -718,8 +718,7 @@ int id homeAsUp 0x7f09000e
 int id icon 0x7f09002b
 int id ifRoom 0x7f09001b
 int id image 0x7f090028
-int id imgLogo 0x7f09005c
-int id infoTextView 0x7f09005b
+int id imgLogo 0x7f09005b
 int id listMode 0x7f09000a
 int id list_item 0x7f09002a
 int id middle 0x7f090022
@@ -839,8 +838,8 @@ int style AlertDialog_AppCompat_Light 0x7f0b0041
 int style Animation_AppCompat_Dialog 0x7f0b0046
 int style Animation_AppCompat_DropDownUp 0x7f0b0047
 int style AppBaseTheme 0x7f0b011b
-int style AppTheme 0x7f0b011e
-int style AppTheme_Base 0x7f0b011f
+int style AppTheme 0x7f0b0123
+int style AppTheme_Base 0x7f0b0124
 int style Base_AlertDialog_AppCompat 0x7f0b00bd
 int style Base_AlertDialog_AppCompat_Light 0x7f0b00be
 int style Base_Animation_AppCompat_Dialog 0x7f0b00b9
@@ -969,6 +968,10 @@ int style Base_Widget_AppCompat_Spinner_Underlined 0x7f0b008b
 int style Base_Widget_AppCompat_TextView_SpinnerItem 0x7f0b00b5
 int style Base_Widget_AppCompat_Toolbar 0x7f0b00a2
 int style Base_Widget_AppCompat_Toolbar_Button_Navigation 0x7f0b00a3
+int style DrawerArrowStyle 0x7f0b0120
+int style DrawerButtonStyle 0x7f0b011f
+int style DrawerLayoutStyle 0x7f0b011e
+int style FragmentButtonStyle 0x7f0b0122
 int style Platform_AppCompat 0x7f0b00f4
 int style Platform_AppCompat_Light 0x7f0b00f5
 int style Platform_ThemeOverlay_AppCompat_Dark 0x7f0b0109
@@ -1057,6 +1060,7 @@ int style ThemeOverlay_AppCompat_ActionBar 0x7f0b00f2
 int style ThemeOverlay_AppCompat_Dark 0x7f0b00f1
 int style ThemeOverlay_AppCompat_Dark_ActionBar 0x7f0b00f3
 int style ThemeOverlay_AppCompat_Light 0x7f0b00f0
+int style ToolbarTitleStyle 0x7f0b0121
 int style Widget_AppCompat_ActionBar 0x7f0b0000
 int style Widget_AppCompat_ActionBar_Solid 0x7f0b0002
 int style Widget_AppCompat_ActionBar_TabBar 0x7f0b000d

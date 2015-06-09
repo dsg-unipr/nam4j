@@ -2183,7 +2183,7 @@ containing a value of this type.
         public static final int action_bar_subtitle=0x7f090024;
         public static final int action_bar_title=0x7f090023;
         public static final int action_context_bar=0x7f090041;
-        public static final int action_info=0x7f09005e;
+        public static final int action_info=0x7f09005d;
         public static final int action_menu_divider=0x7f090005;
         public static final int action_menu_presenter=0x7f090006;
         public static final int action_mode_bar=0x7f09003d;
@@ -2210,7 +2210,7 @@ containing a value of this type.
         public static final int disableHome=0x7f09000d;
         public static final int drawer_layout=0x7f090050;
         public static final int dropdown=0x7f09001f;
-        public static final int dsg_contacts=0x7f09005d;
+        public static final int dsg_contacts=0x7f09005c;
         public static final int edit_query=0x7f090042;
         public static final int end=0x7f090021;
         public static final int expand_activities_button=0x7f090027;
@@ -2220,8 +2220,7 @@ containing a value of this type.
         public static final int icon=0x7f09002b;
         public static final int ifRoom=0x7f09001b;
         public static final int image=0x7f090028;
-        public static final int imgLogo=0x7f09005c;
-        public static final int infoTextView=0x7f09005b;
+        public static final int imgLogo=0x7f09005b;
         public static final int listMode=0x7f09000a;
         public static final int list_item=0x7f09002a;
         public static final int middle=0x7f090022;
@@ -2431,8 +2430,8 @@ containing a value of this type.
         
          */
         public static final int AppBaseTheme=0x7f0b011b;
-        public static final int AppTheme=0x7f0b011e;
-        public static final int AppTheme_Base=0x7f0b011f;
+        public static final int AppTheme=0x7f0b0123;
+        public static final int AppTheme_Base=0x7f0b0124;
         public static final int Base_AlertDialog_AppCompat=0x7f0b00bd;
         public static final int Base_AlertDialog_AppCompat_Light=0x7f0b00be;
         public static final int Base_Animation_AppCompat_Dialog=0x7f0b00b9;
@@ -2606,6 +2605,12 @@ containing a value of this type.
     
          */
         public static final int Base_Widget_AppCompat_Toolbar_Button_Navigation=0x7f0b00a3;
+        /**  To change the toggle button style, set the following attribute in themes.xml as <item name="drawerArrowStyle">@style/DrawerArrowStyle</item> 
+         */
+        public static final int DrawerArrowStyle=0x7f0b0120;
+        public static final int DrawerButtonStyle=0x7f0b011f;
+        public static final int DrawerLayoutStyle=0x7f0b011e;
+        public static final int FragmentButtonStyle=0x7f0b0122;
         public static final int Platform_AppCompat=0x7f0b00f4;
         public static final int Platform_AppCompat_Light=0x7f0b00f5;
         public static final int Platform_ThemeOverlay_AppCompat_Dark=0x7f0b0109;
@@ -2731,6 +2736,7 @@ containing a value of this type.
          the value of colorAccent, colorPrimary and its variants. 
          */
         public static final int ThemeOverlay_AppCompat_Light=0x7f0b00f0;
+        public static final int ToolbarTitleStyle=0x7f0b0121;
         /**  Styles in here can be extended for customisation in your application. Each utilises
          one of the.styles. If Holo themes are available on the current platform version
          they will be used instead of the compat styles. 
