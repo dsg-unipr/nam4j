@@ -238,26 +238,32 @@ public class PeerList implements Iterable<PeerDescriptor>, IPeerList {
 	 */
 	public Set<PeerDescriptor> getRandomPeerDescriptors(int numberOfPeerDescriptors, PeerDescriptor peerToBeIgnored) {
 		
-		Set<PeerDescriptor> randomPeerDescriptors = Collections.newSetFromMap(new ConcurrentHashMap<PeerDescriptor, Boolean>());;
+		Set<PeerDescriptor> randomPeerDescriptors = Collections.newSetFromMap(new ConcurrentHashMap<PeerDescriptor, Boolean>());
 		
-		Random rand = new Random();
+		if (this.size() > numberOfPeerDescriptors) {
 		
-		for(int i = 0; i < numberOfPeerDescriptors; i++) {
+			Random rand = new Random();
 			
-			// Generate a random integer between 1 and the number of known peers
-			int randomNum = rand.nextInt((this.size() - 1) + 1) + 1;
-			int j = 1;
+			while(!(randomPeerDescriptors.size() == numberOfPeerDescriptors)){
+				
+				// Generate a random int between 1 and the number of known peers
+				int randomNum = rand.nextInt((this.size() - 1) + 1) + 1;
+				int j = 1;
+							
+				for(PeerDescriptor pd : this.getPeerDescriptors()) {
+					if (j == randomNum && !(randomPeerDescriptors.contains(pd)) && !(peerToBeIgnored.getContactAddress().equalsIgnoreCase(pd.getContactAddress()))) {
+						randomPeerDescriptors.add(pd);					
+					}
+					j++;
+				}
+			}
+			
+		} else {
 			
 			for(PeerDescriptor pd : this.getPeerDescriptors()) {
-				if (j == randomNum && !(randomPeerDescriptors.contains(pd)) && !(peerToBeIgnored.getContactAddress().equalsIgnoreCase(pd.getContactAddress()))) {
-					randomPeerDescriptors.add(pd);
-					
-					if (randomPeerDescriptors.contains(pd)) {
-						i--;
-						break;
-					}
+				if (!(randomPeerDescriptors.contains(pd)) && !(peerToBeIgnored.getContactAddress().equalsIgnoreCase(pd.getContactAddress()))) {
+					randomPeerDescriptors.add(pd);					
 				}
-				j++;
 			}
 		}
 		
